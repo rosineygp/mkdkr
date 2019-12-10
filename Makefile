@@ -1,22 +1,47 @@
+# .ONESHELL:
+.EXPORT_ALL_VARIABLES:
+
 SHELL=/bin/bash --init-file .bash -i
 
-.PHONY: test build
+.PHONY: shellcheck unnamed service consumer dind brainfuck
 
-all: test build
+all: shellcheck unnamed consumer dind
 
-test:
-	name=$(shell export name=tetra)
-	launch ubuntu:16.04
-	.= apt-get update
-	.= apt-get install \
-		htop \
-		vim -y
-	.= ps -ef
+shellcheck:
+	$(eval export name=shellcheck_ubuntu)
+	launch ubuntu:18.04
+	.= 'apt-get update && \
+			apt-get install -y shellcheck'
+	.= shellcheck -e SC1088 .bash
 	destroy
 
-build:
-	launch ubuntu:16.04
-	.= 'apt-get update && \
-		apt-get install htop'
-	.= ps -ef
+unnamed:
+	launch alpine
+	.= apk add htop
+	destroy
+
+service:
+	$(eval export name=service_nginx)
+	service nginx
+
+consumer: service
+	$(eval export name=consumer_nginx)
+	launch alpine '--link service_nginx:nginx'
+	.= apk add curl
+	.= curl -s nginx
+	destroy
+	destroy service_nginx
+
+dind:
+	$(eval export name=dind)
+	privileged docker:19
+	.= docker build -t mdp:dind .
+	destroy
+
+brainfuck:
+	$(eval export name=brainfuck)
+	git clone . /tmp/brainfuck || true
+	privileged docker:19 '-v /tmp/brainfuck:/tmp/brainfuck'
+	.= apk add make bash
+	.= 'cd /tmp/brainfuck && make all'
 	destroy
