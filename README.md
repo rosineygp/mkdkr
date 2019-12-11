@@ -26,6 +26,16 @@ pipeline {
 }
 ```
 
+### How to install
+
+```Shell
+# required
+curl https://raw.githubusercontent.com/rosineygp/mdp/master/.bash > .bash
+
+# not required, but can be used as template
+curl https://raw.githubusercontent.com/rosineygp/mdp/master/Makefile > Makefile
+```
+
 ### Create a simple and isolated job
 
 ```Makefile
@@ -45,9 +55,7 @@ job:
   destroy                                 # just destroy the image
 ```
 ```Shell
-# to run execute
-
-make job
+make job # execute
 ```
 
 ### Too slow you can go fast with unnamed jobs
@@ -62,8 +70,6 @@ ping:
 ```
 
 ```Shell
-# to run execute
-
 make ping
 ```
 
@@ -75,16 +81,16 @@ Testing a job that depends of the another job is very simple.
 
 ```Makefile
 static:
-	$(eval export name=service_nginx)
-	service nginx                                 # here use service
+  $(eval export name=service_nginx)
+  service nginx                                 # here use service
 
 cucumber: service
-	$(eval export name=consumer_nginx)
-	launch cucumber '--link service_nginx:nginx'
-	.= gem install bundler
-	.= cucumber
-	destroy
-	destroy service_nginx                        # do not forget to destroy the service
+  $(eval export name=consumer_nginx)
+  launch cucumber '--link service_nginx:nginx'
+  .= gem install bundler
+  .= cucumber
+  destroy
+  destroy service_nginx                        # do not forget to destroy the service
 ```
 
 ```Shell
@@ -96,10 +102,10 @@ make cucumber
 
 ```Makefile
 build:
-	$(eval export name=builder)      
-	privileged docker:19                       # now whe require some privileages
-	.= docker build -t awesome:v1.0.0 .
-	destroy
+  $(eval export name=builder)
+  privileged docker:19                       # now whe require some privileages
+  .= docker build -t awesome:v1.0.0 .
+  destroy
 ```
 
 ```Shell
@@ -110,13 +116,12 @@ make build
 
 ```Makefile
 multiline:
-	$(eval export name=shellcheck_ubuntu)
-	launch ubuntu:18.04
-	.= 'apt-get update && \
-			apt-get install -y shellcheck'      # very elegant code
-	.= shellcheck -e SC1088 .bash
-	destroy
-
+  $(eval export name=shellcheck_ubuntu)
+  launch ubuntu:18.04
+  .= 'apt-get update && \
+        apt-get install -y shellcheck'      # very elegant code
+  .= shellcheck -e SC1088 .bash
+  destroy
 ```
 
 ```Shell
