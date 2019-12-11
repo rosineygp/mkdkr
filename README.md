@@ -1,4 +1,4 @@
-# MakeItInBox
+# Make It In Box
 
 Super small and powerfull framework for make pipilines based on Makefile and docker containers.
 
