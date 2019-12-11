@@ -1,6 +1,4 @@
-# .ONESHELL:
 .EXPORT_ALL_VARIABLES:
-
 SHELL=/bin/bash --init-file .bash -i
 
 .PHONY: shellcheck unnamed service consumer dind brainfuck
