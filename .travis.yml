@@ -1,0 +1,13 @@
+language: minimal
+
+services:
+  - docker
+
+before_install:
+  - sudo apt-get install -y make
+
+jobs:
+  include:
+    - stage: lint
+      name: shellcheck
+      script: make shellcheck
