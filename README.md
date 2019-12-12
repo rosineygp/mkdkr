@@ -1,6 +1,6 @@
 # Make It In Box
 
-Super small and powerfull framework for make pipilines based on Makefile and docker containers.
+Super small and powerful framework for make pipelines based on Makefile and docker containers.
 
 - Just the make, docker and bash as system requirements
 - Just 2 files in your source code (Makefile and .bash)
@@ -103,7 +103,7 @@ make cucumber
 ```Makefile
 build:
   $(eval export name=builder)
-  privileged docker:19                       # now whe require some privileages
+  privileged docker:19                       # now its require some privileges
   .= docker build -t awesome:v1.0.0 .
   destroy
 ```
