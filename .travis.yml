@@ -11,3 +11,15 @@ jobs:
     - stage: lint
       name: shellcheck
       script: make shellcheck
+    - stage: simple test
+      name: unnamed
+      script: make unnamed
+    - stage: service
+      name: nginx and curl
+      script: make consumer
+    - stage: dind
+      name: introspective
+      script: make dind
+    - stage: glorious
+      name: brainfuck
+      script: make brainfuck
