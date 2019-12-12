@@ -36,6 +36,49 @@ curl https://raw.githubusercontent.com/rosineygp/mdp/master/.bash > .bash
 curl https://raw.githubusercontent.com/rosineygp/mdp/master/Makefile > Makefile
 ```
 
+### Special Commands
+
+```
+launch <image> <args>
+
+  Create a docker container.
+
+  image *  any docker image name
+  args     any docker arguments use apostrophe eg. '--cpus 1'
+
+privileged <image> <args>
+
+  Create a docker container with docker privileged capabilities, 
+  use it to build or call other docker images
+  docker local socket is mounted automatically.
+
+  image *    any docker image name
+  args       any docker arguments use apostrophe eg. '--cpus 1'
+
+service <image> <args>
+
+  Create a docker image, but run as detached, the default cmd command isn't overloaded.
+
+  image *    any docker image name
+  args       any docker arguments use apostrophe eg. '--cpus 1'
+
+.= <command>
+
+  Run any command inside a container. In case of special chars like && \n use apostrophe.
+
+  command *  any sh command eg. 'apk add nodejs'
+
+destroy <container>
+
+  destroy a docker container
+
+  container  destroy a container by name.
+
+* required
+```
+
+
+
 ### Create a simple and isolated job
 
 ```Makefile
