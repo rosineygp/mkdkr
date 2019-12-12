@@ -8,8 +8,8 @@ launch() {
   docker run --rm -d \
     --name "${name:-unnamed}" \
     --entrypoint "" \
-    -v "$(pwd)":/repos \
-    --workdir /repos \
+    -v "$(pwd)":"$(pwd)" \
+    --workdir "$(pwd)" \
     ${args} \
     "${image}" \
     sleep "${ttl:-3600}"

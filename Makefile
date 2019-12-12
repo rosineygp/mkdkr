@@ -16,7 +16,7 @@ shellcheck:
 unnamed:
 	launch alpine
 	.= apk add htop
-	destroy
+	# destroy
 
 service:
 	$(eval export name=service_nginx)
@@ -38,8 +38,7 @@ dind:
 
 brainfuck:
 	$(eval export name=brainfuck)
-	git clone . /tmp/brainfuck || true
-	privileged docker:19 '-v /tmp/brainfuck:/tmp/brainfuck'
+	privileged docker:19
 	.= apk add make bash
-	.= 'cd /tmp/brainfuck && make all'
+	.= make all
 	destroy
