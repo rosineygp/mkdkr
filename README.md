@@ -1,4 +1,4 @@
-# Make It In Box
+# Make Docker
 
 Super small and powerful framework for make pipelines based on Makefile and docker containers.
 
