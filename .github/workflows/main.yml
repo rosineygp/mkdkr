@@ -1,0 +1,25 @@
+name: CI
+
+on: [push]
+
+jobs:
+  pipeline:
+
+    runs-on: ubuntu-18.04
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: install dependecies
+      run: |
+        sudo apt-get update
+        sudo apt-get install make -y
+    - name: shellcheck
+      run: make shellcheck
+    - name: unnamed
+      run: make unnamed
+    - name: service
+      run: make consumer
+    - name: dind
+      run: make dind
+    - name: the brainfuck
+      run: make brainfuck

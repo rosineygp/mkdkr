@@ -16,7 +16,7 @@ shellcheck:
 unnamed:
 	launch alpine
 	.= apk add htop
-	# destroy
+	destroy
 
 service:
 	$(eval export name=service_nginx)
