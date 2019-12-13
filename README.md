@@ -13,14 +13,16 @@ Super small and powerful framework for make pipelines based on Makefile and dock
 - All power of make
 - All power of docker
 - All power of bash
+- Easy switch between pipeline systems
 
 Fast to write and fast to move
 
 ## Reason
 
-Build pipeline for one platform can take a lot of time to learn and test, with MakeItInBox your can test all thing locally and run it before in any pipeline engine, like Jenkins, Actions, Gitlab and others.
+Build pipeline for a dedicated platform can take a lot of time to learn and test, with **Make Docker** your can test all thing locally and run it before in any pipeline engine, like Jenkins, Actions, Gitlab-ci and others.
 
 ```Jenkinsfile
+# Jenkins
 pipeline {
   stage("test") {
     sh "make test"
@@ -30,6 +32,29 @@ pipeline {
   }
   ...
 }
+```
+
+```yaml
+# gitlab-ci
+stages:
+  - lint
+  - uses case
+  - glorious
+
+services:
+  - docker:19.03.1-dind
+
+shellcheck:
+  stage: lint
+  image: docker:19
+  variables:
+    DOCKER_HOST: tcp://docker:2376
+    DOCKER_TLS_CERTDIR: "/certs"
+  before_script:
+  - apk add make
+  - apk add bash
+  script: 
+  - make shellcheck
 ```
 
 ### How to install
