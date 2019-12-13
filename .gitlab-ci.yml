@@ -12,10 +12,31 @@ variables:
 
 image: docker:19
 
-shellcheck:
-  stage: lint
-  before_script:
+before_script:
   - apk add make
   - apk add bash
+
+shellcheck:
+  stage: lint
   script: 
   - make shellcheck
+
+unnamed:
+  stage: uses case
+  script:
+  - make unnamed
+
+service:
+  stage: uses case
+  script:
+  - make consumer
+
+dind:
+  stage: uses case
+  script:
+  - make dind
+
+brainfuck:
+  stage: glorious
+  script:
+  - make brainfuck
