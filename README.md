@@ -1,5 +1,7 @@
 # Make Docker
 
+[![Build Status](https://travis-ci.org/rosineygp/mkdkr.svg?branch=master)](https://travis-ci.org/rosineygp/mkdkr)
+
 Super small and powerful framework for make pipelines based on Makefile and docker containers.
 
 - Just the make, docker and bash as system requirements

@@ -1,0 +1,24 @@
+language: minimal
+
+dist: bionic
+
+services:
+  - docker
+
+before_install:
+  - sudo apt-get install -y make
+
+jobs:
+  include:
+    - stage: lint
+      name: shellcheck
+      script: make shellcheck
+    - stage: simple test
+      name: unnamed
+      script: make unnamed
+    - stage: service
+      name: nginx and curl
+      script: make consumer
+    - stage: dind
+      name: introspective
+      script: make dind
