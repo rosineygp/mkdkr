@@ -36,7 +36,7 @@ dind:
   script:
   - make dind
 
-brainfuck:
+.brainfuck:
   stage: glorious
   script:
   - make brainfuck
