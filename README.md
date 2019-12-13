@@ -67,6 +67,13 @@ curl https://raw.githubusercontent.com/rosineygp/mkdkr/master/.bash > .bash
 curl https://raw.githubusercontent.com/rosineygp/mkdkr/master/Makefile > Makefile
 ```
 
+### Examples of Pipeline
+
+- [Circle CI](.circleci/config.yml)
+- [Github Actions](.github/workflows/main.yml)
+- [Gitlab CI](.gitilab-ci.yml)
+- [Travis](.travis.yml)
+
 ### Special Commands
 
 ```
