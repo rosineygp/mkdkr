@@ -17,6 +17,4 @@ jobs:
       - run:
           name: dind
           command: make dind
-      - run:
-          name: brainfuck
-          command: make brainfuck
+
