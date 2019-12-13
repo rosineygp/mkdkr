@@ -1,0 +1,42 @@
+stages:
+  - lint
+  - uses case
+  - glorious
+
+services:
+  - docker:19.03.1-dind
+
+variables:
+  DOCKER_HOST: tcp://docker:2376
+  DOCKER_TLS_CERTDIR: "/certs"
+
+image: docker:19
+
+before_script:
+  - apk add make
+  - apk add bash
+
+shellcheck:
+  stage: lint
+  script: 
+  - make shellcheck
+
+unnamed:
+  stage: uses case
+  script:
+  - make unnamed
+
+service:
+  stage: uses case
+  script:
+  - make consumer
+
+dind:
+  stage: uses case
+  script:
+  - make dind
+
+.brainfuck:
+  stage: glorious
+  script:
+  - make brainfuck

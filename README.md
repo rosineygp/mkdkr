@@ -2,6 +2,8 @@
 
 [![Build Status](https://travis-ci.org/rosineygp/mkdkr.svg?branch=master)](https://travis-ci.org/rosineygp/mkdkr)
 
+[![pipeline status](https://gitlab.com/rosiney.gp/mkdkr/badges/master/pipeline.svg)](https://gitlab.com/rosiney.gp/mkdkr/commits/master)
+
 Super small and powerful framework for make pipelines based on Makefile and docker containers.
 
 - Just the make, docker and bash as system requirements
