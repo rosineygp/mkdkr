@@ -34,10 +34,10 @@ pipeline {
 
 ```Shell
 # required
-curl https://raw.githubusercontent.com/rosineygp/mdp/master/.bash > .bash
+curl https://raw.githubusercontent.com/rosineygp/mkdkr/master/.bash > .bash
 
 # not required, but can be used as template
-curl https://raw.githubusercontent.com/rosineygp/mdp/master/Makefile > Makefile
+curl https://raw.githubusercontent.com/rosineygp/mkdkr/master/Makefile > Makefile
 ```
 
 ### Special Commands
