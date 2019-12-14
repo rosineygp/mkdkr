@@ -40,6 +40,11 @@ privileged() {
 # shellcheck disable=SC1036
 .=() {
   docker exec -i ${name:-unnamed} sh -c "$*"
+  EXIT_CODE=$?
+  if [ "${EXIT_CODE}" != "0" ]; then
+    destroy
+    exit "${EXIT_CODE}"
+  fi
 }
 
 destroy(){

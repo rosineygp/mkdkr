@@ -21,5 +21,3 @@ jobs:
       run: make consumer
     - name: dind
       run: make dind
-    - name: the brainfuck
-      run: make brainfuck
