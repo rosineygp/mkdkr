@@ -6,23 +6,33 @@
 
 mkdkr = Make wih Docker
 
-Super small and powerful framework for make pipelines based on Makefile and docker containers.
+Super small and powerful framework for make pipelines based on make and docker.
 
-- Just the make, docker and bash as system requirements
-- Just 2 files in your source code (Makefile and .bash)
+- Dependencies: make, docker and bash
+- Less garbage files (Makefile and .mkdkr)
 - All power of make
 - All power of docker
 - All power of bash
-- Easy switch between pipeline systems
+- Easy switch between pipeline systems (eg. gitlab, actions, jenkins, ...)
 
 Fast to write and fast to move
 
+```Makefile
+job:                  # job name
+  $(call .)           # required to load mkdkr functions
+  ... alpine          # initialized a docker container
+  .. apk add curl     # run a command
+  .. curl \           # another command
+    https://raw.githubusercontent.com/rosineygp/mkdkr/master/README.md
+  .                   # end of job
+```
+
 ## Reason
 
-Build pipeline for a dedicated platform can take a lot of time to learn and test, with **Make Docker** your can test all thing locally and run it before in any pipeline engine, like Jenkins, Actions, Gitlab-ci and others.
+Build pipeline for a dedicated platform can take a lot of time to learn and test, with **mkdkr** your can test all thing locally and run it before in any pipeline engine, like Jenkins, Actions, Gitlab-ci and others.
 
-```Jenkinsfile
-# Jenkins
+```Bash
+# Jenkinsfile DSL
 pipeline {
   stage("test") {
     sh "make test"
@@ -37,27 +47,35 @@ pipeline {
 ```yaml
 # gitlab-ci
 stages:
-  - lint
-  - uses case
-  - glorious
+  - test
+  - build
 
 services:
   - docker:19.03.1-dind
 
-shellcheck:
-  stage: lint
-  image: docker:19
-  variables:
-    DOCKER_HOST: tcp://docker:2376
-    DOCKER_TLS_CERTDIR: "/certs"
-  before_script:
-  - apk add make
-  - apk add bash
+image: docker:19
+
+variables:
+  DOCKER_HOST: tcp://docker:2376
+  DOCKER_TLS_CERTDIR: "/certs"
+
+before_script:
+  - apk add make bash
+
+test:
+  stage: test
   script:
-  - make shellcheck
+  - make test
+
+build:
+  stage: build
+  script:
+  - make build
+
+...
 ```
 
-### How to install
+## How to install
 
 ```Shell
 # required
@@ -67,39 +85,51 @@ curl https://raw.githubusercontent.com/rosineygp/mkdkr/master/.mkdkr > .mkdkr
 curl https://raw.githubusercontent.com/rosineygp/mkdkr/master/Makefile > Makefile
 ```
 
-### Examples of Pipeline
+## Pipelines
+
+### local
+
+```Makefile
+
+# included this job
+pipeline:
+	make shellcheck               # syntax test
+	make scenarios -j3            # test scenarios in parallel
+```
+
+### extenal services
 
 - [Circle CI](.circleci/config.yml)
 - [Github Actions](.github/workflows/main.yml)
 - [Gitlab CI](.gitlab-ci.yml)
 - [Travis](.travis.yml)
 
-### Special Commands
+## Functions
+
+**ATTENTION:** All functions is a **.** It create a beautiful code style like yaml, but indents is not required.
 
 ```
-... <action> <image> <args>
+...   Create a docker container
+      parameters:
+          <String action> <String image> <Array args>
+          action*     [job, privileged, service]
+                      job        => create a docker container used in job
+                      privileged => is like a job, but with daemon access
+                      service    => start a container but not overwrite the current image cmd
+          image*      any docker image, tag is optional
+          args        any docker arguments (--cpus 1 --memory 32MB)
 
-  Create a docker container.
+..     Execute a command inside docker container
+          parameters:
+          <Array command>
+          command*    any sh command eg. 'apk add nodejs'
 
-  action*  [job, privileged, service]
-            job        = just a new docker container
-            privileged = a docker container with daemon access
-            service    = start de default cmd of container
-  image *  any docker image name
-  args     any docker arguments use apostrophe eg. '--cpus 1'
-
-.. <command>
-
-  Run any command inside a container. In case of special chars like && \n use apostrophe.
-
-  command *  any sh command eg. 'apk add nodejs'
-
-. The end of job, delete all initialized container in make target.
+.      destroy all containers initialized in a job.
 ```
 
+## Create jobs
 
-
-### Create a simple and isolated job
+### Simple job
 
 ```Makefile
 .EXPORT_ALL_VARIABLES:
@@ -125,7 +155,7 @@ job:
 make job # execute
 ```
 
-### Create a service and test your webservice
+### Service and Job
 
 Testing a job that depends of the another job is very simple.
 
@@ -142,11 +172,7 @@ intergration-test:
   .                                 # this is the end
 ```
 
-```Shell
-make cucumber
-```
-
-### Needs to build a docker file
+### Privileged (dind)
 > Easy Peasy
 
 ```Makefile
@@ -157,11 +183,7 @@ build:
   .
 ```
 
-```Shell
-make build
-```
-
-### Multiline syntax, everything inside apostrophes
+### Long commands
 
 ```Makefile
 multiline:
@@ -175,8 +197,11 @@ multiline:
   .
 ```
 
+## Execute your jobs
+
 ```Shell
-make multiline
+# make <job_name>
+$ make build
 ```
 
 ## Environment variables

@@ -9,9 +9,9 @@ endef
 
 # END OF MAKE DEFINITIONS, CREATE YOUR JOBS BELOW
 
-.PHONY: small shellcheck service dind brainfuck
+.PHONY: small shellcheck service dind brainfuck scenarios
 
-all: small service dind
+scenarios: small service dind
 
 small:
 	$(call .)
@@ -45,5 +45,9 @@ brainfuck:
 	$(call .)
 	... privileged docker:19
 	.. apk add make bash
-	.. make all
+	.. make pipeline
 	.
+
+pipeline:
+	make shellcheck
+	make scenarios -j3
