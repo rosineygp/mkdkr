@@ -1,7 +1,6 @@
 stages:
   - lint
   - scenarios
-  - glorious
 
 services:
   - docker:19.03.1-dind
@@ -16,12 +15,13 @@ before_script:
   - apk add make
   - apk add bash
 
+
 shellcheck:
   stage: lint
-  script: 
+  script:
   - make shellcheck
 
-unnamed:
+small:
   stage: scenarios
   script:
   - make small
@@ -35,8 +35,3 @@ dind:
   stage: scenarios
   script:
   - make dind
-
-.brainfuck:
-  stage: glorious
-  script:
-  - make brainfuck

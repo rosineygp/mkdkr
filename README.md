@@ -31,6 +31,8 @@ job:                  # job name
 
 Build pipeline for a dedicated platform can take a lot of time to learn and test, with **mkdkr** your can test all thing locally and run it before in any pipeline engine, like Jenkins, Actions, Gitlab-ci and others.
 
+![alt standards](https://imgs.xkcd.com/comics/standards.png)
+
 ```Bash
 # Jenkinsfile DSL
 pipeline {
@@ -126,6 +128,27 @@ pipeline:
 
 .      destroy all containers initialized in a job.
 ```
+
+### Pipeline generation
+
+```Makefile
+# generate pipeline for gitlab
+generate/gitlab:
+  $(call .)
+  ... job rosiney/mkdkr
+  .. gitlab-ci \
+    lint=shellcheck \
+    scenarios=simple,service,dind > .gitlab-ci.yml
+  .
+```
+```
+Function gitlab-ci parameters
+  <stage>=<job>,<job>,...
+
+  The name of key is the **stage** and the **job(s)** is the values separated by comma.
+```
+
+> Avoid spaces, slashes or symbols it will keep compatibility with pipeline vendors.
 
 ## Create jobs
 

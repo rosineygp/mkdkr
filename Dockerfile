@@ -1,9 +1,11 @@
 # this dockerfile is an example
-FROM ubuntu:18.04
+FROM python:3.6-alpine
 
-RUN apt-get update && \
-    apt-get install htop -y
+RUN pip install jinja2-cli[yaml] && \
+  apk add bash
 
-EXPOSE 80
+COPY generator /generator
 
-CMD [ "ps", "-ef" ]
+WORKDIR /generator
+
+RUN ln -sf /generator/gitlab-ci /usr/local/bin/
