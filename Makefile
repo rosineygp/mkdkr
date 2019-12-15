@@ -1,44 +1,49 @@
 .EXPORT_ALL_VARIABLES:
-SHELL=/bin/bash --init-file .bash -i
+.ONESHELL:
+SHELL = /bin/bash
 
-.PHONY: shellcheck unnamed service consumer dind brainfuck
+define .
+	source .mkdkr
+	JOB_NAME="$(@)_$(shell date +%Y%m%d%H%M%S)"
+endef
 
-all: shellcheck unnamed consumer dind
+# END OF MAKE DEFINITIONS, CREATE YOUR JOBS BELOW
+
+.PHONY: small shellcheck service dind brainfuck
+
+all: small service dind
+
+small:
+	$(call .)
+	... job alpine --cpus 1 --memory 32MB
+	.. echo "Hello darkness, my old friend"
+	.
 
 shellcheck:
-	$(eval export name=shellcheck_ubuntu)
-	launch ubuntu:18.04
-	.= 'apt-get update && \
-			apt-get install -y shellcheck'
-	.= shellcheck -e SC1088 .bash
-	destroy
-
-unnamed:
-	launch alpine
-	.= apk add htop
-	destroy
+	$(call .)
+	... job ubuntu:18.04
+	.. apt-get update '&&' \
+		apt-get install -y shellcheck
+	.. shellcheck -e SC1088 -e SC2068 -e SC2086 .mkdkr
+	.
 
 service:
-	$(eval export name=service_nginx)
-	service nginx
-
-consumer: service
-	$(eval export name=consumer_nginx)
-	launch alpine '--link service_nginx:nginx'
-	.= apk add curl
-	.= curl -s nginx
-	destroy
-	destroy service_nginx
+	$(call .)
+	... service nginx
+	... job alpine --link service_$$JOB_NAME:nginx
+	.. apk add curl
+	.. curl -s nginx
+	.
 
 dind:
-	$(eval export name=dind)
-	privileged docker:19
-	.= docker build -t mdp:dind .
-	destroy
+	$(call .)
+	... privileged docker:19
+	.. docker build --force-rm --no-cache -t mdp:dind .
+	.
 
 brainfuck:
-	$(eval export name=brainfuck)
-	privileged docker:19
-	.= apk add make bash
-	.= make all
-	destroy
+	$(call .)
+	... privileged docker:19
+	.. apk add make bash
+	.. make all
+	.
