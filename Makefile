@@ -4,7 +4,7 @@ SHELL = /bin/bash
 
 define .
 	source .mkdkr
-	JOB_NAME="$(@)_$(shell date +%Y%m%d%H%M%S)"
+	JOB_NAME="$(shell echo $(@)_$(shell date +%Y%m%d%H%M%S) | sed 's/\//_/g')"
 endef
 
 # END OF MAKE DEFINITIONS, CREATE YOUR JOBS BELOW
@@ -25,6 +25,7 @@ shellcheck:
 	.. apt-get update '&&' \
 		apt-get install -y shellcheck
 	.. shellcheck -e SC1088 -e SC2068 -e SC2086 .mkdkr
+	.. shellcheck generator/gitlab-ci
 	.
 
 service:
@@ -38,7 +39,7 @@ service:
 dind:
 	$(call .)
 	... privileged docker:19
-	.. docker build --force-rm --no-cache -t mdp:dind .
+	.. docker build -t rosiney/mkdkr .
 	.
 
 brainfuck:
@@ -46,6 +47,13 @@ brainfuck:
 	... privileged docker:19
 	.. apk add make bash
 	.. make pipeline
+	.
+
+generator/gitlab:
+	$(call .)
+	... job rosineygp/mkdkr
+	.. gitlab-ci lint=shellcheck \
+		scenarios=small,service,dind > .gitlab-ci.yml
 	.
 
 pipeline:

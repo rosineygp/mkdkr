@@ -1,0 +1,21 @@
+#!/bin/bash
+
+#Generate yaml data file for jinja template
+
+DATA_FILE_TMP="/tmp/generator_gitlab_$(date +%Y%m%d%H%M%S).yml"
+echo "jobs:" > "$DATA_FILE_TMP"
+
+PARAMS=("${@:1}")
+for PARAM in "${PARAMS[@]}"; do
+
+  STAGE=$(echo "${PARAM}" | cut -d"=" -f1 )
+  JOBS=($(echo "${PARAM}" | sed  's/^.*\=//g;s/\ /_/g;s/,/\ /g'))
+
+  for JOB in "${JOBS[@]}"; do
+    echo "  - name: ${JOB}"     >> "$DATA_FILE_TMP"
+    echo "    stage: ${STAGE}"  >> "$DATA_FILE_TMP"
+  done
+
+done
+
+jinja2 --format=yml /generator/templates/gitlab-ci.yml.j2 "$DATA_FILE_TMP"
