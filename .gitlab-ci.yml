@@ -1,6 +1,6 @@
 stages:
   - lint
-  - uses case
+  - scenarios
   - glorious
 
 services:
@@ -22,17 +22,17 @@ shellcheck:
   - make shellcheck
 
 unnamed:
-  stage: uses case
+  stage: scenarios
   script:
-  - make unnamed
+  - make small
 
 service:
-  stage: uses case
+  stage: scenarios
   script:
-  - make consumer
+  - make service
 
 dind:
-  stage: uses case
+  stage: scenarios
   script:
   - make dind
 

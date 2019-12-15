@@ -1,0 +1,63 @@
+#!/bin/bash
+
+_launch() {
+  CONTAINER_NAME="${1}"
+  IMAGE="${2}"
+  COMMAND="${3}"
+  ARGS="${*:4}"
+
+  docker run --rm -d \
+    --name "${CONTAINER_NAME}" \
+    --entrypoint "" \
+    -v "${PWD}":"${PWD}" \
+    --workdir "${PWD}" \
+    ${ARGS[@]} \
+    "${IMAGE}" ${COMMAND}
+}
+
+_service() {
+  CONTAINER_NAME="${1}"
+  IMAGE="${2}"
+  ARGS="${*:3}"
+
+  docker run --rm -d \
+    --name "${CONTAINER_NAME}" \
+    -v "${PWD}":"${PWD}" \
+    --workdir "${PWD}" \
+    ${ARGS} \
+    "${IMAGE}"
+}
+
+# shellcheck disable=SC1036
+...() {
+  TYPE="${1}"
+  IMAGE="${2}"
+  ARGS="${*:3}"
+  COMMAND="sleep ${TTL:-3600}"
+
+  if [ "${TYPE}" == "service" ]; then
+    _service "service_${JOB_NAME}" "${IMAGE}" "${ARGS[*]}"
+  else 
+    if [ "${TYPE}" == "privileged" ]; then
+      ARGS=("${ARGS[@]}" "--privileged" "-v" "/var/run/docker.sock:/var/run/docker.sock")
+    fi
+    _launch "job_${JOB_NAME}" "${IMAGE}" "${COMMAND}" "${ARGS[*]}"
+  fi
+}
+
+
+# shellcheck disable=SC1036
+..() {
+  CONTAINER_NAME="job_${JOB_NAME}"
+
+  docker exec -i ${CONTAINER_NAME} sh -c "$*"
+  EXIT_CODE=$?
+  if [ "${EXIT_CODE}" != "0" ]; then
+    .
+    exit "${EXIT_CODE}"
+  fi
+}
+
+.() {
+  docker ps | grep "${JOB_NAME}" | awk '{print $1}' | xargs -t docker rm -f
+}

@@ -9,11 +9,11 @@ jobs:
           name: lint
           command: make shellcheck
       - run:
-          name: unnamed
-          command: make unnamed
+          name: small
+          command: make small
       - run:
           name: service
-          command: make consumer
+          command: make service
       - run:
           name: dind
           command: make dind
