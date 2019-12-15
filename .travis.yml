@@ -13,12 +13,12 @@ jobs:
     - stage: lint
       name: shellcheck
       script: make shellcheck
-    - stage: simple test
-      name: unnamed
-      script: make unnamed
-    - stage: service
-      name: nginx and curl
-      script: make consumer
-    - stage: dind
-      name: introspective
+    - stage: scenarios
+      name: small
+      script: make small
+    - stage: scenarios
+      name: service
+      script: make service
+    - stage: scenarios
+      name: dind
       script: make dind

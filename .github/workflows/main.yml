@@ -9,15 +9,11 @@ jobs:
 
     steps:
     - uses: actions/checkout@v1
-    - name: install dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install make -y
     - name: shellcheck
       run: make shellcheck
-    - name: unnamed
-      run: make unnamed
+    - name: small
+      run: make small
     - name: service
-      run: make consumer
+      run: make service
     - name: dind
       run: make dind
