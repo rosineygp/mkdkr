@@ -18,4 +18,4 @@ for PARAM in "${PARAMS[@]}"; do
 
 done
 
-jinja2 --format=yml /generator/templates/gitlab-ci.yml.j2 "$DATA_FILE_TMP"
+jinja2 --format=yml /generator/templates/.gitlab-ci.yml.j2 "$DATA_FILE_TMP"
