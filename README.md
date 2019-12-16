@@ -161,7 +161,7 @@ SHELL = /bin/bash
 
 define .
 	source .mkdkr
-	JOB_NAME="$(@)_$(shell date +%Y%m%d%H%M%S)"
+	JOB_NAME="$(shell echo $(@)_$(shell date +%Y%m%d%H%M%S) | sed 's/\//_/g')"
 endef
 
 # end of header
