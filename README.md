@@ -4,6 +4,10 @@
 
 # mkdkr
 
+<center>
+  <img src="media/logo.png" alt="logo" align="center" width="200"/>
+</center>
+
 mkdkr = Make wih Docker
 
 Super small and powerful framework for make pipelines based on make and docker.
@@ -31,7 +35,9 @@ job:                  # job name
 
 Build pipeline for a dedicated platform can take a lot of time to learn and test, with **mkdkr** your can test all thing locally and run it before in any pipeline engine, like Jenkins, Actions, Gitlab-ci and others.
 
-![alt standards](https://imgs.xkcd.com/comics/standards.png)
+<center>
+  <img src="https://imgs.xkcd.com/comics/standards.png" alt="standards" align="center"/>
+</center>
 
 ```Bash
 # Jenkinsfile DSL
