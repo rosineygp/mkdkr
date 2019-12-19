@@ -22,13 +22,13 @@ Super small and powerful framework for make pipelines based on make and docker.
 Fast to write and fast to move
 
 ```Makefile
-job:                  # job name
-  $(call .)           # required to load mkdkr functions
-  ... alpine          # initialized a docker container
-  .. apk add curl     # run a command
-  .. curl \           # another command
-    https://raw.githubusercontent.com/rosineygp/mkdkr/master/README.md
-  .                   # end of job
+job:				# job name
+	$(call .)		# required to load mkdkr functions
+	... alpine		# initialized a docker container
+	.. apk add curl		# run a command
+	.. curl \		# another command
+		https://raw.githubusercontent.com/rosineygp/mkdkr/master/README.md
+	.			# end of job
 ```
 
 ## Reason
@@ -140,12 +140,12 @@ pipeline:
 ```Makefile
 # generate pipeline for gitlab
 generate/gitlab:
-  $(call .)
-  ... job rosiney/mkdkr
-  .. gitlab-ci \
-    lint=shellcheck \
-    scenarios=simple,service,dind > .gitlab-ci.yml
-  .
+	$(call .)
+	... job rosiney/mkdkr
+	.. gitlab-ci \
+		lint=shellcheck \
+		scenarios=simple,service,dind > .gitlab-ci.yml
+	.
 ```
 ```
 Function gitlab-ci parameters
@@ -167,18 +167,18 @@ SHELL = /bin/bash
 
 define .
 	source .mkdkr
-	JOB_NAME="$(shell echo $(@)_$(shell date +%Y%m%d%H%M%S) | sed 's/\//_/g')"
+JOB_NAME="$(shell echo $(@)_$(shell date +%Y%m%d%H%M%S) | sed 's/\//_/g')"
 endef
 
 # end of header
 
 # simple job
 job:
-  $(call .)                         # required to load shell functions and name the job
-  ... job alpine                    # create a job with alpine container
-  .. apk add curl                   # install packages (run inside image)
-  .. curl https://www.google.com    # execute curl command (also inside image)
-  .                                 # just destroy everything
+	$(call .)                         # required to load shell functions and name the job
+	... job alpine                    # create a job with alpine container
+	.. apk add curl                   # install packages (run inside image)
+	.. curl https://www.google.com    # execute curl command (also inside image)
+	.                                 # just destroy everything
 ```
 ```Shell
 make job # execute
@@ -192,13 +192,13 @@ Testing a job that depends of the another job is very simple.
 # ---
 
 intergration-test:
-  $(call .)                         # required to load shell functions and name the job
-  ... service nginx                 # start a nginx service
-  ... job cumcumber \               # start a job with cucumber
-    --link service_$$JOB_NAME:nginx
-  .. gem install bundler            # build your stuffs
-  .. cucumber                       # run the test
-  .                                 # this is the end
+	$(call .)                         # required to load shell functions and name the job
+	... service nginx                 # start a nginx service
+	... job cumcumber \               # start a job with cucumber
+		--link service_$$JOB_NAME:nginx
+	.. gem install bundler            # build your stuffs
+	.. cucumber                       # run the test
+	.                                 # this is the end
 ```
 
 ### Privileged (dind)
@@ -206,24 +206,24 @@ intergration-test:
 
 ```Makefile
 build:
-  $(call .)
-  ... privileged docker:19             # now its require some privileges
-  .. docker build -t awesome:v1.0.0 .
-  .
+	$(call .)
+	... privileged docker:19             # now its require some privileges
+	.. docker build -t awesome:v1.0.0 .
+	.
 ```
 
 ### Long commands
 
 ```Makefile
 multiline:
-  $(call .)
-  ... job ubuntu:18.04
-  .. apt-get update '&&' \      # be careful with shell escapes
-    apt-get install -y \        # very elegant syntax, remeber tabs!=spaces
-    shellcheck \
-    htop \
-    vim
-  .
+	$(call .)
+	... job ubuntu:18.04
+	.. apt-get update '&&' \	# be careful with shell escapes
+		apt-get install -y \	# very elegant syntax, remeber tabs!=spaces
+		shellcheck \
+		htop \
+		vim
+	.
 ```
 
 ## Execute your jobs
