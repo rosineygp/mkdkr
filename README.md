@@ -165,9 +165,10 @@ Function gitlab-ci parameters
 .ONESHELL:
 SHELL = /bin/bash
 
-define .
+define . =
 	source .mkdkr
-JOB_NAME="$(shell echo $(@)_$(shell date +%Y%m%d%H%M%S) | sed 's/\//_/g')"
+	$(eval JOB_NAME="$(shell echo $(@)_$(shell date +%Y%m%d%H%M%S) | sed 's/\//_/g')")
+	export JOB_NAME=$(JOB_NAME)
 endef
 
 # end of header
