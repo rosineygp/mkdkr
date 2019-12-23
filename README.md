@@ -117,6 +117,11 @@ pipeline:
 **ATTENTION:** All functions is a **.** It create a beautiful code style like yaml, but indents is not required.
 
 ```
+....  Create or return a job name
+      ATTENTION: this is load on $(call .), you probably don't need to use this function.
+      parameters:
+		  <String job_name>		Set a job_name for current job, if it already run, just return the last name.
+
 ...   Create a docker container
       parameters:
           <String action> <String image> <Array args>
@@ -167,8 +172,8 @@ SHELL = /bin/bash
 
 define . =
 	source .mkdkr
-	$(eval JOB_NAME="$(shell echo $(@)_$(shell date +%Y%m%d%H%M%S) | sed 's/\//_/g')")
-	export JOB_NAME=$(JOB_NAME)
+	$(eval JOB_NAME=$(shell bash -c 'source .mkdkr; .... $(@)'))
+	.... $(JOB_NAME)
 endef
 
 # end of header

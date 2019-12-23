@@ -4,8 +4,8 @@ SHELL = /bin/bash
 
 define . =
 	source .mkdkr
-	$(eval JOB_NAME="$(shell echo $(@)_$(shell date +%Y%m%d%H%M%S) | sed 's/\//_/g')")
-	export JOB_NAME=$(JOB_NAME)
+	$(eval JOB_NAME=$(shell bash -c 'source .mkdkr; .... $(@)'))
+	.... $(JOB_NAME)
 endef
 
 # END OF MAKE DEFINITIONS, CREATE YOUR JOBS BELOW
