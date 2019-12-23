@@ -28,6 +28,14 @@ _service() {
     "${IMAGE}"
 }
 
+....() {
+  if [ -z "${JOB_NAME}" ]; then
+    _JOB_NAME=$(echo "${1}_$(date +%Y%m%d%H%M%S)" | sed 's/\//_/g')
+    export JOB_NAME="${_JOB_NAME}"
+  fi
+  echo "${JOB_NAME}"
+}
+
 # shellcheck disable=SC1036
 ...() {
   TYPE="${1}"
