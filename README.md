@@ -139,7 +139,7 @@ pipeline:
 
 ## . Functions
 
-**ATTENTION:** All functions is a **.** It creates a beautiful code style like yaml, but indents is not required.
+**ATTENTION:** All functions are a **.** It creates a beautiful code style like yaml, but indents are not required.
 
 ```
 ....  Create or return a job name
