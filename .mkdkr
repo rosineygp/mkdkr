@@ -1,5 +1,9 @@
 #!/bin/bash
 
+_prn_exec() {
+    echo -e "\e[32m${*}\e[0m"
+}
+
 _launch() {
   CONTAINER_NAME="${1}"
   IMAGE="${2}"
@@ -43,6 +47,8 @@ _service() {
   ARGS="${*:3}"
   COMMAND="sleep ${TTL:-3600}"
 
+  _prn_exec "... ${TYPE} ${IMAGE} ${ARGS[*]}"
+
   if [ "${TYPE}" == "service" ]; then
     _service "service_${JOB_NAME}" "${IMAGE}" "${ARGS[*]}"
   else 
@@ -58,6 +64,8 @@ _service() {
 ..() {
   CONTAINER_NAME="job_${JOB_NAME}"
 
+  _prn_exec ".. ${*}"
+
   docker exec -i ${CONTAINER_NAME} sh -c "$*"
   EXIT_CODE=$?
   if [ "${EXIT_CODE}" != "0" ]; then
@@ -67,5 +75,6 @@ _service() {
 }
 
 .() {
-  docker ps | grep "${JOB_NAME}" | awk '{print $1}' | xargs -t docker rm -f
+  _prn_exec "."
+  docker ps | grep "${JOB_NAME}" | awk '{print $1}' | xargs docker rm -f
 }

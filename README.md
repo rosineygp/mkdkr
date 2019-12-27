@@ -22,13 +22,22 @@ Super small and powerful framework for make pipelines based on make and docker.
 Fast to write and fast to move
 
 ```Makefile
+.EXPORT_ALL_VARIABLES:
+.ONESHELL:
+SHELL = /bin/bash
+
+define . =
+	source .mkdkr
+	$(eval JOB_NAME=$(shell bash -c 'source .mkdkr; .... $(@)'))
+endef
+
 job:				# job name
-	$(call .)		# required to load mkdkr functions
+	@$(.)   		# required to load mkdkr functions
 	... alpine		# initialized a docker container
-	.. apk add curl		# run a command
+	.. apk add curl # run a command
 	.. curl \		# another command
 		https://raw.githubusercontent.com/rosineygp/mkdkr/master/README.md
-	.			# end of job
+	.			    # end of job
 ```
 
 ## Reason
@@ -112,7 +121,7 @@ pipeline:
 - [Gitlab CI](.gitlab-ci.yml)
 - [Travis](.travis.yml)
 
-## Functions
+## . Functions
 
 **ATTENTION:** All functions is a **.** It create a beautiful code style like yaml, but indents is not required.
 
@@ -173,14 +182,13 @@ SHELL = /bin/bash
 define . =
 	source .mkdkr
 	$(eval JOB_NAME=$(shell bash -c 'source .mkdkr; .... $(@)'))
-	.... $(JOB_NAME)
 endef
 
 # end of header
 
 # simple job
 job:
-	$(call .)                         # required to load shell functions and name the job
+	@$(.)                             # required to load shell functions and name the job
 	... job alpine                    # create a job with alpine container
 	.. apk add curl                   # install packages (run inside image)
 	.. curl https://www.google.com    # execute curl command (also inside image)
@@ -198,7 +206,7 @@ Testing a job that depends of the another job is very simple.
 # ---
 
 intergration-test:
-	$(call .)                         # required to load shell functions and name the job
+	@$(.)                             # required to load shell functions and name the job
 	... service nginx                 # start a nginx service
 	... job cumcumber \               # start a job with cucumber
 		--link service_$$JOB_NAME:nginx
@@ -212,7 +220,7 @@ intergration-test:
 
 ```Makefile
 build:
-	$(call .)
+	@$(.)
 	... privileged docker:19             # now its require some privileges
 	.. docker build -t awesome:v1.0.0 .
 	.
@@ -222,7 +230,7 @@ build:
 
 ```Makefile
 multiline:
-	$(call .)
+	@$(.)
 	... job ubuntu:18.04
 	.. apt-get update '&&' \	# be careful with shell escapes
 		apt-get install -y \	# very elegant syntax, remeber tabs!=spaces
