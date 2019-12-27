@@ -60,7 +60,7 @@ cdab4af95cec              # id(s) of container(s) removed
 
 ## Reason
 
-Build pipeline for a dedicated platform can take a lot of time to learn and test, with **mkdkr** your can test all thing locally and run it before in any pipeline engine, like Jenkins, Actions, Gitlab-ci and others.
+Build pipeline for a dedicated platform can take a lot of time to learn and test, with **mkdkr** you can test all things locally and run it before in any pipeline engine like Jenkins, Actions, Gitlab-ci and others.
 
 ![standards](https://imgs.xkcd.com/comics/standards.png)
 
@@ -130,7 +130,7 @@ pipeline:
 	make scenarios -j3            # test scenarios in parallel
 ```
 
-### extenal services
+### External services
 
 - [Circle CI](.circleci/config.yml)
 - [Github Actions](.github/workflows/main.yml)
@@ -139,7 +139,7 @@ pipeline:
 
 ## . Functions
 
-**ATTENTION:** All functions is a **.** It create a beautiful code style like yaml, but indents is not required.
+**ATTENTION:** All functions is a **.** It creates a beautiful code style like yaml, but indents is not required.
 
 ```
 ....  Create or return a job name
@@ -216,7 +216,7 @@ make job # execute
 
 ### Service and Job
 
-Testing a job that depends of the another job is very simple.
+Testing a job that depends on another job is very simple.
 
 ```Makefile
 intergration-test:
