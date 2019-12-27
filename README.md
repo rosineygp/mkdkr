@@ -21,6 +21,13 @@ Super small and powerful framework for make pipelines based on make and docker.
 
 Fast to write and fast to move
 
+```bash
+# Download .mkdkr
+curl https://raw.githubusercontent.com/rosineygp/mkdkr/master/.mkdkr > .mkdkr
+```
+
+> Create a file with name Makefile and paste the following content
+
 ```Makefile
 .EXPORT_ALL_VARIABLES:
 .ONESHELL:
@@ -31,14 +38,27 @@ define . =
 	$(eval JOB_NAME=$(shell bash -c 'source .mkdkr; .... $(@)'))
 endef
 
-job:				# job name
-	@$(.)   		# required to load mkdkr functions
-	... alpine		# initialized a docker container
-	.. apk add curl # run a command
-	.. curl \		# another command
-		https://raw.githubusercontent.com/rosineygp/mkdkr/master/README.md
-	.			    # end of job
+job:
+	@$(.)
+	... job alpine
+	.. echo "hello mkdkr!
+	.
 ```
+
+```bash
+# execute
+make job
+
+# Output
+... job alpine            # creating a docker container with alpine image
+cdab4af95cec...           # docker container id
+.. echo hello mkdkr!      # execute command inside container
+hello mkdkr!              # output of command
+.                         # destroy all containers related of this job
+cdab4af95cec              # id(s) of container(s) removed
+
+```
+
 
 ## Reason
 
@@ -154,7 +174,7 @@ pipeline:
 ```Makefile
 # generate pipeline for gitlab
 generate/gitlab:
-	$(call .)
+	@$(.)
 	... job rosiney/mkdkr
 	.. gitlab-ci \
 		lint=shellcheck \
@@ -203,8 +223,6 @@ make job # execute
 Testing a job that depends of the another job is very simple.
 
 ```Makefile
-# ---
-
 intergration-test:
 	@$(.)                             # required to load shell functions and name the job
 	... service nginx                 # start a nginx service
