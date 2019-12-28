@@ -39,7 +39,7 @@ endef
 job:
 	@$(.)
 	... job alpine
-	.. echo "hello mkdkr!
+	.. echo "hello mkdkr!"
 	.
 ```
 
