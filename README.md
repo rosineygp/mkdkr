@@ -8,25 +8,57 @@
 
 mkdkr = Makefile + Docker
 
-Super small and powerful framework for make pipelines based on make and docker.
+Super small and powerful framework for build CI pipelines scripted with Makefile and isolated with docker.
 
-- Dependencies: make, docker and bash
-- Less garbage files (Makefile and .mkdkr)
-- All power of make
-- All power of docker
-- All power of bash
-- Easy switch between pipeline systems (eg. gitlab, actions, jenkins, ...)
+- Dependencies: [ [make](https://www.gnu.org/software/make/manual/make.html), [docker](https://www.docker.com/), [bash](https://www.gnu.org/software/bash/) ]
+- Two files only (Makefile and .mkdkr), less garbage on your repo
+- All power of make, docker and bash
+- Easy shipping and switch among CI engines like GitHub Actions, Gitlab-ci, Jenkins, Travis.. and more
+- Clean and elegant syntax
 
-Fast to write and fast to move
+Table of contents
+-----------------
+
+* [Usage](#usage)
+* * [Installation](#installation)
+* * [Create Makefile](#create-makefile)
+* * [Execute](#execute)
+* * [Result](#result)
+* [Reason](#reason)
+* [Job Functions](#job-functions)
+* * [`....`](#-4-dots)
+* * [`...`](#-3-dots)
+* * [`..`](#-2-dots)
+* * [`.`](#-1-dot)
+* [Examples](#examples)
+* * [Simple](#simple)
+* * [Service](#service)
+* * [DIND](#dind)
+* * [Escapes](#escapes)
+* * [Pipelines](#pipelines)
+* [Generators](#generators)
+* * [Gitlab CI](#gitlab-ci)
+* [Environment Variables](#environment-variables)
+
+Usage
+-----
+
+### Installation
 
 ```bash
 # Download .mkdkr
 curl https://raw.githubusercontent.com/rosineygp/mkdkr/master/.mkdkr > .mkdkr
+
+# not required, but can be used as template
+curl https://raw.githubusercontent.com/rosineygp/mkdkr/master/Makefile > Makefile
 ```
 
-> Create a file with name Makefile and paste the following content
+### Create Makefile
+
+Create a file with name Makefile and paste the following content
 
 ```Makefile
+# Required header
 .EXPORT_ALL_VARIABLES:
 .ONESHELL:
 SHELL = /bin/bash
@@ -35,20 +67,29 @@ define . =
 	source .mkdkr
 	$(eval JOB_NAME=$(shell bash -c 'source .mkdkr; .... $(@)'))
 endef
+# end of header
 
-job:
-	@$(.)
-	... job alpine
-	.. echo "hello mkdkr!"
-	.
+job:                            # job name
+	@$(.)                       # required: load mkdkr and create unique job name
+	... job alpine              # create a docker container using alpine image
+	.. echo "hello mkdkr!"      # execute a command inside container
+	.                           # destroy all container started in this job
+
+# if you want to test it remove all comments of job
 ```
+
+### Execute
 
 ```bash
 # execute
 make job
+```
 
-# Output
-... job alpine            # creating a docker container with alpine image
+### Result
+
+```bash
+# output
+... job alpine            # creating a docker container using alpine image
 cdab4af95cec...           # docker container id
 .. echo hello mkdkr!      # execute command inside container
 hello mkdkr!              # output of command
@@ -57,119 +98,170 @@ cdab4af95cec              # id(s) of container(s) removed
 
 ```
 
-
-## Reason
+Reason
+------
 
 Build pipeline for a dedicated platform can take a lot of time to learn and test, with **mkdkr** you can test all things locally and run it before in any pipeline engine like Jenkins, Actions, Gitlab-ci and others.
 
 ![standards](https://imgs.xkcd.com/comics/standards.png)
 
-```Bash
-# Jenkinsfile DSL
-pipeline {
-  stage("test") {
-    sh "make test"
-  }
-  stage("build") {
-    sh "make build"
-  }
-  ...
-}
-```
+Job Functions
+-------------
 
-```yaml
-# gitlab-ci
-stages:
-  - test
-  - build
-
-services:
-  - docker:19.03.1-dind
-
-image: docker:19
-
-variables:
-  DOCKER_HOST: tcp://docker:2376
-  DOCKER_TLS_CERTDIR: "/certs"
-
-before_script:
-  - apk add make bash
-
-test:
-  stage: test
-  script:
-  - make test
-
-build:
-  stage: build
-  script:
-  - make build
-
-...
-```
-
-## How to install
-
-```Shell
-# required
-curl https://raw.githubusercontent.com/rosineygp/mkdkr/master/.mkdkr > .mkdkr
-
-# not required, but can be used as template
-curl https://raw.githubusercontent.com/rosineygp/mkdkr/master/Makefile > Makefile
-```
-
-## Pipelines
-
-### local
+**ATTENTION:** All functions are a **.** It creates a beautiful code style like yaml, but indents are not required.
 
 ```Makefile
-
-# included this job
-pipeline:
-	make shellcheck               # syntax test
-	make scenarios -j3            # test scenarios in parallel
+job:
+	....
+	...
+	..
+	.
 ```
 
-### External services
+> yes, just dots
+
+### `....` 4 dots
+
+Create a unique job name, this is automatically call after `@$(.)`.
+
+Parameters:
+
+- String, JOB_NAME: If not exist set a JOB_NAME otherwise return current JOB_NAME.
+
+Return:
+
+- String, JOB_NAME
+
+### `...` 3 dots
+
+Create a docker container, it can set as simple job, service or privileged job.
+
+Parameters:
+
+- String, ACTION *: Actions is the mode that container will run it can be a:
+- - job: simple docker container
+- - service: is like a job, but run in detached mode
+- - privileged: is a job but with docker socket access
+- String, IMAGE *: any docker image name
+- String|Array, ARGS: additional docker init args like (--cpus 1 --memory 64MB)
+
+Return:
+
+- String, Container Id
+
+### `..` 2 dots
+
+Execute a command inside docker container (job or privileged).
+
+Parameters:
+
+- String|Array, command: any sh command eg. 'apk add nodejs'
+
+Return:
+
+- String, Command(s) output
+
+
+### `.` 1 dot
+
+Destroy all containers initialized in a job.
+
+Parameters:
+
+- None
+
+Return:
+
+- String, Container Id
+
+Examples
+--------
+
+### Simple
+
+```Makefile
+simple:
+	@$(.)
+	... job alpine
+	.. echo "hello mkdkr!"
+	.
+```
+
+[Makefile](examples/simple.mk)
+
+### Service
+
+
+```Makefile
+service:
+	@$(.)
+	... service nginx
+	... job alpine --link service_$$JOB_NAME:nginx
+	.. apk add curl
+	.. curl -s nginx
+	.
+```
+
+[Makefile](examples/service.mk)
+
+### DIND
+
+Privileged job
+
+```Makefile
+dind:
+	@$(.)
+	... privileged docker:19
+	.. docker build -t rosiney/pylint .
+	.
+```
+
+[Makefile](examples/dind.mk)
+
+### Escapes
+
+```Makefile
+pipes:
+	@$(.)
+	... job ubuntu:18.04
+	.. "find . -iname '*.mk' -type f -exec cat {} \; | grep -c escapes"
+	.
+```
+
+> More examples at file
+
+[Makefile](examples/escapes.mk)
+
+### Pipelines
+
+Group of jobs for parallel and organization execution
+
+```Makefile
+pipeline:
+	make test -j 3	# parallel execution
+	make build
+	make pack
+	make deploy
+```
+
+[Makefile](examples/pipeline.mk)
+
+Generators
+----------
+
+Create a scaffold to another pipeline engine.
+
+Examples of external pipeline:
 
 - [Circle CI](.circleci/config.yml)
 - [Github Actions](.github/workflows/main.yml)
 - [Gitlab CI](.gitlab-ci.yml)
 - [Travis](.travis.yml)
 
-## . Functions
-
-**ATTENTION:** All functions are a **.** It creates a beautiful code style like yaml, but indents are not required.
-
-```
-....  Create or return a job name
-      ATTENTION: this is load on $(call .), you probably don't need to use this function.
-      parameters:
-		  <String job_name>		Set a job_name for current job, if it already run, just return the last name.
-
-...   Create a docker container
-      parameters:
-          <String action> <String image> <Array args>
-          action*     [job, privileged, service]
-                      job        => create a docker container used in job
-                      privileged => is like a job, but with daemon access
-                      service    => start a container but not overwrite the current image cmd
-          image*      any docker image, tag is optional
-          args        any docker arguments (--cpus 1 --memory 32MB)
-
-..     Execute a command inside docker container
-          parameters:
-          <Array command>
-          command*    any sh command eg. 'apk add nodejs'
-
-.      destroy all containers initialized in a job.
-```
-
-### Pipeline generation
+### Gitlab CI
 
 ```Makefile
-# generate pipeline for gitlab
-generate/gitlab:
+gitlab:
 	@$(.)
 	... job rosiney/mkdkr
 	.. gitlab-ci \
@@ -177,91 +269,16 @@ generate/gitlab:
 		scenarios=simple,service,dind > .gitlab-ci.yml
 	.
 ```
-```
-Function gitlab-ci parameters
-  <stage>=<job>,<job>,...
 
-  The name of key is the **stage** and the **job(s)** is the values separated by comma.
-```
+Parameters:
 
+- String(key)=String(job),String(job),...	The name of key is the **stage** and the **job(s)** is the values separated by comma.
+
+> Ex. test=lint,syntax build=gcc deploy=k8s <br>
 > Avoid spaces, slashes or symbols it will keep compatibility with pipeline vendors.
 
-## Create jobs
-
-### Simple job
-
-```Makefile
-.EXPORT_ALL_VARIABLES:
-.ONESHELL:
-SHELL = /bin/bash
-
-define . =
-	source .mkdkr
-	$(eval JOB_NAME=$(shell bash -c 'source .mkdkr; .... $(@)'))
-endef
-
-# end of header
-
-# simple job
-job:
-	@$(.)                             # required to load shell functions and name the job
-	... job alpine                    # create a job with alpine container
-	.. apk add curl                   # install packages (run inside image)
-	.. curl https://www.google.com    # execute curl command (also inside image)
-	.                                 # just destroy everything
-```
-```Shell
-make job # execute
-```
-
-### Service and Job
-
-Testing a job that depends on another job is very simple.
-
-```Makefile
-intergration-test:
-	@$(.)                             # required to load shell functions and name the job
-	... service nginx                 # start a nginx service
-	... job cumcumber \               # start a job with cucumber
-		--link service_$$JOB_NAME:nginx
-	.. gem install bundler            # build your stuffs
-	.. cucumber                       # run the test
-	.                                 # this is the end
-```
-
-### Privileged (dind)
-> Easy Peasy
-
-```Makefile
-build:
-	@$(.)
-	... privileged docker:19             # now its require some privileges
-	.. docker build -t awesome:v1.0.0 .
-	.
-```
-
-### Long commands
-
-```Makefile
-multiline:
-	@$(.)
-	... job ubuntu:18.04
-	.. apt-get update '&&' \	# be careful with shell escapes
-		apt-get install -y \	# very elegant syntax, remeber tabs!=spaces
-		shellcheck \
-		htop \
-		vim
-	.
-```
-
-## Execute your jobs
-
-```Shell
-# make <job_name>
-$ make build
-```
-
-## Environment variables
+Environment Variables
+---------------------
 
 |Name|Default|Description|
 |----|-------|-----------|
