@@ -34,10 +34,10 @@ Table of contents
   * [Result](#result)
 * [Reason](#reason)
 * [Dot Functions](#dot-functions)
-  * [••••](#••••)
-  * [•••](#•••)
-  * [••](#••)
-  * [•](#•)
+  * [••••](#-4-dots)
+  * [•••](#-3-dots)
+  * [••](#-2-dots)
+  * [•](#-1-dot)
 * [Examples](#examples)
   * [Simple](#simple)
   * [Service](#service)
@@ -130,7 +130,7 @@ job:
 
 > yes, just dots
 
-## ••••
+## •••• 4 dots
 
 Create a unique job name.
 
@@ -142,7 +142,7 @@ Create a unique job name.
 
 > Automatically load after call `@$(.)`.
 
-## •••
+## ••• 3 dots
 
 Create a docker container, it can set as simple job, service or privileged job.
 
@@ -157,7 +157,7 @@ Create a docker container, it can set as simple job, service or privileged job.
 **Return:**
 - String, Container Id
 
-## ••
+## •• 2 dots
 
 Execute a command inside docker container (job or privileged).
 
@@ -168,7 +168,7 @@ Execute a command inside docker container (job or privileged).
 - String, Command(s) output
 
 
-## •
+## • 1 dot
 
 Destroy all containers initialized in a job.
 
