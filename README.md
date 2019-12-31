@@ -57,7 +57,7 @@ Table of contents
 curl https://raw.githubusercontent.com/rosineygp/mkdkr/master/.mkdkr > .mkdkr
 
 # not required, but can be used as template
-curl https://raw.githubusercontent.com/rosineygp/mkdkr/master/Makefile > Makefile
+curl https://raw.githubusercontent.com/rosineygp/mkdkr/master/examples/simple.mk > Makefile
 ```
 
 ## Makefile
