@@ -23,7 +23,7 @@ Super small and powerful framework for build CI pipeline, scripted with Makefile
 - Clean and elegant code syntax
 
 <p align="center">
-	<a href="#">
+	<a href="https://terminalizer.com/view/a07de9182694">
     	<img src="media/presentation.gif?raw=true" />
 	</a>
 </p>
