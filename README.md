@@ -12,8 +12,6 @@
 [![GitHub license](https://img.shields.io/github/license/rosineygp/mkdkr.svg)](https://github.com/rosineygp/mkdkr/blob/master/LICENSE)
 [![GitHub release](https://img.shields.io/github/release/rosineygp/mkdkr.svg)](https://GitHub.com/rosineygp/mkdkr/releases/)
 
-
-
 > mkdkr = Makefile + Docker
 
 Super small and powerful framework for build CI pipeline, scripted with Makefile and isolated with docker.
@@ -23,6 +21,12 @@ Super small and powerful framework for build CI pipeline, scripted with Makefile
 - All power of make, docker and bash
 - Shipping and switch among CI engines like GitHub Actions, Gitlab-ci, Jenkins, Travis.. and more
 - Clean and elegant code syntax
+
+<p align="center">
+	<a href="#">
+    	<img src="media/presentation.gif?raw=true" />
+	</a>
+</p>
 
 Table of contents
 -----------------
