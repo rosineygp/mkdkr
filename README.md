@@ -1,49 +1,56 @@
-[![Build Status](https://travis-ci.org/rosineygp/mkdkr.svg?branch=master)](https://travis-ci.org/rosineygp/mkdkr)
-[![pipeline status](https://gitlab.com/rosiney.gp/mkdkr/badges/master/pipeline.svg)](https://gitlab.com/rosiney.gp/mkdkr/commits/master)
-[![CircleCI](https://circleci.com/gh/rosineygp/mkdkr/tree/master.svg?style=svg)](https://circleci.com/gh/rosineygp/mkdkr/tree/master)
+<p align="center">
+  <a alt="mkdkr" href="https://rosineygp.github.io/mkdkr">
+    <img src="media/logo.png?raw=true" width="128"/>
+  </a>
+</p>
 
 # mkdkr
 
-<img src="media/logo.svg" alt="logo" align="center" width="128"/>
+[![Build Status](https://travis-ci.org/rosineygp/mkdkr.svg?branch=master)](https://travis-ci.org/rosineygp/mkdkr)
+[![pipeline status](https://gitlab.com/rosiney.gp/mkdkr/badges/master/pipeline.svg)](https://gitlab.com/rosiney.gp/mkdkr/commits/master)
+[![CircleCI](https://circleci.com/gh/rosineygp/mkdkr/tree/master.svg?style=svg)](https://circleci.com/gh/rosineygp/mkdkr/tree/master)
+[![GitHub license](https://img.shields.io/github/license/rosineygp/mkdkr.svg)](https://github.com/rosineygp/mkdkr/blob/master/LICENSE)
+[![GitHub release](https://img.shields.io/github/release/rosineygp/mkdkr.svg)](https://GitHub.com/rosineygp/mkdkr/releases/)
 
-mkdkr = Makefile + Docker
 
-Super small and powerful framework for build CI pipelines scripted with Makefile and isolated with docker.
+
+> mkdkr = Makefile + Docker
+
+Super small and powerful framework for build CI pipeline, scripted with Makefile and isolated with docker.
 
 - Dependencies: [ [make](https://www.gnu.org/software/make/manual/make.html), [docker](https://www.docker.com/), [bash](https://www.gnu.org/software/bash/) ]
 - Two files only (Makefile and .mkdkr), less garbage on your repo
 - All power of make, docker and bash
-- Easy shipping and switch among CI engines like GitHub Actions, Gitlab-ci, Jenkins, Travis.. and more
-- Clean and elegant syntax
+- Shipping and switch among CI engines like GitHub Actions, Gitlab-ci, Jenkins, Travis.. and more
+- Clean and elegant code syntax
 
 Table of contents
 -----------------
 
 * [Usage](#usage)
-* * [Installation](#installation)
-* * [Create Makefile](#create-makefile)
-* * [Execute](#execute)
-* * [Result](#result)
+  * [Installation](#installation)
+  * [Create Makefile](#create-makefile)
+  * [Execute](#execute)
+  * [Result](#result)
 * [Reason](#reason)
-* [Job Functions](#job-functions)
-* * [`....`](#-4-dots)
-* * [`...`](#-3-dots)
-* * [`..`](#-2-dots)
-* * [`.`](#-1-dot)
+* [Dot Functions](#dot-functions)
+  * [••••](#-4-dots)
+  * [•••](#-3-dots)
+  * [••](#-2-dots)
+  * [•](#-1-dot)
 * [Examples](#examples)
-* * [Simple](#simple)
-* * [Service](#service)
-* * [DIND](#dind)
-* * [Escapes](#escapes)
-* * [Pipelines](#pipelines)
+  * [Simple](#simple)
+  * [Service](#service)
+  * [DIND](#dind)
+  * [Escapes](#escapes)
+  * [Pipelines](#pipelines)
 * [Generators](#generators)
-* * [Gitlab CI](#gitlab-ci)
+  * [Gitlab CI](#gitlab-ci)
 * [Environment Variables](#environment-variables)
 
-Usage
------
+# Usage
 
-### Installation
+## Installation
 
 ```bash
 # Download .mkdkr
@@ -53,7 +60,7 @@ curl https://raw.githubusercontent.com/rosineygp/mkdkr/master/.mkdkr > .mkdkr
 curl https://raw.githubusercontent.com/rosineygp/mkdkr/master/Makefile > Makefile
 ```
 
-### Create Makefile
+## Makefile
 
 Create a file with name Makefile and paste the following content
 
@@ -69,7 +76,7 @@ define . =
 endef
 # end of header
 
-job:                            # job name
+job:                                # job name
 	@$(.)                       # required: load mkdkr and create unique job name
 	... job alpine              # create a docker container using alpine image
 	.. echo "hello mkdkr!"      # execute a command inside container
@@ -78,14 +85,14 @@ job:                            # job name
 # if you want to test it remove all comments of job
 ```
 
-### Execute
+## Execute
 
 ```bash
 # execute
 make job
 ```
 
-### Result
+## Result
 
 ```bash
 # output
@@ -98,17 +105,20 @@ cdab4af95cec              # id(s) of container(s) removed
 
 ```
 
-Reason
-------
+# Reason
 
-Build pipeline for a dedicated platform can take a lot of time to learn and test, with **mkdkr** you can test all things locally and run it before in any pipeline engine like Jenkins, Actions, Gitlab-ci and others.
+Build pipeline for a dedicated platform can take a lot of time to learn and test, with **mkdkr** you can test all things locally and run it in any pipeline engine like Jenkins, Actions, Gitlab-ci and others.
 
-![standards](https://imgs.xkcd.com/comics/standards.png)
 
-Job Functions
--------------
+<p align="center">
+  <a href="ttps://imgs.xkcd.com/comics/standards.png">
+    <img alt="standards" src="https://imgs.xkcd.com/comics/standards.png" />
+  </a>
+</p>
 
-**ATTENTION:** All functions are a **.** It creates a beautiful code style like yaml, but indents are not required.
+# Dot Functions
+
+**ATTENTION:** All functions are represented with **.(s)** It creates a beautiful code style like yaml, indents are not required.
 
 ```Makefile
 job:
@@ -120,64 +130,57 @@ job:
 
 > yes, just dots
 
-### `....` 4 dots
+## •••• 4 dots
 
-Create a unique job name, this is automatically call after `@$(.)`.
+Create a unique job name.
 
-Parameters:
-
+**Parameters:**
 - String, JOB_NAME: If not exist set a JOB_NAME otherwise return current JOB_NAME.
 
-Return:
-
+**Return:**
 - String, JOB_NAME
 
-### `...` 3 dots
+> Automatically load after call `@$(.)`.
+
+## ••• 3 dots
 
 Create a docker container, it can set as simple job, service or privileged job.
 
-Parameters:
-
+**Parameters:**
 - String, ACTION *: Actions is the mode that container will run it can be a:
-- - job: simple docker container
-- - service: is like a job, but run in detached mode
-- - privileged: is a job but with docker socket access
+  - job: simple docker container
+  - service: is like a job, but run in detached mode
+  - privileged: is a job but with docker socket access
 - String, IMAGE *: any docker image name
 - String|Array, ARGS: additional docker init args like (--cpus 1 --memory 64MB)
 
-Return:
-
+**Return:**
 - String, Container Id
 
-### `..` 2 dots
+## •• 2 dots
 
 Execute a command inside docker container (job or privileged).
 
-Parameters:
-
+**Parameters:**
 - String|Array, command: any sh command eg. 'apk add nodejs'
 
-Return:
-
+**Return:**
 - String, Command(s) output
 
 
-### `.` 1 dot
+## • 1 dot
 
 Destroy all containers initialized in a job.
 
-Parameters:
-
+**Parameters:**
 - None
 
-Return:
-
+**Return:**
 - String, Container Id
 
-Examples
---------
+# Examples
 
-### Simple
+## Simple
 
 ```Makefile
 simple:
@@ -189,7 +192,7 @@ simple:
 
 [Makefile](examples/simple.mk)
 
-### Service
+## Service
 
 
 ```Makefile
@@ -204,7 +207,7 @@ service:
 
 [Makefile](examples/service.mk)
 
-### DIND
+## DIND
 
 Privileged job
 
@@ -218,7 +221,7 @@ dind:
 
 [Makefile](examples/dind.mk)
 
-### Escapes
+## Escapes
 
 ```Makefile
 pipes:
@@ -232,7 +235,7 @@ pipes:
 
 [Makefile](examples/escapes.mk)
 
-### Pipelines
+## Pipeline
 
 Group of jobs for parallel and organization execution
 
@@ -246,19 +249,18 @@ pipeline:
 
 [Makefile](examples/pipeline.mk)
 
-Generators
-----------
+# Generators
 
 Create a scaffold to another pipeline engine.
 
-Examples of external pipeline:
+External pipeline:
 
 - [Circle CI](.circleci/config.yml)
 - [Github Actions](.github/workflows/main.yml)
 - [Gitlab CI](.gitlab-ci.yml)
 - [Travis](.travis.yml)
 
-### Gitlab CI
+## Gitlab CI
 
 ```Makefile
 gitlab:
@@ -270,15 +272,13 @@ gitlab:
 	.
 ```
 
-Parameters:
-
+**Parameters:**
 - String(key)=String(job),String(job),...	The name of key is the **stage** and the **job(s)** is the values separated by comma.
 
-> Ex. test=lint,syntax build=gcc deploy=k8s <br>
-> Avoid spaces, slashes or symbols it will keep compatibility with pipeline vendors.
+> - Ex. test=lint,syntax build=gcc deploy=k8s 
+> - Avoid spaces, slashes or symbols it will keep compatibility with pipeline vendors.
 
-Environment Variables
----------------------
+# Environment Variables
 
 |Name|Default|Description|
 |----|-------|-----------|
