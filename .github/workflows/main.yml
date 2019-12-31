@@ -11,6 +11,8 @@ jobs:
     - uses: actions/checkout@v1
     - name: shellcheck
       run: make shellcheck
+    - name: unit
+      run: make unit
     - name: small
       run: make small
     - name: service

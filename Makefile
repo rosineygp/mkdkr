@@ -30,6 +30,13 @@ shellcheck:
 	.. shellcheck generator/gitlab-ci
 	.
 
+unit:
+	@$(.)
+	... privileged docker:19 --workdir $(PWD)/test
+	.. apk add bash
+	.. ./fn_job_name.sh
+	.
+
 service:
 	@$(.)
 	... service nginx
