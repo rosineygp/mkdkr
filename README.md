@@ -1,6 +1,6 @@
 <p align="center">
-  <a href="https://rosineygp.github.io/mkdkr">
-    <img alt="mkdkr" src="media/logo.svg?raw=true" width="128"/>
+  <a alt="mkdkr" href="https://rosineygp.github.io/mkdkr">
+    <img src="media/logo.png?raw=true" width="128"/>
   </a>
 </p>
 
@@ -9,6 +9,9 @@
 [![Build Status](https://travis-ci.org/rosineygp/mkdkr.svg?branch=master)](https://travis-ci.org/rosineygp/mkdkr)
 [![pipeline status](https://gitlab.com/rosiney.gp/mkdkr/badges/master/pipeline.svg)](https://gitlab.com/rosiney.gp/mkdkr/commits/master)
 [![CircleCI](https://circleci.com/gh/rosineygp/mkdkr/tree/master.svg?style=svg)](https://circleci.com/gh/rosineygp/mkdkr/tree/master)
+[![GitHub license](https://img.shields.io/github/license/rosineygp/mkdkr.svg)](https://github.com/rosineygp/mkdkr/blob/master/LICENSE)
+[![GitHub release](https://img.shields.io/github/release/rosineygp/mkdkr.svg)](https://GitHub.com/rosineygp/mkdkr/releases/)
+
 
 
 > mkdkr = Makefile + Docker
@@ -73,7 +76,7 @@ define . =
 endef
 # end of header
 
-job:                            # job name
+job:                                # job name
 	@$(.)                       # required: load mkdkr and create unique job name
 	... job alpine              # create a docker container using alpine image
 	.. echo "hello mkdkr!"      # execute a command inside container
