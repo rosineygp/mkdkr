@@ -24,6 +24,18 @@ unit:
 	.. ./unit_job_name
 	.
 
+coverage:
+	@$(.)
+	... job kcov/kcov:v31 \
+		-e CODECOV_TOKEN=$$CODECOV_TOKEN \
+		--workdir $(PWD)/test
+	.. 'apt-get update && \
+		apt-get install -y git curl'
+	.. kcov --exclude-path=shunit2 coverage unit_job_name
+	.. kcov --exclude-path=shunit2 coverage .mkdkr
+	.. 'curl -s https://codecov.io/bash | bash -s --'
+	.
+
 simple:
 	make --silent -f examples/simple.mk simple
 

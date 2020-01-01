@@ -13,6 +13,10 @@ jobs:
       run: make shellcheck
     - name: unit
       run: make unit
+    - name: coverage
+      run: make coverage
+      env:
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
     - name: simple
       run: make simple
     - name: service
