@@ -31,6 +31,7 @@ coverage:
 		--workdir $(PWD)/test
 	.. 'apt-get update && \
 		apt-get install -y git curl'
+	.. kcov --exclude-path=shunit2 coverage unit_job_name
 	.. kcov --exclude-path=shunit2 coverage .mkdkr
 	.. 'curl -s https://codecov.io/bash | bash -s --'
 	.
