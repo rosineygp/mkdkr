@@ -26,10 +26,10 @@ unit:
   script:
   - make unit
 
-small:
+simple:
   stage: scenarios
   script:
-  - make small
+  - make simple
 
 service:
   stage: scenarios

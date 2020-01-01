@@ -16,8 +16,8 @@ jobs:
     - stage: unit
       name: make unit
     - stage: scenarios
-      name: small
-      script: make small
+      name: simple
+      script: make simple
     - stage: scenarios
       name: service
       script: make service

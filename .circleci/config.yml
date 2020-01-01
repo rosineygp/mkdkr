@@ -12,8 +12,8 @@ jobs:
           name: unit
           command: make unit
       - run:
-          name: small
-          command: make small
+          name: simple
+          command: make simple
       - run:
           name: service
           command: make service
