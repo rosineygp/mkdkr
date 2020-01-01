@@ -13,6 +13,8 @@ jobs:
     - stage: lint
       name: shellcheck
       script: make shellcheck
+    - stage: unit
+      name: make unit
     - stage: scenarios
       name: small
       script: make small

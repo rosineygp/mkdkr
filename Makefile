@@ -23,18 +23,17 @@ small:
 
 shellcheck:
 	@$(.)
-	... job ubuntu:18.04
-	.. apt-get update '&&' \
-		apt-get install -y shellcheck
+	... job koalaman/shellcheck-alpine:v0.4.6
 	.. shellcheck -e SC1088 -e SC2068 -e SC2086 .mkdkr
 	.. shellcheck generator/gitlab-ci
+	.. shellcheck -e SC2181 test/unit_job_name
 	.
 
 unit:
 	@$(.)
 	... privileged docker:19 --workdir $(PWD)/test
 	.. apk add bash
-	.. ./fn_job_name.sh
+	.. ./unit_job_name
 	.
 
 service:
@@ -67,4 +66,5 @@ generator/gitlab:
 
 pipeline:
 	make shellcheck
+	make unit
 	make scenarios -j3
