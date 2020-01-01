@@ -19,3 +19,7 @@ jobs:
       run: make service
     - name: dind
       run: make dind
+    - name: escapes
+      run: make escapes
+    - name: pipeline
+      run: make examples/pipeline

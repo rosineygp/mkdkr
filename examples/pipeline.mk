@@ -40,7 +40,7 @@ pack:
 deploy:
 	@$(.)
 	... job alpine
-	.. echo "deploy $(@)"
+	.. echo "stage: $(@)"
 	.
 
 test: test_a test_b test_c
@@ -48,7 +48,7 @@ test: test_a test_b test_c
 .PHONY: pipeline
 
 pipeline:
-	make -f pipeline.mk test -j 3
+	make -f pipeline.mk test -j 3 --output-sync
 	make -f pipeline.mk build
 	make -f pipeline.mk pack
 	make -f pipeline.mk deploy

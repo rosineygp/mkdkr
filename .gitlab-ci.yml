@@ -16,7 +16,6 @@ before_script:
   - apk add make
   - apk add bash
 
-
 shellcheck:
   stage: lint
   script:
@@ -41,3 +40,13 @@ dind:
   stage: scenarios
   script:
   - make dind
+
+escapes:
+  stage: scenarios
+  script:
+  - make escapes
+
+pipeline:
+    stage: scenarios
+    script:
+    - make examples/pipeline

@@ -9,18 +9,6 @@ endef
 
 # END OF MAKE DEFINITIONS, CREATE YOUR JOBS BELOW
 
-.PHONY: small shellcheck service dind brainfuck scenarios
-
-scenarios: small service dind
-
-small:
-	@$(.)
-	... job alpine --cpus 1 --memory 32MB
-	.. echo "Hello darkness, my old friend"
-	.. echo "hello world!"
-	.. ps -ef
-	.
-
 shellcheck:
 	@$(.)
 	... job koalaman/shellcheck-alpine:v0.4.6
@@ -36,19 +24,22 @@ unit:
 	.. ./unit_job_name
 	.
 
+simple:
+	make --silent -f examples/simple.mk simple
+
 service:
-	@$(.)
-	... service nginx
-	... job alpine --link service_$$JOB_NAME:nginx
-	.. apk add curl
-	.. curl -s nginx
-	.
+	make --silent -f examples/service.mk service
 
 dind:
-	@$(.)
-	... privileged docker:19
-	.. docker build -t rosiney/mkdkr .
-	.
+	make --silent -f examples/dind.mk dind
+
+escapes:
+	make --silent -f examples/escapes.mk all
+
+examples/pipeline:
+	@cd examples && make --silent -f pipeline.mk pipeline
+
+scenarios: simple service dind escapes example/pipeline
 
 brainfuck:
 	@$(.)
@@ -65,6 +56,6 @@ generator/gitlab:
 	.
 
 pipeline:
-	make shellcheck
-	make unit
-	make scenarios -j3
+	make --silent shellcheck
+	make --silent unit
+	make --silent scenarios -j $(shell nproc) --output-sync

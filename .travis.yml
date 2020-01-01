@@ -24,3 +24,9 @@ jobs:
     - stage: scenarios
       name: dind
       script: make dind
+    - stage: scenarios
+      name: escapes
+      script: make escapes
+    - stage: pipeline
+      name: escapes
+      script: make examples/pipeline
