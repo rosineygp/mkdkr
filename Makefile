@@ -29,10 +29,10 @@ coverage:
 	... job kcov/kcov:v31 \
 		-e CODECOV_TOKEN=$(CODECOV_TOKEN) \
 		--workdir $(PWD)/test
-	.. 'apt update && \
-		apt install git curl'
-	.. kcov --exclude-path=shunit2 coverage unit_job_name
-	.. bash <(curl -s https://codecov.io/bash)
+	.. 'apt-get update && \
+		apt-get install -y git curl'
+	.. kcov --exclude-path=shunit2 coverage .mkdkr
+	.. 'curl -s https://codecov.io/bash | bash -s --'
 	.
 
 simple:
