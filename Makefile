@@ -27,7 +27,7 @@ unit:
 coverage:
 	@$(.)
 	... job kcov/kcov:v31 \
-		-e CODECOV_TOKEN=$(CODECOV_TOKEN) \
+		-e CODECOV_TOKEN=$$CODECOV_TOKEN \
 		--workdir $(PWD)/test
 	.. 'apt-get update && \
 		apt-get install -y git curl'
