@@ -16,11 +16,17 @@ jobs:
     - stage: unit
       name: make unit
     - stage: scenarios
-      name: small
-      script: make small
+      name: simple
+      script: make simple
     - stage: scenarios
       name: service
       script: make service
     - stage: scenarios
       name: dind
       script: make dind
+    - stage: scenarios
+      name: escapes
+      script: make escapes
+    - stage: scenarios
+      name: pipeline
+      script: make examples/pipeline

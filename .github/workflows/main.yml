@@ -13,9 +13,13 @@ jobs:
       run: make shellcheck
     - name: unit
       run: make unit
-    - name: small
-      run: make small
+    - name: simple
+      run: make simple
     - name: service
       run: make service
     - name: dind
       run: make dind
+    - name: escapes
+      run: make escapes
+    - name: pipeline
+      run: make examples/pipeline

@@ -12,12 +12,17 @@ jobs:
           name: unit
           command: make unit
       - run:
-          name: small
-          command: make small
+          name: simple
+          command: make simple
       - run:
           name: service
           command: make service
       - run:
           name: dind
           command: make dind
-
+      - run:
+          name: escapes
+          command: make escapes
+      - run:
+          name: pipeline
+          command: make examples/pipeline
