@@ -9,6 +9,9 @@ jobs:
           name: lint
           command: make shellcheck
       - run:
+          name: unit
+          command: make unit
+      - run:
           name: small
           command: make small
       - run:

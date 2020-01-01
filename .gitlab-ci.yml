@@ -1,5 +1,6 @@
 stages:
   - lint
+  - unit
   - scenarios
 
 services:
@@ -20,6 +21,11 @@ shellcheck:
   stage: lint
   script:
   - make shellcheck
+
+unit:
+  stage: unit
+  script:
+  - make unit
 
 small:
   stage: scenarios
