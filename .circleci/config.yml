@@ -21,6 +21,9 @@ jobs:
           name: dind
           command: make dind
       - run:
+          name: shell
+          command: make shell
+      - run:
           name: escapes
           command: make escapes
       - run:

@@ -48,10 +48,13 @@ dind:
 escapes:
 	make --silent -f examples/escapes.mk all
 
+shell:
+	make --silent -f examples/shell.mk shell
+
 examples/pipeline:
 	@cd examples && make --silent -f pipeline.mk pipeline
 
-scenarios: simple service dind escapes example/pipeline
+scenarios: simple service dind escapes shell examples/pipeline
 
 brainfuck:
 	@$(.)

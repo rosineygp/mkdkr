@@ -48,6 +48,7 @@ Table of contents
   * [Service](#service)
   * [DIND](#dind)
   * [Escapes](#escapes)
+  * [Shell](#shell)
   * [Pipelines](#pipelines)
 * [Generators](#generators)
   * [Gitlab CI](#gitlab-ci)
@@ -240,6 +241,23 @@ pipes:
 
 [Makefile](examples/escapes.mk)
 
+## Shell
+
+Switch to another shell
+
+```Makefile
+shell:
+	@$(.)
+	... job ubuntu
+	export MKDKR_SHELL=bash
+	.. 'echo $$0'
+	.
+```
+
+> More examples at file
+
+[Makefile](examples/shell.mk)
+
 ## Pipeline
 
 Group of jobs for parallel and organization execution
@@ -280,13 +298,14 @@ gitlab:
 **Parameters:**
 - String(key)=String(job),String(job),...	The name of key is the **stage** and the **job(s)** is the values separated by comma.
 
-> - Ex. test=lint,syntax build=gcc deploy=k8s 
+> - Ex. test=lint,syntax build=gcc deploy=k8s
 > - Avoid spaces, slashes or symbols it will keep compatibility with pipeline vendors.
 
 # Environment Variables
 
 |Name|Default|Description|
 |----|-------|-----------|
-|TTL|3600|The time limit to a job or service run|
+|MKDKR_TTL|3600|The time limit to a job or service run|
+|MKDKR_SHELL|sh|Change to another shell eg. bash, csh|
 
 > to overwrite the values use: `export <var>=<value>`
