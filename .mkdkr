@@ -45,7 +45,7 @@ _service() {
   TYPE="${1}"
   IMAGE="${2}"
   ARGS="${*:3}"
-  COMMAND="sleep ${TTL:-3600}"
+  COMMAND="sleep ${MKDKR_TTL:-3600}"
 
   _prn_exec "... ${TYPE} ${IMAGE} ${ARGS[*]}"
 
@@ -66,7 +66,7 @@ _service() {
 
   _prn_exec ".. ${*}"
 
-  docker exec -i ${CONTAINER_NAME} sh -c "$*"
+  docker exec -i ${CONTAINER_NAME} ${MKDKR_SHELL:-sh} -c "$*"
   EXIT_CODE=$?
   if [ "${EXIT_CODE}" != "0" ]; then
     .

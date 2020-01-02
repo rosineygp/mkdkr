@@ -41,6 +41,11 @@ dind:
   script:
   - make dind
 
+shell:
+  stage: scenarios
+  script:
+  - make shell
+
 escapes:
   stage: scenarios
   script:

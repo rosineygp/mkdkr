@@ -25,6 +25,9 @@ jobs:
       name: dind
       script: make dind
     - stage: scenarios
+      name: shell
+      script: make shell
+    - stage: scenarios
       name: escapes
       script: make escapes
     - stage: scenarios

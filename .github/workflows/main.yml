@@ -23,6 +23,8 @@ jobs:
       run: make service
     - name: dind
       run: make dind
+    - name: shell
+      run: make shell
     - name: escapes
       run: make escapes
     - name: pipeline
