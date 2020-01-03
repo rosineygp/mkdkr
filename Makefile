@@ -26,14 +26,21 @@ unit:
 
 coverage:
 	@$(.)
-	... job kcov/kcov:v31 \
-		-e CODECOV_TOKEN=$$CODECOV_TOKEN \
-		--workdir $(PWD)/test
-	.. 'apt-get update && \
-		apt-get install -y git curl'
+	... job kcov/kcov:v31 --workdir $(PWD)/test
 	.. kcov --exclude-path=shunit2 coverage unit_job_name
-	.. kcov --exclude-path=shunit2 coverage .mkdkr
-	.. 'curl -s https://codecov.io/bash | bash -s --'
+	.
+	... job python:3.6-buster --workdir $(PWD)/test/coverage
+	.. pip install anybadge
+	.. anybadge \
+		--value=$$(cat test/coverage/index.json | sed -n 's|.*"covered":"\([^"]*\)".*|\1|p') \
+		--file=coverage.svg coverage
+	.
+	... job node:12 \
+		-e SURGE_LOGIN='$(SURGE_LOGIN)' \
+		-e SURGE_TOKEN=$$SURGE_TOKEN
+	.. cp .surgeignore ./test/coverage/
+	.. npm install -g surge
+	.. surge --project ./test/coverage --domain mkdkr.surge.sh
 	.
 
 simple:
