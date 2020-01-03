@@ -11,7 +11,7 @@
 [![CircleCI](https://circleci.com/gh/rosineygp/mkdkr/tree/master.svg?style=svg)](https://circleci.com/gh/rosineygp/mkdkr/tree/master)
 [![GitHub license](https://img.shields.io/github/license/rosineygp/mkdkr.svg)](https://github.com/rosineygp/mkdkr/blob/master/LICENSE)
 [![GitHub release](https://img.shields.io/github/release/rosineygp/mkdkr.svg)](https://GitHub.com/rosineygp/mkdkr/releases/)
-[![codecov](https://codecov.io/gh/rosineygp/mkdkr/branch/master/graph/badge.svg)](https://codecov.io/gh/rosineygp/mkdkr)
+[![kcov](https://mkdkr.surge.sh/coverage.svg)](https://mkdkr.surge.sh/)
 
 > mkdkr = Makefile + Docker
 

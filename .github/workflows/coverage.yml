@@ -1,0 +1,18 @@
+name: Coverage Report
+
+on: 
+  push:
+    branches:
+      - master
+
+jobs:
+  pipeline:
+
+    runs-on: ubuntu-18.04
+
+    steps:
+    - name: coverage
+      run: make coverage
+      env:
+        SURGE_LOGIN: ${{ secrets.SURGE_LOGIN }}
+        SURGE_TOKEN: ${{ secrets.SURGE_TOKEN }}
