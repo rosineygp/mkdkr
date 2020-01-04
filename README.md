@@ -235,7 +235,6 @@ simple:
 	@$(.)
 	... job alpine
 	.. echo "hello mkdkr!"
-	.
 ```
 
 [Makefile](examples/simple.mk)
@@ -249,7 +248,6 @@ service:
 	... job alpine --link service_$$JOB_NAME:nginx
 	.. apk add curl
 	.. curl -s nginx
-	.
 ```
 
 [Makefile](examples/service.mk)
@@ -263,7 +261,6 @@ dind:
 	@$(.)
 	... privileged docker:19
 	.. docker build -t rosiney/pylint .
-	.
 ```
 
 [Makefile](examples/dind.mk)
@@ -275,7 +272,6 @@ pipes:
 	@$(.)
 	... job ubuntu:18.04
 	.. "find . -iname '*.mk' -type f -exec cat {} \; | grep -c escapes"
-	.
 ```
 
 > More examples at file
@@ -292,7 +288,6 @@ shell:
 	... job ubuntu
 	export MKDKR_SHELL=bash
 	.. 'echo $$0'
-	.
 ```
 
 > More examples at file
@@ -307,7 +302,6 @@ broken:
 	... service nginx
 	... job alpine
 	.. ps -ef
-
 ```
 
 > Job finished without call **.**, now trap close it correctly.
@@ -323,8 +317,6 @@ implicit-job:
 	@$(.)
 	... alpine --memory 32MB
 	.. echo "hello nano job"
-	.
-
 ```
 
 > implicit='Less code!'
@@ -365,7 +357,6 @@ gitlab:
 	.. gitlab-ci \
 		lint=shellcheck \
 		scenarios=simple,service,dind > .gitlab-ci.yml
-	.
 ```
 
 **Parameters:**

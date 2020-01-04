@@ -12,37 +12,31 @@ test_a:
 	@$(.)
 	... job alpine
 	.. echo "test $(@)"
-	.
 
 test_b:
 	@$(.)
 	... job alpine
 	.. echo "test $(@)"
-	.
 
 test_c:
 	@$(.)
 	... job alpine
 	.. echo "test $(@)"
-	.
 
 build:
 	@$(.)
 	... job alpine
 	.. echo "build $(@)"
-	.
 
 pack:
 	@$(.)
 	... job alpine
 	.. echo "pack $(@)"
-	.
 
 deploy:
 	@$(.)
 	... job alpine
 	.. echo "stage: $(@)"
-	.
 
 test: test_a test_b test_c
 

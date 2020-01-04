@@ -21,4 +21,3 @@ shell:
 	.. 'echo $$0'
 	export MKDKR_SHELL=bash
 	.. 'echo $$0'
-	.

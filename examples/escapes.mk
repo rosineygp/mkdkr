@@ -15,7 +15,6 @@ multiline:
 	.. apk add htop \
 		vim \
 		bash
-	.
 
 # add quote in && to not back to local terminal
 logical_and:
@@ -26,14 +25,12 @@ logical_and:
 			htop \
 			vim \
 			csh'
-	.
 
 # add quote to pipes also
 pipes:
 	@$(.)
 	... job ubuntu:18.04
 	.. "find . -iname '*.mk' -type f -exec cat {} \; | grep -c escapes"
-	.
 
 # you can redirect a output to outside container
 redirect_to_outside:
@@ -41,6 +38,5 @@ redirect_to_outside:
 	... job ubuntu:18.04
 	.. dpkg -l > dpkg_report.txt
 	cat dpkg_report.txt            # outside container
-	.
 
 all: multiline logical_and pipes redirect_to_outside

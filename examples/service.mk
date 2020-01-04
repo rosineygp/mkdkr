@@ -14,4 +14,3 @@ service:
 	... job alpine --link service_$$JOB_NAME:nginx
 	.. apk add curl
 	.. curl -s nginx
-	.

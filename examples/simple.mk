@@ -12,4 +12,3 @@ simple:
 	@$(.)
 	... job alpine
 	.. echo "hello mkdkr!"
-	.

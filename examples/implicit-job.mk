@@ -12,4 +12,3 @@ implicit-job:
 	@$(.)
 	... alpine --memory 32MB
 	.. echo "hello nano job"
-	.

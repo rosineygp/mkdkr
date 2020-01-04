@@ -15,7 +15,6 @@ commitlint:
 	... job node:10
 	.. npm install -g @commitlint/cli @commitlint/config-conventional
 	.. commitlint --from=HEAD~1 --verbose
-	.
 
 shellcheck:
 	@$(.)
@@ -23,14 +22,12 @@ shellcheck:
 	.. shellcheck -e SC1088 -e SC2068 -e SC2086 .mkdkr
 	.. shellcheck generator/gitlab-ci
 	.. shellcheck -e SC2181 test/unit_job_name
-	.
 
 unit:
 	@$(.)
 	... privileged docker:19 --workdir $(PWD)/test
 	.. apk add bash
 	.. ./unit_job_name
-	.
 
 coverage:
 	@$(.)
@@ -49,7 +46,6 @@ coverage:
 	.. cp .surgeignore ./test/coverage/
 	.. npm install -g surge
 	.. surge --project ./test/coverage --domain mkdkr.surge.sh
-	.
 
 simple:
 	make --silent -f examples/simple.mk simple
@@ -82,14 +78,12 @@ brainfuck:
 	... privileged docker:19
 	.. apk add make bash
 	.. make pipeline
-	.
 
 generator/gitlab:
 	@$(.)
 	... job rosineygp/mkdkr
 	.. gitlab-ci lint=shellcheck \
 		scenarios=small,service,dind > .gitlab-ci.yml
-	.
 
 pipeline:
 	make --silent commitlint
