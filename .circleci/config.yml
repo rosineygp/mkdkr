@@ -6,7 +6,10 @@ jobs:
     steps:
       - checkout
       - run:
-          name: lint
+          name: commitlint
+          command: make commitlint
+      - run:
+          name: shellcheck
           command: make shellcheck
       - run:
           name: unit

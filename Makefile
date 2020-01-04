@@ -9,6 +9,13 @@ endef
 
 # END OF MAKE DEFINITIONS, CREATE YOUR JOBS BELOW
 
+commitlint:
+	$(.)
+	... job node:10
+	.. npm install -g @commitlint/cli @commitlint/config-conventional
+	.. commitlint --from=HEAD~1 --verbose
+	.
+
 shellcheck:
 	@$(.)
 	... job koalaman/shellcheck-alpine:v0.4.6
@@ -78,6 +85,7 @@ generator/gitlab:
 	.
 
 pipeline:
+	make --silent commitlint
 	make --silent shellcheck
 	make --silent unit
 	make --silent scenarios -j $(shell nproc) --output-sync

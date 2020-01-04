@@ -16,6 +16,11 @@ before_script:
   - apk add make
   - apk add bash
 
+commitlint:
+  stage: lint
+  script:
+  - make commitlint
+
 shellcheck:
   stage: lint
   script:
