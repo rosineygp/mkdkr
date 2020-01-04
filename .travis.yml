@@ -34,5 +34,11 @@ jobs:
       name: escapes
       script: make escapes
     - stage: scenarios
+      name: trap
+      script: make trap
+    - stage: scenarios
+      name: implicit-job
+      script: make implicit-job
+    - stage: scenarios
       name: pipeline
       script: make examples/pipeline

@@ -49,6 +49,8 @@ Table of contents
   * [DIND](#dind)
   * [Escapes](#escapes)
   * [Shell](#shell)
+  * [Trap](#trap)
+  * [Implicit Job](#implicit-job)
   * [Pipelines](#pipelines)
 * [Generators](#generators)
   * [Gitlab CI](#gitlab-ci)
@@ -149,20 +151,42 @@ job:
 
 > Automatically load after call `@$(.)`.
 
+**Usage**
+
+```Bash
+.... my-awesome-job		# name a job
+```
+
 ## ••• 3 dots
 
 [required] Create a docker container, it can set as simple job, service or privileged job.
 
 **Parameters:**
-- String, ACTION *: Actions is the mode that container will run it can be a:
-  - job: simple docker container
+- String, ACTION: Actions is the mode that container will run it can be a:
+  - job **[default]**: simple docker container
   - service: is like a job, but run in detached mode
   - privileged: is a job but with docker socket access
+
+> if any action was passed, it will be a job
+
 - String, IMAGE *: any docker image name
 - String|Array, ARGS: additional docker init args like (--cpus 1 --memory 64MB)
 
 **Return:**
 - String, Container Id
+
+**Usage**
+
+```Bash
+... job alpine                  # simple job
+... ubuntu:18.04                # if it's a simple job, pass action [job] is not required
+... centeos:7 \
+    --cpus 2 \
+    --memory 1024MB \
+    -e PASSWORD=$$PASSWORD      # container parameters
+... service nginx               # create a service
+... privileged docker:19        # create a job with docker demon access
+```
 
 ## •• 2 dots
 
@@ -174,6 +198,15 @@ job:
 **Return:**
 - String, Command(s) output
 
+**Usage**
+
+```Bash
+.. apk add curl                # run a command inside container
+.. ls -la > myfile             # run a command inside container and redirect output to host
+.. 'ls -la > myfile'           # run a command inside container and redirect output to container
+.. 'apt-get update && \
+    apt-get install -y curl'   # just need '' cause && redirect outside container
+```
 
 ## • 1 dot
 
@@ -186,6 +219,12 @@ job:
 
 **Return:**
 - String, Container Id
+
+**Usage**
+
+```Bash
+.   # Kill 'Em All
+```
 
 # Examples
 
@@ -202,7 +241,6 @@ simple:
 [Makefile](examples/simple.mk)
 
 ## Service
-
 
 ```Makefile
 service:
@@ -259,7 +297,39 @@ shell:
 
 > More examples at file
 
-[Makefile](examples/shell.mk)
+## Trap
+
+Prevent keep container running when after error or exit.
+
+```Makefile
+broken:
+	@$(.)
+	... service nginx
+	... job alpine
+	.. ps -ef
+
+```
+
+> Job finished without call **.**, now trap close it correctly.
+
+[Makefile](examples/trap.mk)
+
+## Implicit Job
+
+When start a new job if [action](#-3-dots) passed, it will create a container as a simple job.
+
+```Makefile
+implicit-job:
+	@$(.)
+	... alpine --memory 32MB
+	.. echo "hello nano job"
+	.
+
+```
+
+> implicit='Less code!'
+
+[Makefile](examples/implicit-job.mk)
 
 ## Pipeline
 

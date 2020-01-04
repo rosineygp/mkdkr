@@ -8,10 +8,8 @@ define . =
 	trap '_destroy_on_exit' EXIT
 endef
 
-# job without destroy at end
-broken:
+implicit-job:
 	@$(.)
-	... service nginx
-	... job alpine
-	echo $$JOB_NAME
-	.. sleep 2
+	... alpine --memory 32MB
+	.. echo "hello nano job"
+	.

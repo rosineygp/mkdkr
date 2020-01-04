@@ -69,10 +69,13 @@ shell:
 trap:
 	make --silent -f examples/trap.mk
 
+implicit-job:
+	make --silent -f examples/implicit-job.mk
+
 examples/pipeline:
 	@cd examples && make --silent -f pipeline.mk pipeline
 
-scenarios: simple service dind escapes shell examples/pipeline
+scenarios: simple service dind escapes shell trap implicit-job examples/pipeline
 
 brainfuck:
 	@$(.)

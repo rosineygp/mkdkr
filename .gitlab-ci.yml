@@ -51,6 +51,16 @@ shell:
   script:
   - make shell
 
+trap:
+  stage: scenarios
+  script:
+  - make trap
+
+implicit-job:
+  stage: scenarios
+  script:
+  - make implicit-job
+
 escapes:
   stage: scenarios
   script:
