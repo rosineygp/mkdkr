@@ -27,6 +27,12 @@ jobs:
           name: shell
           command: make shell
       - run:
+          name: trap
+          command: make trap
+      - run:
+          name: implicit-job
+          command: make implicit-job
+      - run:
           name: escapes
           command: make escapes
       - run:

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 _prn_exec() {
-    echo -e "\e[32m${*}\e[0m"
+  echo -e "\e[32m${*}\e[0m"
 }
 
 _launch() {
@@ -32,7 +32,7 @@ _service() {
     "${IMAGE}"
 }
 
-_destroy_on_exit () {
+_destroy_on_exit() {
   ALIVE=$(docker ps | grep "${JOB_NAME}" | awk '{print $1}')
   if [ "${ALIVE[0]}" != "" ]; then
     .
@@ -54,18 +54,25 @@ _destroy_on_exit () {
   ARGS="${*:3}"
   COMMAND="sleep ${MKDKR_TTL:-3600}"
 
+  if [ "${TYPE}" != "job" ] &&
+    [ "${TYPE}" != "service" ] &&
+    [ "${TYPE}" != "privileged" ]; then
+    ARGS="${*:2}"
+    IMAGE="${TYPE}"
+    TYPE="job"
+  fi
+
   _prn_exec "... ${TYPE} ${IMAGE} ${ARGS[*]}"
 
   if [ "${TYPE}" == "service" ]; then
     _service "service_${JOB_NAME}" "${IMAGE}" "${ARGS[*]}"
-  else 
+  else
     if [ "${TYPE}" == "privileged" ]; then
       ARGS=("${ARGS[@]}" "--privileged" "-v" "/var/run/docker.sock:/var/run/docker.sock")
     fi
     _launch "job_${JOB_NAME}" "${IMAGE}" "${COMMAND}" "${ARGS[*]}"
   fi
 }
-
 
 # shellcheck disable=SC1036
 ..() {

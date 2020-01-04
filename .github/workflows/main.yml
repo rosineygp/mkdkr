@@ -23,6 +23,10 @@ jobs:
       run: make dind
     - name: shell
       run: make shell
+    - name: trap
+      run: make trap
+    - name: implicit-job
+      run: make implicit-job
     - name: escapes
       run: make escapes
     - name: pipeline
