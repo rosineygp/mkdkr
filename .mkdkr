@@ -4,6 +4,14 @@ _prn_exec() {
   echo -e "\e[32m${*}\e[0m"
 }
 
+_prn_warn() {
+  echo -e "\e[33m${*}\e[0m"
+}
+
+_image() {
+  docker ps | grep "${1}" | awk '{print $2}'
+}
+
 _launch() {
   CONTAINER_NAME="${1}"
   IMAGE="${2}"
@@ -55,6 +63,11 @@ _service() {
     TYPE="job"
   fi
 
+  if [ "$(docker ps | grep job_${JOB_NAME})" != "" ]; then
+    _prn_warn "image changed, from: $(_image job_${JOB_NAME}) to: ${IMAGE}"
+    docker rm -f "job_${JOB_NAME}"
+  fi
+
   _prn_exec "... ${TYPE} ${IMAGE} ${ARGS[*]}"
 
   if [ "${TYPE}" == "service" ]; then
@@ -64,10 +77,11 @@ _service() {
       ARGS=("${ARGS[@]}" "--privileged" "-v" "/var/run/docker.sock:/var/run/docker.sock")
     fi
 
-    SERVICE=$(docker ps | grep "service_${JOB_NAME}" | awk '{print $2}' | sed 's/:.*//g;s/\//_/g')
+    SERVICE=$(_image "service_${JOB_NAME}" | sed 's/:.*//g;s/\//_/g')
     if [ "${SERVICE}" != "" ]; then
       ARGS+=("--link" "service_${JOB_NAME}:${SERVICE}" ${ARGS[@]})
     fi
+
     _launch "job_${JOB_NAME}" "${IMAGE}" "${COMMAND}" "${ARGS[*]}"
   fi
 }

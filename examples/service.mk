@@ -21,3 +21,7 @@ link:
 	... alpine
 	.. apk add curl
 	.. curl -s nginx
+	... ubuntu:18.04
+	.. apt-get update
+	.. apt-get install curl -y
+	.. curl -s nginx

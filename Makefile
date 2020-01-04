@@ -32,14 +32,13 @@ unit:
 coverage:
 	@$(.)
 	... kcov/kcov:v31 --workdir $(PWD)/test
+	.. rm -rf coverage
 	.. kcov --exclude-path=shunit2 coverage unit_job_name
-	.
 	... python:3.6-buster --workdir $(PWD)/test/coverage
 	.. pip install anybadge
 	.. anybadge \
 		--value=$$(cat test/coverage/index.json | sed -n 's|.*"covered":"\([^"]*\)".*|\1|p') \
 		--file=coverage.svg coverage
-	.
 	... node:12 \
 		-e SURGE_LOGIN='$(SURGE_LOGIN)' \
 		-e SURGE_TOKEN=$$SURGE_TOKEN
