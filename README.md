@@ -81,7 +81,7 @@ SHELL = /bin/bash
 define . =
 	source .mkdkr
 	$(eval JOB_NAME=$(shell source .mkdkr; .... $(@)))
-	trap '_destroy_on_exit' EXIT
+	trap '.' EXIT
 endef
 # end of header
 
