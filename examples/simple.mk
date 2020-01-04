@@ -10,5 +10,5 @@ endef
 
 simple:
 	@$(.)
-	... job alpine
+	... alpine
 	.. echo "hello mkdkr!"

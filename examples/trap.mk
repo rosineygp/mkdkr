@@ -8,10 +8,10 @@ define . =
 	trap '.' EXIT
 endef
 
-# job without destroy at end
+# without destroy at end
 broken:
 	@$(.)
 	... service nginx
-	... job alpine
+	... alpine
 	echo $$JOB_NAME
 	.. sleep 2

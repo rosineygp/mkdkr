@@ -10,32 +10,32 @@ endef
 
 test_a:
 	@$(.)
-	... job alpine
+	... alpine
 	.. echo "test $(@)"
 
 test_b:
 	@$(.)
-	... job alpine
+	... alpine
 	.. echo "test $(@)"
 
 test_c:
 	@$(.)
-	... job alpine
+	... alpine
 	.. echo "test $(@)"
 
 build:
 	@$(.)
-	... job alpine
+	... alpine
 	.. echo "build $(@)"
 
 pack:
 	@$(.)
-	... job alpine
+	... alpine
 	.. echo "pack $(@)"
 
 deploy:
 	@$(.)
-	... job alpine
+	... alpine
 	.. echo "stage: $(@)"
 
 test: test_a test_b test_c

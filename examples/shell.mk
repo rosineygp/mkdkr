@@ -10,7 +10,7 @@ endef
 
 shell:
 	@$(.)
-	... job ubuntu:18.04
+	... ubuntu:18.04
 	.. 'apt-get update && apt-get install -y csh tcsh ksh bash'
 	.. 'echo $$0'
 	export MKDKR_SHELL=csh

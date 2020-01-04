@@ -12,13 +12,13 @@ endef
 
 commitlint:
 	$(.)
-	... job node:10
+	... node:10
 	.. npm install -g @commitlint/cli @commitlint/config-conventional
 	.. commitlint --from=HEAD~1 --verbose
 
 shellcheck:
 	@$(.)
-	... job koalaman/shellcheck-alpine:v0.4.6
+	... koalaman/shellcheck-alpine:v0.4.6
 	.. shellcheck -e SC1088 -e SC2068 -e SC2086 .mkdkr
 	.. shellcheck generator/gitlab-ci
 	.. shellcheck -e SC2181 test/unit_job_name
@@ -31,16 +31,16 @@ unit:
 
 coverage:
 	@$(.)
-	... job kcov/kcov:v31 --workdir $(PWD)/test
+	... kcov/kcov:v31 --workdir $(PWD)/test
 	.. kcov --exclude-path=shunit2 coverage unit_job_name
 	.
-	... job python:3.6-buster --workdir $(PWD)/test/coverage
+	... python:3.6-buster --workdir $(PWD)/test/coverage
 	.. pip install anybadge
 	.. anybadge \
 		--value=$$(cat test/coverage/index.json | sed -n 's|.*"covered":"\([^"]*\)".*|\1|p') \
 		--file=coverage.svg coverage
 	.
-	... job node:12 \
+	... node:12 \
 		-e SURGE_LOGIN='$(SURGE_LOGIN)' \
 		-e SURGE_TOKEN=$$SURGE_TOKEN
 	.. cp .surgeignore ./test/coverage/
@@ -81,7 +81,7 @@ brainfuck:
 
 generator/gitlab:
 	@$(.)
-	... job rosineygp/mkdkr
+	... rosineygp/mkdkr
 	.. gitlab-ci lint=shellcheck \
 		scenarios=small,service,dind > .gitlab-ci.yml
 

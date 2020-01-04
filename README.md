@@ -245,7 +245,7 @@ simple:
 service:
 	@$(.)
 	... service nginx
-	... job alpine --link service_$$JOB_NAME:nginx
+	... alpine --link service_$$JOB_NAME:nginx
 	.. apk add curl
 	.. curl -s nginx
 ```
@@ -270,7 +270,7 @@ dind:
 ```Makefile
 pipes:
 	@$(.)
-	... job ubuntu:18.04
+	... ubuntu:18.04
 	.. "find . -iname '*.mk' -type f -exec cat {} \; | grep -c escapes"
 ```
 
@@ -285,7 +285,7 @@ Switch to another shell
 ```Makefile
 shell:
 	@$(.)
-	... job ubuntu
+	... ubuntu
 	export MKDKR_SHELL=bash
 	.. 'echo $$0'
 ```
@@ -300,7 +300,7 @@ Prevent keep container running when after error or exit.
 broken:
 	@$(.)
 	... service nginx
-	... job alpine
+	... alpine
 	.. ps -ef
 ```
 
@@ -353,7 +353,7 @@ External pipeline:
 ```Makefile
 gitlab:
 	@$(.)
-	... job rosiney/mkdkr
+	... rosiney/mkdkr
 	.. gitlab-ci \
 		lint=shellcheck \
 		scenarios=simple,service,dind > .gitlab-ci.yml

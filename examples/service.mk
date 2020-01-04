@@ -11,6 +11,6 @@ endef
 service:
 	@$(.)
 	... service nginx
-	... job alpine --link service_$$JOB_NAME:nginx
+	... alpine --link service_$$JOB_NAME:nginx
 	.. apk add curl
 	.. curl -s nginx
