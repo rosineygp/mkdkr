@@ -11,6 +11,9 @@ before_install:
 jobs:
   include:
     - stage: lint
+      name: commitlint
+      script: make commitlint
+    - stage: lint
       name: shellcheck
       script: make shellcheck
     - stage: unit
