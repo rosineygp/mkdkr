@@ -78,7 +78,8 @@ SHELL = /bin/bash
 
 define . =
 	source .mkdkr
-	$(eval JOB_NAME=$(shell bash -c 'source .mkdkr; .... $(@)'))
+	$(eval JOB_NAME=$(shell source .mkdkr; .... $(@)))
+	trap '_destroy_on_exit' EXIT
 endef
 # end of header
 
@@ -138,7 +139,7 @@ job:
 
 ## •••• 4 dots
 
-Create a unique job name.
+[auto] Create a unique job name.
 
 **Parameters:**
 - String, JOB_NAME: If not exist set a JOB_NAME otherwise return current JOB_NAME.
@@ -150,7 +151,7 @@ Create a unique job name.
 
 ## ••• 3 dots
 
-Create a docker container, it can set as simple job, service or privileged job.
+[required] Create a docker container, it can set as simple job, service or privileged job.
 
 **Parameters:**
 - String, ACTION *: Actions is the mode that container will run it can be a:
@@ -165,7 +166,7 @@ Create a docker container, it can set as simple job, service or privileged job.
 
 ## •• 2 dots
 
-Execute a command inside docker container (job or privileged).
+[required] Execute a command inside docker container (job or privileged).
 
 **Parameters:**
 - String|Array, command: any sh command eg. 'apk add nodejs'
@@ -176,7 +177,9 @@ Execute a command inside docker container (job or privileged).
 
 ## • 1 dot
 
-Destroy all containers initialized in a job.
+[optional] Destroy all containers initialized in a job.
+
+> At end of job it is called implicitly.
 
 **Parameters:**
 - None

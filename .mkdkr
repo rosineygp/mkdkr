@@ -32,6 +32,13 @@ _service() {
     "${IMAGE}"
 }
 
+_destroy_on_exit () {
+  ALIVE=$(docker ps | grep "${JOB_NAME}" | awk '{print $1}')
+  if [ "${ALIVE[0]}" != "" ]; then
+    .
+  fi
+}
+
 ....() {
   if [ -z "${JOB_NAME}" ]; then
     _JOB_NAME=$(echo "${1}_$(cat /proc/sys/kernel/random/uuid)" | sed 's/\//_/g')

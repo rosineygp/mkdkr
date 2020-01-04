@@ -5,6 +5,7 @@ SHELL = /bin/bash
 define . =
 	source .mkdkr
 	$(eval JOB_NAME=$(shell bash -c 'source .mkdkr; .... $(@)'))
+	trap '_destroy_on_exit' EXIT
 endef
 
 test_a:
@@ -44,8 +45,6 @@ deploy:
 	.
 
 test: test_a test_b test_c
-
-.PHONY: pipeline
 
 pipeline:
 	make -f pipeline.mk test -j 3 --output-sync

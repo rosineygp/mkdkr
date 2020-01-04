@@ -4,7 +4,8 @@ SHELL = /bin/bash
 
 define . =
 	source .mkdkr
-	$(eval JOB_NAME=$(shell bash -c 'source .mkdkr; .... $(@)'))
+	$(eval JOB_NAME=$(shell source .mkdkr; .... $(@)))
+	trap '_destroy_on_exit' EXIT
 endef
 
 # END OF MAKE DEFINITIONS, CREATE YOUR JOBS BELOW
@@ -64,6 +65,9 @@ escapes:
 
 shell:
 	make --silent -f examples/shell.mk shell
+
+trap:
+	make --silent -f examples/trap.mk
 
 examples/pipeline:
 	@cd examples && make --silent -f pipeline.mk pipeline
