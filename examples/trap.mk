@@ -8,8 +8,10 @@ define . =
 	trap '_destroy_on_exit' EXIT
 endef
 
-simple:
+# job withou destroy at end
+broken:
 	@$(.)
+	... service nginx
 	... job alpine
-	.. echo "hello mkdkr!"
-	.
+	echo $$JOB_NAME
+	.. sleep 2
