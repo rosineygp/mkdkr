@@ -63,6 +63,11 @@ _service() {
     if [ "${TYPE}" == "privileged" ]; then
       ARGS=("${ARGS[@]}" "--privileged" "-v" "/var/run/docker.sock:/var/run/docker.sock")
     fi
+
+    SERVICE=$(docker ps | grep "service_${JOB_NAME}" | awk '{print $2}' | sed 's/:.*//g;s/\//_/g')
+    if [ "${SERVICE}" != "" ]; then
+      ARGS+=("--link" "service_${JOB_NAME}:${SERVICE}" ${ARGS[@]})
+    fi
     _launch "job_${JOB_NAME}" "${IMAGE}" "${COMMAND}" "${ARGS[*]}"
   fi
 }
