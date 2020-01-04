@@ -1,0 +1,42 @@
+{
+  "name": "mkdkr",
+  "version": "0.9.1",
+  "description": "Super small and powerful framework for build CI pipeline, scripted with Makefile and isolated with docker.",
+  "main": "index.js",
+  "directories": {
+    "example": "examples",
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rosineygp/mkdkr.git"
+  },
+  "keywords": [
+    "makefile",
+    "docker",
+    "git",
+    "pipeline",
+    "ci",
+    "cd"
+  ],
+  "author": "Rosiney Gomes Pereira",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/rosineygp/mkdkr/issues"
+  },
+  "homepage": "https://github.com/rosineygp/mkdkr#readme",
+  "devDependencies": {
+    "@commitlint/cli": "^8.3.4",
+    "@commitlint/config-conventional": "^8.3.4",
+    "husky": "^3.1.0"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "make shellcheck",
+      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
+    }  
+  }
+}
