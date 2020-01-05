@@ -5,12 +5,12 @@ SHELL = /bin/bash
 define . =
 	source .mkdkr
 	$(eval JOB_NAME=$(shell bash -c 'source .mkdkr; .... $(@)'))
-	trap '_destroy_on_exit' EXIT
+	trap '.' EXIT
 endef
 
 shell:
 	@$(.)
-	... job ubuntu:18.04
+	... ubuntu:18.04
 	.. 'apt-get update && apt-get install -y csh tcsh ksh bash'
 	.. 'echo $$0'
 	export MKDKR_SHELL=csh
@@ -21,4 +21,3 @@ shell:
 	.. 'echo $$0'
 	export MKDKR_SHELL=bash
 	.. 'echo $$0'
-	.

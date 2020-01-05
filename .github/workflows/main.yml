@@ -17,6 +17,8 @@ jobs:
       run: make unit
     - name: simple
       run: make simple
+    - name: multi-images
+      run: make multi-images
     - name: service
       run: make service
     - name: dind

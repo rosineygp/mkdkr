@@ -36,6 +36,11 @@ simple:
   script:
   - make simple
 
+multi-images:
+  stage: scenarios
+  script:
+  - make multi-images
+
 service:
   stage: scenarios
   script:

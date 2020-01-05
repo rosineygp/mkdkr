@@ -5,13 +5,13 @@ SHELL = /bin/bash
 define . =
 	source .mkdkr
 	$(eval JOB_NAME=$(shell bash -c 'source .mkdkr; .... $(@)'))
-	trap '_destroy_on_exit' EXIT
+	trap '.' EXIT
 endef
 
-# job without destroy at end
+# without destroy at end
 broken:
 	@$(.)
 	... service nginx
-	... job alpine
+	... alpine
 	echo $$JOB_NAME
 	.. sleep 2

@@ -81,15 +81,14 @@ SHELL = /bin/bash
 define . =
 	source .mkdkr
 	$(eval JOB_NAME=$(shell source .mkdkr; .... $(@)))
-	trap '_destroy_on_exit' EXIT
+	trap '.' EXIT
 endef
 # end of header
 
 job:                                # job name
 	@$(.)                       # required: load mkdkr and create unique job name
-	... job alpine              # create a docker container using alpine image
+	... alpine                  # create a docker container using alpine image
 	.. echo "hello mkdkr!"      # execute a command inside container
-	.                           # destroy all container started in this job
 
 # if you want to test it remove all comments of job
 ```
@@ -159,7 +158,7 @@ job:
 
 ## ••• 3 dots
 
-[required] Create a docker container, it can set as simple job, service or privileged job.
+[optional**] Create a docker container, it can set as simple job, service or privileged job.
 
 **Parameters:**
 - String, ACTION: Actions is the mode that container will run it can be a:
@@ -179,7 +178,7 @@ job:
 
 ```Bash
 ... job alpine                  # simple job
-... ubuntu:18.04                # if it's a simple job, pass action [job] is not required
+... ubuntu:18.04                # if it's a job, pass action [job] is not required
 ... centeos:7 \
     --cpus 2 \
     --memory 1024MB \
@@ -188,9 +187,11 @@ job:
 ... privileged docker:19        # create a job with docker demon access
 ```
 
+> \*\* Required when is a service or a privileged container
+
 ## •• 2 dots
 
-[required] Execute a command inside docker container (job or privileged).
+[required] Execute a command inside docker container [job or privileged].
 
 **Parameters:**
 - String|Array, command: any sh command eg. 'apk add nodejs'
@@ -235,8 +236,9 @@ simple:
 	@$(.)
 	... job alpine
 	.. echo "hello mkdkr!"
-	.
 ```
+
+> Is possible to mix images during job, see in example
 
 [Makefile](examples/simple.mk)
 
@@ -246,10 +248,9 @@ simple:
 service:
 	@$(.)
 	... service nginx
-	... job alpine --link service_$$JOB_NAME:nginx
+	... alpine --link service_$$JOB_NAME:nginx
 	.. apk add curl
 	.. curl -s nginx
-	.
 ```
 
 [Makefile](examples/service.mk)
@@ -263,7 +264,6 @@ dind:
 	@$(.)
 	... privileged docker:19
 	.. docker build -t rosiney/pylint .
-	.
 ```
 
 [Makefile](examples/dind.mk)
@@ -273,9 +273,8 @@ dind:
 ```Makefile
 pipes:
 	@$(.)
-	... job ubuntu:18.04
+	... ubuntu:18.04
 	.. "find . -iname '*.mk' -type f -exec cat {} \; | grep -c escapes"
-	.
 ```
 
 > More examples at file
@@ -289,10 +288,9 @@ Switch to another shell
 ```Makefile
 shell:
 	@$(.)
-	... job ubuntu
+	... ubuntu
 	export MKDKR_SHELL=bash
 	.. 'echo $$0'
-	.
 ```
 
 > More examples at file
@@ -305,9 +303,8 @@ Prevent keep container running when after error or exit.
 broken:
 	@$(.)
 	... service nginx
-	... job alpine
+	... alpine
 	.. ps -ef
-
 ```
 
 > Job finished without call **.**, now trap close it correctly.
@@ -323,8 +320,6 @@ implicit-job:
 	@$(.)
 	... alpine --memory 32MB
 	.. echo "hello nano job"
-	.
-
 ```
 
 > implicit='Less code!'
@@ -361,11 +356,10 @@ External pipeline:
 ```Makefile
 gitlab:
 	@$(.)
-	... job rosiney/mkdkr
+	... rosiney/mkdkr
 	.. gitlab-ci \
 		lint=shellcheck \
 		scenarios=simple,service,dind > .gitlab-ci.yml
-	.
 ```
 
 **Parameters:**
