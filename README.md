@@ -87,9 +87,8 @@ endef
 
 job:                                # job name
 	@$(.)                       # required: load mkdkr and create unique job name
-	... job alpine              # create a docker container using alpine image
+	... alpine                  # create a docker container using alpine image
 	.. echo "hello mkdkr!"      # execute a command inside container
-	.                           # destroy all container started in this job
 
 # if you want to test it remove all comments of job
 ```
@@ -159,7 +158,7 @@ job:
 
 ## ••• 3 dots
 
-[required] Create a docker container, it can set as simple job, service or privileged job.
+[optional**] Create a docker container, it can set as simple job, service or privileged job.
 
 **Parameters:**
 - String, ACTION: Actions is the mode that container will run it can be a:
@@ -179,7 +178,7 @@ job:
 
 ```Bash
 ... job alpine                  # simple job
-... ubuntu:18.04                # if it's a simple job, pass action [job] is not required
+... ubuntu:18.04                # if it's a job, pass action [job] is not required
 ... centeos:7 \
     --cpus 2 \
     --memory 1024MB \
@@ -188,9 +187,11 @@ job:
 ... privileged docker:19        # create a job with docker demon access
 ```
 
+> \*\* Required when is a service or a privileged container
+
 ## •• 2 dots
 
-[required] Execute a command inside docker container (job or privileged).
+[required] Execute a command inside docker container [job or privileged].
 
 **Parameters:**
 - String|Array, command: any sh command eg. 'apk add nodejs'
@@ -236,6 +237,8 @@ simple:
 	... job alpine
 	.. echo "hello mkdkr!"
 ```
+
+> Is possible to mix images during job, see in example
 
 [Makefile](examples/simple.mk)
 

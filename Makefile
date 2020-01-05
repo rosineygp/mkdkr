@@ -49,6 +49,9 @@ coverage:
 simple:
 	make --silent -f examples/simple.mk simple
 
+multi-images:
+	make --silent -f examples/simple.mk multi-images
+
 service:
 	make --silent -f examples/service.mk service
 
@@ -70,7 +73,7 @@ implicit-job:
 examples/pipeline:
 	@cd examples && make --silent -f pipeline.mk pipeline
 
-scenarios: simple service dind escapes shell trap implicit-job examples/pipeline
+scenarios: simple multi-images service dind escapes shell trap implicit-job examples/pipeline
 
 brainfuck:
 	@$(.)
