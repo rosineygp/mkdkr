@@ -41,11 +41,11 @@ _service() {
 }
 
 ....() {
-  if [ -z "${JOB_NAME}" ]; then
-    _JOB_NAME=$(echo "${1}_$(cat /proc/sys/kernel/random/uuid)" | sed 's/\//_/g')
-    export JOB_NAME="${_JOB_NAME}"
+  if [ -z "${MKDKR_JOB_NAME}" ]; then
+    _MKDKR_JOB_NAME=$(echo "${1}_$(cat /proc/sys/kernel/random/uuid)" | sed 's/\//_/g')
+    export MKDKR_JOB_NAME="${_MKDKR_JOB_NAME}"
   fi
-  echo "${JOB_NAME}"
+  echo "${MKDKR_JOB_NAME}"
 }
 
 # shellcheck disable=SC1036
@@ -63,32 +63,32 @@ _service() {
     TYPE="job"
   fi
 
-  if [ "$(docker ps | grep job_${JOB_NAME})" != "" ]; then
-    _prn_warn "image changed, from: $(_image job_${JOB_NAME}) to: ${IMAGE}"
-    docker rm -f "job_${JOB_NAME}"
+  if [ "$(docker ps | grep job_${MKDKR_JOB_NAME})" != "" ]; then
+    _prn_warn "image changed, from: $(_image job_${MKDKR_JOB_NAME}) to: ${IMAGE}"
+    docker rm -f "job_${MKDKR_JOB_NAME}"
   fi
 
   _prn_exec "... ${TYPE} ${IMAGE} ${ARGS[*]}"
 
   if [ "${TYPE}" == "service" ]; then
-    _service "service_${JOB_NAME}" "${IMAGE}" "${ARGS[*]}"
+    _service "service_${MKDKR_JOB_NAME}" "${IMAGE}" "${ARGS[*]}"
   else
     if [ "${TYPE}" == "privileged" ]; then
       ARGS=("${ARGS[@]}" "--privileged" "-v" "/var/run/docker.sock:/var/run/docker.sock")
     fi
 
-    SERVICE=$(_image "service_${JOB_NAME}" | sed 's/:.*//g;s/\//_/g')
+    SERVICE=$(_image "service_${MKDKR_JOB_NAME}" | sed 's/:.*//g;s/\//_/g')
     if [ "${SERVICE}" != "" ]; then
-      ARGS+=("--link" "service_${JOB_NAME}:${SERVICE}" ${ARGS[@]})
+      ARGS+=("--link" "service_${MKDKR_JOB_NAME}:${SERVICE}" ${ARGS[@]})
     fi
 
-    _launch "job_${JOB_NAME}" "${IMAGE}" "${COMMAND}" "${ARGS[*]}"
+    _launch "job_${MKDKR_JOB_NAME}" "${IMAGE}" "${COMMAND}" "${ARGS[*]}"
   fi
 }
 
 # shellcheck disable=SC1036
 ..() {
-  CONTAINER_NAME="job_${JOB_NAME}"
+  CONTAINER_NAME="job_${MKDKR_JOB_NAME}"
 
   _prn_exec ".. ${*}"
 
@@ -101,9 +101,9 @@ _service() {
 }
 
 .() {
-  ALIVE=$(docker ps | grep "${JOB_NAME}" | awk '{print $1}')
+  ALIVE=$(docker ps | grep "${MKDKR_JOB_NAME}" | awk '{print $1}')
   if [ "${ALIVE[0]}" != "" ]; then
     _prn_exec "."
-    docker ps | grep "${JOB_NAME}" | awk '{print $1}' | xargs docker rm -f
+    docker ps | grep "${MKDKR_JOB_NAME}" | awk '{print $1}' | xargs docker rm -f
   fi
 }

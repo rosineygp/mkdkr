@@ -1,6 +1,6 @@
 #!/bin/bash
 
-test_job_name() {
+test_mkdkr_job_name() {
     # shellcheck disable=SC1091
     source .mkdkr
 
@@ -9,19 +9,19 @@ test_job_name() {
     for NAME in "${JOBS[@]}"; do
         .... "$NAME" > /dev/null
 
-        assertNotNull "$JOB_NAME"
+        assertNotNull "$MKDKR_JOB_NAME"
         [[ "$?" == "0" ]] && \
-            _prn_exec "assert ${JOB_NAME} is not null [ OK ]"
+            _prn_exec "assert ${MKDKR_JOB_NAME} is not null [ OK ]"
 
-        assertContains "$JOB_NAME" "$(echo "$NAME" | sed 's/\//_/g')"
+        assertContains "$MKDKR_JOB_NAME" "$(echo "$NAME" | sed 's/\//_/g')"
         [[ "$?" == "0" ]] && \
-            _prn_exec "assert ${JOB_NAME} contains current name [ OK ]"
+            _prn_exec "assert ${MKDKR_JOB_NAME} contains current name [ OK ]"
 
-        assertEquals "$([[ "$JOB_NAME" =~ ^.*_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12} ]] && echo true )" "true"
+        assertEquals "$([[ "$MKDKR_JOB_NAME" =~ ^.*_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12} ]] && echo true )" "true"
         [[ "$?" == "0" ]] && \
-            _prn_exec "assert ${JOB_NAME} contains uuid [ OK ]"
+            _prn_exec "assert ${MKDKR_JOB_NAME} contains uuid [ OK ]"
 
-        unset JOB_NAME
+        unset MKDKR_JOB_NAME
 
         echo
     done
@@ -33,7 +33,7 @@ test_job_name() {
 test_output_return() {
     # shellcheck disable=SC1091
     source .mkdkr
-    unset JOB_NAME
+    unset MKDKR_JOB_NAME
     NAME="test_output_return"
     OUT_NAME=$(.... "$NAME")
 
@@ -54,16 +54,16 @@ test_keep_session_name() {
     # shellcheck disable=SC1091
     source .mkdkr
 
-    unset JOB_NAME
-    .... "first_job_name"
+    unset MKDKR_JOB_NAME
+    .... "first_mkdkr_job_name"
 
-    _FIRST_JOB_NAME="$JOB_NAME"
+    _FIRST_MKDKR_JOB_NAME="$MKDKR_JOB_NAME"
 
-    .... "new_job_name"
+    .... "new_mkdkr_job_name"
 
-    assertEquals "$JOB_NAME" "$_FIRST_JOB_NAME"
+    assertEquals "$MKDKR_JOB_NAME" "$_FIRST_MKDKR_JOB_NAME"
     [[ "$?" == "0" ]] && \
-        _prn_exec "assert ${JOB_NAME} last JOB_NAME not changed [ OK ]"
+        _prn_exec "assert ${MKDKR_JOB_NAME} last MKDKR_JOB_NAME not changed [ OK ]"
 
     echo -e "\nRan\e[36m 1 \e[0masserts."
 }

@@ -83,7 +83,7 @@ SHELL = /bin/bash
 
 define . =
 	source .mkdkr
-	$(eval JOB_NAME=$(shell source .mkdkr; .... $(@)))
+	$(eval MKDKR_JOB_NAME=$(shell source .mkdkr; .... $(@)))
 	trap '.' EXIT
 endef
 # end of header
@@ -146,10 +146,10 @@ job:
 [auto] Create a unique job name.
 
 **Parameters:**
-- String, JOB_NAME: If not exist set a JOB_NAME otherwise return current JOB_NAME.
+- String, MKDKR_JOB_NAME: If not exist set a MKDKR_JOB_NAME otherwise return current MKDKR_JOB_NAME.
 
 **Return:**
-- String, JOB_NAME
+- String, MKDKR_JOB_NAME
 
 > Automatically load after call `@$(.)`.
 
@@ -251,7 +251,7 @@ simple:
 service:
 	@$(.)
 	... service nginx
-	... alpine --link service_$$JOB_NAME:nginx
+	... alpine --link service_$$MKDKR_JOB_NAME:nginx
 	.. apk add curl
 	.. curl -s nginx
 ```
@@ -377,5 +377,7 @@ gitlab:
 |----|-------|-----------|
 |MKDKR_TTL|3600|The time limit to a job or service run|
 |MKDKR_SHELL|sh|Change to another shell eg. bash, csh|
+|MKDKR_JOB_NAME*|(job|service)_target-name_(uuid)|Unique job name, used as container name suffix|
 
-> to overwrite the values use: `export <var>=<value>`
+> - to overwrite the values use: `export <var>=<value>`
+> - \* auto generated 

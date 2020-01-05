@@ -4,14 +4,14 @@ SHELL = /bin/bash
 
 define . =
 	source .mkdkr
-	$(eval JOB_NAME=$(shell source .mkdkr; .... $(@)))
+	$(eval MKDKR_JOB_NAME=$(shell source .mkdkr; .... $(@)))
 	trap '.' EXIT
 endef
 
 # END OF MAKE DEFINITIONS, CREATE YOUR JOBS BELOW
 
 commitlint:
-	$(.)
+	@$(.)
 	... node:10
 	.. npm install -g @commitlint/cli @commitlint/config-conventional
 	.. commitlint --from=HEAD~1 --verbose
