@@ -377,7 +377,7 @@ gitlab:
 |----|-------|-----------|
 |MKDKR_TTL|3600|The time limit to a job or service run|
 |MKDKR_SHELL|sh|Change to another shell eg. bash, csh|
-|MKDKR_JOB_NAME*|(job|service)_target-name_(uuid)|Unique job name, used as container name suffix|
+|MKDKR_JOB_NAME*|(job\|service)_target-name_(uuid)|Unique job name, used as container name suffix|
 
 > - to overwrite the values use: `export <var>=<value>`
 > - \* auto generated 
