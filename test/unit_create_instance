@@ -1,0 +1,80 @@
+#!/bin/bash
+
+test_mkdkr_create_instance() {
+  # shellcheck disable=SC1091
+  source .mkdkr
+  unset MKDKR_JOB_NAME
+
+  NAME="simple_instance"
+  .... "${NAME}"
+
+  ... alpine
+  assertNotNull "$(docker ps | grep job_${NAME})"
+  .
+
+  echo -e "\nRan\e[36m 1 \e[0masserts."
+}
+
+test_mkdkr_create_instance_name() {
+  # shellcheck disable=SC1091
+  source .mkdkr
+  unset MKDKR_JOB_NAME
+
+  NAME="simple_instance"
+  .... "${NAME}"
+
+  ... job alpine
+  assertNotNull "$(docker ps | grep job_${NAME})"
+  .
+
+  echo -e "\nRan\e[36m 1 \e[0masserts."
+}
+
+test_mkdkr_create_instance_service() {
+  # shellcheck disable=SC1091
+  source .mkdkr
+  unset MKDKR_JOB_NAME
+  
+  NAME="simple_instance_idempotent"
+  .... "${NAME}"
+
+  ... service nginx
+  assertNotNull "$(docker ps | grep service_${NAME})"
+  .
+
+  echo -e "\nRan\e[36m 1 \e[0masserts."
+}
+
+test_mkdkr_create_instance_privileged() {
+  # shellcheck disable=SC1091
+  source .mkdkr
+  unset MKDKR_JOB_NAME
+  
+  NAME="simple_instance_privileged"
+  .... "${NAME}"
+
+  ... privileged docker:19
+  assertNotNull "$(docker ps | grep job_${NAME})"
+  .
+
+  echo -e "\nRan\e[36m 1 \e[0masserts."
+}
+
+test_mkdkr_create_instance_idempotent() {
+  # shellcheck disable=SC1091
+  source .mkdkr
+  unset MKDKR_JOB_NAME
+
+  NAME="simple_instance_idempotent"
+  .... "${NAME}"
+
+  ... alpine
+  ... debian
+  assertNotNull "$(docker ps | grep job_${NAME})"
+  .
+
+  echo -e "\nRan\e[36m 1 \e[0masserts."
+}
+
+# shellcheck disable=SC1091
+. ./shunit2

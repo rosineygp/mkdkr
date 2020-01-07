@@ -1,0 +1,8 @@
+#!/bin/bash
+
+JSON=$(grep header test/coverage/index.json | cut -d"=" -f2 | sed 's/,\};/}/g')
+
+INSTRUMENTED=$(echo "$JSON" | jq .instrumented)
+COVERED=$(echo "$JSON" | jq .covered)
+
+echo "scale=2; ($COVERED / $INSTRUMENTED) * 100" | bc
