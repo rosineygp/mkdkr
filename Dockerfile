@@ -1,8 +1,9 @@
 # this dockerfile is an example
 FROM python:3.6-alpine
 
-RUN pip install jinja2-cli[yaml] && \
-  apk add bash
+RUN pip install jinja2-cli[yaml] \
+  && apk --no-cache add bash \
+  && rm -rf /var/cache/apk/*
 
 COPY generator /generator
 
