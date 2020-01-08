@@ -1,6 +1,6 @@
 <p align="center">
   <a alt="mkdkr" href="https://rosineygp.github.io/mkdkr">
-    <img src="media/logo.png?raw=true" width="128"/>
+    <img src="https://github.com/rosineygp/mkdkr/raw/master/media/logo.png?raw=true" width="128"/>
   </a>
 </p>
 
@@ -11,7 +11,7 @@
 [![CircleCI](https://circleci.com/gh/rosineygp/mkdkr/tree/master.svg?style=svg)](https://circleci.com/gh/rosineygp/mkdkr/tree/master)
 [![GitHub license](https://img.shields.io/github/license/rosineygp/mkdkr.svg)](https://github.com/rosineygp/mkdkr/blob/master/LICENSE)
 [![GitHub release](https://img.shields.io/github/release/rosineygp/mkdkr.svg)](https://GitHub.com/rosineygp/mkdkr/releases/)
-[![kcov](https://mkdkr.surge.sh/coverage.svg)](https://mkdkr.surge.sh/)
+[![kcov](https://img.shields.io/endpoint?url=https%3A%2F%2Fmkdkr.surge.sh%2Fcoverage.json)](https://mkdkr.surge.sh/)
 [![CodeFactor](https://www.codefactor.io/repository/github/rosineygp/mkdkr/badge)](https://www.codefactor.io/repository/github/rosineygp/mkdkr)
 
 > mkdkr = Makefile + Docker
@@ -28,8 +28,8 @@ Super small and powerful framework for build CI pipeline, scripted with Makefile
 - Clean and elegant code syntax
 
 <p align="center">
-	<a href="https://terminalizer.com/view/a07de9182694">
-    	<img src="media/presentation.gif?raw=true" />
+	<a alt="terminalizer" href="https://terminalizer.com/view/a07de9182694">
+    	<img src="https://github.com/rosineygp/mkdkr/raw/master/media/presentation.gif?raw=true" />
 	</a>
 </p>
 

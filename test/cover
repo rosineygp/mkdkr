@@ -1,0 +1,17 @@
+#!/bin/bash
+
+JSON=$(grep header coverage/index.json | cut -d"=" -f2 | sed 's/,\};/}/g')
+
+INSTRUMENTED=$(echo "$JSON" | jq .instrumented)
+COVERED=$(echo "$JSON" | jq .covered)
+
+PERCENT=$(echo "scale=2; ($COVERED / $INSTRUMENTED) * 100" | bc)
+
+cat << EOF
+{
+  "schemaVersion": 1,
+  "label": "coverage",
+  "message": "${PERCENT}%",
+  "color": "orange"
+}
+EOF
