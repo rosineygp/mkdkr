@@ -23,7 +23,7 @@ shellcheck:
 	.. shellcheck generator/gitlab-ci
 	.. shellcheck -e SC2181 test/unit_job_name
 	.. shellcheck -e SC2181 test/unit_create_instance
-	.. shellcheck test/coveraged
+	.. shellcheck test/cover
 
 unit:
 	@$(.)
@@ -32,20 +32,18 @@ unit:
 	.. ./unit_job_name
 	.. ./unit_create_instance
 
+DOCKER_BIN=https://download.docker.com/linux/static/stable/x86_64/docker-19.03.5.tgz
+
 coverage:
 	@$(.)
 	... privileged kcov/kcov:v31 --workdir $(PWD)/test
 	.. rm -rf coverage
-	.. 'apt-get update && apt-get install -y curl'
-	.. curl -s 'https://download.docker.com/linux/static/stable/x86_64/docker-19.03.5.tgz > /tmp/docker.tgz'
+	.. 'apt-get update && apt-get install -y curl jq bc'
+	.. curl -s '$(DOCKER_BIN) > /tmp/docker.tgz'
 	.. tar -zxvf /tmp/docker.tgz --strip=1 -C /usr/local/bin/
 	.. kcov --exclude-path=shunit2 coverage unit_job_name
 	.. kcov --exclude-path=shunit2 coverage unit_create_instance
-	... python:3.6-buster
-	.. 'apt-get update && apt-get install -y bc jq'
-	.. pip install anybadge
-	.. anybadge --value='$$(./test/coveraged)' \
-		--file=./test/coverage/coverage.svg coverage
+	.. './cover > coverage/coverage.json'
 	... node:12 \
 		-e SURGE_LOGIN='$(SURGE_LOGIN)' \
 		-e SURGE_TOKEN=$$SURGE_TOKEN
