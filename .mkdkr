@@ -58,6 +58,26 @@ _service() {
     "${IMAGE}"
 }
 
+_remove_running_job() {
+  if [ "$(docker ps | grep job_${MKDKR_JOB_NAME})" != "" ]; then
+    pretty purple "image changed, from: $(_image job_${MKDKR_JOB_NAME}) to: ${IMAGE}"
+    docker rm -f "job_${MKDKR_JOB_NAME}"
+  fi
+}
+
+_implicit_job() {
+
+  TYPE="${1}"
+
+  if [ "${TYPE}" != "job" ] &&
+    [ "${TYPE}" != "service" ] &&
+    [ "${TYPE}" != "privileged" ]; then
+    echo true
+  else
+    echo false
+  fi
+}
+
 ....() {
   if [ -z "${MKDKR_JOB_NAME}" ]; then
     _MKDKR_JOB_NAME=$(echo "${1}_$(cat /proc/sys/kernel/random/uuid)" | sed 's/\//_/g')
@@ -73,18 +93,13 @@ _service() {
   ARGS="${*:3}"
   COMMAND="sleep ${MKDKR_TTL:-3600}"
 
-  if [ "${TYPE}" != "job" ] &&
-    [ "${TYPE}" != "service" ] &&
-    [ "${TYPE}" != "privileged" ]; then
+  if [ "$(_implicit_job "${TYPE}")" == true ]; then
     ARGS="${*:2}"
     IMAGE="${TYPE}"
     TYPE="job"
   fi
 
-  if [ "$(docker ps | grep job_${MKDKR_JOB_NAME})" != "" ]; then
-    pretty purple "image changed, from: $(_image job_${MKDKR_JOB_NAME}) to: ${IMAGE}"
-    docker rm -f "job_${MKDKR_JOB_NAME}"
-  fi
+  _remove_running_job
 
   pretty cyan "... ${TYPE} ${IMAGE} ${ARGS[*]}"
 
