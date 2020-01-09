@@ -37,11 +37,11 @@ _launch() {
   ARGS="${*:4}"
 
   docker run --rm -d \
-    --name "${CONTAINER_NAME}" \
     --entrypoint "" \
     -v "${PWD}":"${PWD}" \
     --workdir "${PWD}" \
     ${ARGS[@]} \
+    --name "${CONTAINER_NAME}" \
     "${IMAGE}" ${COMMAND}
 }
 
@@ -51,10 +51,10 @@ _service() {
   ARGS="${*:3}"
 
   docker run --rm -d \
-    --name "${CONTAINER_NAME}" \
     -v "${PWD}":"${PWD}" \
     --workdir "${PWD}" \
     ${ARGS} \
+    --name "${CONTAINER_NAME}" \
     "${IMAGE}"
 }
 
