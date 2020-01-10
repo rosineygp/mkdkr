@@ -2,6 +2,8 @@
 
 declare -A colors
 
+OLDIFS=$IFS
+
 colors+=(
   ["black"]='\e[0;30m'
   ["red"]='\e[0;31m'
@@ -88,6 +90,7 @@ _implicit_job() {
 
 # shellcheck disable=SC1036
 ...() {
+  IFS='⠀'
   TYPE="${1}"
   IMAGE="${2}"
   ARGS="${*:3}"
@@ -107,7 +110,8 @@ _implicit_job() {
     _service "service_${MKDKR_JOB_NAME}" "${IMAGE}" "${ARGS[*]}"
   else
     if [ "${TYPE}" == "privileged" ]; then
-      ARGS=("${ARGS[@]}" "--privileged" "-v" "/var/run/docker.sock:/var/run/docker.sock")
+      PRIVILEGED=(--privileged -v /var/run/docker.sock:/var/run/docker.sock)
+      # ARGS=("${ARGS[@]}" "--privileged" "-v" "/var/run/docker.sock:/var/run/docker.sock")
     fi
 
     SERVICE=$(_image "service_${MKDKR_JOB_NAME}" | sed 's/:.*//g;s/\//_/g')
@@ -115,12 +119,29 @@ _implicit_job() {
       ARGS+=("--link" "service_${MKDKR_JOB_NAME}:${SERVICE}" ${ARGS[@]})
     fi
 
-    _launch "job_${MKDKR_JOB_NAME}" "${IMAGE}" "${COMMAND}" "${ARGS[*]}"
+    for i in ${ARGS[@]}; do
+      echo $i
+    done
+
+    # exit
+    # set -x
+
+    # ${ARGS}
+
+    # _launch "job_${MKDKR_JOB_NAME}" "${IMAGE}" "${COMMAND}" "${ARGS[*]}"
+    docker run --rm -d \
+      -v "${PWD}":"${PWD}" \
+      --workdir "${PWD}" \
+      $ARGS \
+      ${PRIVILEGED[@]} \
+      --name "job_${MKDKR_JOB_NAME}" \
+      "${IMAGE}" sleep "${MKDKR_TTL:-3600}"
   fi
 }
 
 # shellcheck disable=SC1036
 ..() {
+  IFS=$OLDIFS
   CONTAINER_NAME="job_${MKDKR_JOB_NAME}"
 
   pretty green ".. ${*}"
