@@ -62,7 +62,7 @@ _implicit_job() {
 
 # shellcheck disable=SC1036
 ...() {
-  IFS='⠀'
+  IFS='⠀' # Braille Pattern Blank (U+2800)
   TYPE="${1}"
   IMAGE="${2}"
   ARGS="${*:3}"
@@ -94,7 +94,6 @@ _implicit_job() {
       SERVICES=(--link "service_${MKDKR_JOB_NAME}:${SERVICE}")
     fi
 
-    # set -x
     docker run --rm -d \
       -v "${PWD}":"${PWD}" \
       --workdir "${PWD}" \

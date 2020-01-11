@@ -10,12 +10,6 @@ endef
 
 # END OF MAKE DEFINITIONS, CREATE YOUR JOBS BELOW
 
-t:
-	@$(.)
-	... alpine --env t=1 -e 'a=b c'
-	.. printenv
-	.. 'echo $$a'
-
 commitlint:
 	@$(.)
 	... node:10
