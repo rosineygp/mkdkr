@@ -2,6 +2,8 @@
 
 declare -A colors
 
+OLDIFS=$IFS
+
 colors+=(
   ["black"]='\e[0;30m'
   ["red"]='\e[0;31m'
@@ -30,37 +32,9 @@ _image() {
   docker ps | grep "${1}" | awk '{print $2}'
 }
 
-_launch() {
-  CONTAINER_NAME="${1}"
-  IMAGE="${2}"
-  COMMAND="${3}"
-  ARGS="${*:4}"
-
-  docker run --rm -d \
-    --entrypoint "" \
-    -v "${PWD}":"${PWD}" \
-    --workdir "${PWD}" \
-    ${ARGS[@]} \
-    --name "${CONTAINER_NAME}" \
-    "${IMAGE}" ${COMMAND}
-}
-
-_service() {
-  CONTAINER_NAME="${1}"
-  IMAGE="${2}"
-  ARGS="${*:3}"
-
-  docker run --rm -d \
-    -v "${PWD}":"${PWD}" \
-    --workdir "${PWD}" \
-    ${ARGS} \
-    --name "${CONTAINER_NAME}" \
-    "${IMAGE}"
-}
-
 _remove_running_job() {
   if [ "$(docker ps | grep job_${MKDKR_JOB_NAME})" != "" ]; then
-    pretty purple "image changed, from: $(_image job_${MKDKR_JOB_NAME}) to: ${IMAGE}"
+    pretty "purple" "image changed, from: $(_image job_${MKDKR_JOB_NAME}) to: ${IMAGE}"
     docker rm -f "job_${MKDKR_JOB_NAME}"
   fi
 }
@@ -88,10 +62,10 @@ _implicit_job() {
 
 # shellcheck disable=SC1036
 ...() {
+  IFS='⠀' # Braille Pattern Blank (U+2800)
   TYPE="${1}"
   IMAGE="${2}"
   ARGS="${*:3}"
-  COMMAND="sleep ${MKDKR_TTL:-3600}"
 
   if [ "$(_implicit_job "${TYPE}")" == true ]; then
     ARGS="${*:2}"
@@ -101,29 +75,43 @@ _implicit_job() {
 
   _remove_running_job
 
-  pretty cyan "... ${TYPE} ${IMAGE} ${ARGS[*]}"
+  pretty "cyan" "... ${TYPE} ${IMAGE} ${ARGS[*]}"
 
   if [ "${TYPE}" == "service" ]; then
-    _service "service_${MKDKR_JOB_NAME}" "${IMAGE}" "${ARGS[*]}"
+    docker run --rm -d \
+      -v "${PWD}":"${PWD}" \
+      --workdir "${PWD}" \
+      $ARGS \
+      --name "service_${MKDKR_JOB_NAME}" \
+      "${IMAGE}"
   else
     if [ "${TYPE}" == "privileged" ]; then
-      ARGS=("${ARGS[@]}" "--privileged" "-v" "/var/run/docker.sock:/var/run/docker.sock")
+      PRIVILEGED=(--privileged -v /var/run/docker.sock:/var/run/docker.sock)
     fi
 
     SERVICE=$(_image "service_${MKDKR_JOB_NAME}" | sed 's/:.*//g;s/\//_/g')
     if [ "${SERVICE}" != "" ]; then
-      ARGS+=("--link" "service_${MKDKR_JOB_NAME}:${SERVICE}" ${ARGS[@]})
+      SERVICES=(--link "service_${MKDKR_JOB_NAME}:${SERVICE}")
     fi
 
-    _launch "job_${MKDKR_JOB_NAME}" "${IMAGE}" "${COMMAND}" "${ARGS[*]}"
+    docker run --rm -d \
+      -v "${PWD}":"${PWD}" \
+      --workdir "${PWD}" \
+      --entrypoint "" \
+      $ARGS \
+      ${PRIVILEGED[@]} \
+      ${SERVICES[@]} \
+      --name "job_${MKDKR_JOB_NAME}" \
+      "${IMAGE}" sleep "${MKDKR_TTL:-3600}"
   fi
 }
 
 # shellcheck disable=SC1036
 ..() {
+  IFS=$OLDIFS
   CONTAINER_NAME="job_${MKDKR_JOB_NAME}"
 
-  pretty green ".. ${*}"
+  pretty "green" ".. ${*}"
 
   docker exec -i ${CONTAINER_NAME} ${MKDKR_SHELL:-sh} -c "$*"
   EXIT_CODE=$?
@@ -136,7 +124,7 @@ _implicit_job() {
 .() {
   ALIVE=$(docker ps | grep "${MKDKR_JOB_NAME}" | awk '{print $1}')
   if [ "${ALIVE[0]}" != "" ]; then
-    pretty green "."
+    pretty "green" "."
     docker ps | grep "${MKDKR_JOB_NAME}" | awk '{print $1}' | xargs docker rm -f
   fi
 }
