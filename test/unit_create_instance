@@ -1,5 +1,7 @@
 #!/bin/bash
 
+OLDIFS=$IFS
+
 test_mkdkr_create_instance() {
   # shellcheck disable=SC1091
   source .mkdkr
@@ -9,6 +11,7 @@ test_mkdkr_create_instance() {
   .... "${NAME}"
 
   ... alpine
+  IFS=$OLDIFS
   assertNotNull "$(docker ps | grep job_${NAME})"
   .
 
@@ -24,6 +27,7 @@ test_mkdkr_create_instance_name() {
   .... "${NAME}"
 
   ... job alpine
+  IFS=$OLDIFS
   assertNotNull "$(docker ps | grep job_${NAME})"
   .
 
@@ -39,6 +43,7 @@ test_mkdkr_create_instance_service() {
   .... "${NAME}"
 
   ... service nginx
+  IFS=$OLDIFS 
   assertNotNull "$(docker ps | grep service_${NAME})"
   .
 
@@ -54,6 +59,7 @@ test_mkdkr_create_instance_privileged() {
   .... "${NAME}"
 
   ... privileged docker:19
+  IFS=$OLDIFS 
   assertNotNull "$(docker ps | grep job_${NAME})"
   .
 
@@ -70,6 +76,23 @@ test_mkdkr_create_instance_idempotent() {
 
   ... alpine
   ... debian
+  IFS=$OLDIFS 
+  assertNotNull "$(docker ps | grep job_${NAME})"
+  .
+
+  echo -e "\nRan\e[36m 1 \e[0masserts."
+}
+
+test_mkdkr_create_instance_with_parameters() {
+  # shellcheck disable=SC1091
+  source .mkdkr
+  unset MKDKR_JOB_NAME
+
+  NAME="simple_instance_idempotent"
+  .... "${NAME}"
+
+  ... alpine --env "simple=1" --env "complex=a b c"
+  IFS=$OLDIFS 
   assertNotNull "$(docker ps | grep job_${NAME})"
   .
 

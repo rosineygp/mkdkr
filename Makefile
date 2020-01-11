@@ -24,9 +24,8 @@ commitlint:
 
 shellcheck:
 	@$(.)
-	... ubuntu:18.04
-	.. apt update \&\& apt install shellcheck
-	.. shellcheck -e SC1088 -e SC2068 -e SC2086 .mkdkr \|\| true
+	... koalaman/shellcheck-alpine:v0.4.6
+	.. shellcheck -e SC1088 -e SC2068 -e SC2086 .mkdkr
 	.. shellcheck generator/gitlab-ci
 	.. shellcheck -e SC2181 test/unit_job_name
 	.. shellcheck -e SC2181 test/unit_create_instance
