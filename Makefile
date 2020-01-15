@@ -22,13 +22,13 @@ shellcheck:
 	.. shellcheck -e SC1088 -e SC2068 -e SC2086 .mkdkr
 	.. shellcheck generator/gitlab-ci
 	.. shellcheck -e SC2181 test/unit_job_name
-	.. shellcheck -e SC2181 test/unit_create_instance
+	.. shellcheck -e SC2181 -e SC2086 test/unit_create_instance
 	.. shellcheck test/cover
 
 unit:
 	@$(.)
 	... privileged docker:19 --workdir $(PWD)/test
-	.. apk add bash
+	.. apk add bash jq
 	.. ./unit_job_name
 	.. ./unit_create_instance
 
