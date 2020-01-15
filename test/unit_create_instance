@@ -1,5 +1,27 @@
 #!/bin/bash
 
+_helper_instance() {
+  assertEquals "$(docker inspect ${1}_${MKDKR_JOB_NAME} | jq .[0].State.Running)" true
+  [[ "$?" == "0" ]] &&
+    pretty "light_purple" "container is running [ OK ]"
+
+  assertEquals "$(docker inspect ${1}_${MKDKR_JOB_NAME} | jq .[0].Config.Cmd[0])" "${3}"
+  [[ "$?" == "0" ]] &&
+    pretty "light_purple" "cmd is ${2} [ OK ]"
+
+  assertEquals "$(docker inspect ${1}_${MKDKR_JOB_NAME} | jq .[0].Config.Image)" "${2}"
+  [[ "$?" == "0" ]] &&
+    pretty "light_purple" "container image is ${2} [ OK ]"
+
+  assertEquals "$(docker inspect ${1}_${MKDKR_JOB_NAME} | jq .[0].Config.Entrypoint)" 'null'
+  [[ "$?" == "0" ]] &&
+    pretty "light_purple" "container entrypoint is null [ OK ]"
+
+  assertNotNull "$(docker inspect ${1}_${MKDKR_JOB_NAME} | jq .[0].Config.WorkingDir)"
+  [[ "$?" == "0" ]] &&
+    pretty "light_purple" "container workdir exist [ OK ]"
+}
+
 test_mkdkr_create_instance() {
   # shellcheck disable=SC1091
   source .mkdkr
@@ -9,55 +31,64 @@ test_mkdkr_create_instance() {
   .... "${NAME}"
 
   ... alpine
-  assertNotNull "$(docker ps | grep job_${NAME})"
+
+  _helper_instance "job" '"alpine"' '"sleep"'
+
   .
 
-  echo -e "\nRan\e[36m 1 \e[0masserts."
+  pretty "light_green" "\nRan 5 assert(s)\n"
 }
 
-test_mkdkr_create_instance_name() {
+test_mkdkr_create_instance_job() {
   # shellcheck disable=SC1091
   source .mkdkr
   unset MKDKR_JOB_NAME
 
-  NAME="simple_instance"
+  NAME="simple_instance_job"
   .... "${NAME}"
 
   ... job alpine
-  assertNotNull "$(docker ps | grep job_${NAME})"
+
+  _helper_instance "job" '"alpine"' '"sleep"'
+
   .
 
-  echo -e "\nRan\e[36m 1 \e[0masserts."
+  pretty "light_green" "\nRan 5 assert(s)\n"
+
 }
 
 test_mkdkr_create_instance_service() {
   # shellcheck disable=SC1091
   source .mkdkr
   unset MKDKR_JOB_NAME
-  
+
   NAME="simple_instance_idempotent"
   .... "${NAME}"
 
-  ... service nginx 
-  assertNotNull "$(docker ps | grep service_${NAME})"
+  ... service nginx
+
+  _helper_instance "service" '"nginx"' '"nginx"'
+
   .
 
-  echo -e "\nRan\e[36m 1 \e[0masserts."
+  pretty "light_green" "\nRan 5 assert(s)\n"
 }
 
 test_mkdkr_create_instance_privileged() {
   # shellcheck disable=SC1091
   source .mkdkr
   unset MKDKR_JOB_NAME
-  
+
   NAME="simple_instance_privileged"
   .... "${NAME}"
 
-  ... privileged docker:19 
-  assertNotNull "$(docker ps | grep job_${NAME})"
+  ... privileged docker:19
+
+  _helper_instance "job" '"docker:19"' '"sleep"'
+
   .
 
-  echo -e "\nRan\e[36m 1 \e[0masserts."
+  pretty "light_green" "\nRan 5 assert(s)\n"
 }
 
 test_mkdkr_create_instance_idempotent() {
@@ -69,30 +100,83 @@ test_mkdkr_create_instance_idempotent() {
   .... "${NAME}"
 
   ... alpine
-  ... debian 
-  assertNotNull "$(docker ps | grep job_${NAME})"
+
+  _helper_instance "job" '"alpine"' '"sleep"'
+
+  ... debian
+
+  _helper_instance "job" '"debian"' '"sleep"'
+
   .
 
-  echo -e "\nRan\e[36m 1 \e[0masserts."
+  echo -e "\nRan\e[36m 10 \e[0masserts."
+}
+
+test_test_mkdkr_create_service_and_job() {
+  # shellcheck disable=SC1091
+  source .mkdkr
+  unset MKDKR_JOB_NAME
+
+  NAME="my_service"
+  .... "${NAME}"
+
+  ... service nginx
+
+  _helper_instance "service" '"nginx"' '"nginx"'
+
+  ... alpine
+
+  _helper_instance "job" '"alpine"' '"sleep"'
+
+  assertNotEquals "$(docker inspect job_${MKDKR_JOB_NAME} | jq .[0].HostConfig.Links[0])" 'null'
+  [[ "$?" == "0" ]] &&
+    pretty "light_purple" "linked with service [ OK ]"
+
+  assertContains "$(docker inspect job_${MKDKR_JOB_NAME} | jq .[0].HostConfig.Links[0])" "nginx"
+  [[ "$?" == "0" ]] &&
+    pretty "light_purple" "alias linked name [ OK ]"
+
+  .
+
+  pretty "light_green" "\nRan 12 assert(s)\n"
+
 }
 
 test_mkdkr_create_instance_with_parameters() {
   # shellcheck disable=SC1091
   source .mkdkr
   unset MKDKR_JOB_NAME
+  unset SERVICES
 
-  NAME="simple_instance_idempotent"
+  NAME="simple_instance_parameters"
   .... "${NAME}"
 
-  ... alpine --env "simple=1" --env "complex=a b c" 
-  # shellcheck disable=SC2016
-  .. echo '$simple'
-  # shellcheck disable=SC2016
-  .. echo '$complex'
-  assertNotNull "$(docker ps | grep job_${NAME})"
+  ... alpine \
+    --cpus 1 \
+    --memory 32MB \
+    -e "simple=simple" \
+    --env "complex=name with space" \
+    --env "pre-processed=$(whoami)" \
+    --env "liteal='\$(literal)'"
+
+  _helper_instance "job" '"alpine"' '"sleep"'
+
+  assertEquals "$(docker inspect job_${MKDKR_JOB_NAME} | jq .[0].HostConfig.NanoCpus)" "1000000000"
+  [[ "$?" == "0" ]] &&
+    pretty "light_purple" "cpu restriction [ OK ]"
+
+  assertEquals "$(docker inspect job_${MKDKR_JOB_NAME} | jq .[0].HostConfig.Memory)" "33554432"
+  [[ "$?" == "0" ]] &&
+    pretty "light_purple" "memory restriction [ OK ]"
+
+  assertEquals "$(docker inspect job_${MKDKR_JOB_NAME} | jq '.[0].Config.Env | length')" 5
+  [[ "$?" == "0" ]] &&
+    pretty "light_purple" "count env vars == 5 [ OK ]"
+
   .
 
-  echo -e "\nRan\e[36m 1 \e[0masserts."
+  pretty "light_green" "\nRan 8 assert(s)\n"
+
 }
 
 # shellcheck disable=SC1091
