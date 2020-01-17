@@ -1,0 +1,170 @@
+#!/bin/bash
+
+test_mkdkr_run_simple() {
+  # shellcheck disable=SC1091
+  source .mkdkr
+  unset MKDKR_JOB_NAME
+
+  NAME="simple_instance"
+  .... "${NAME}"
+
+  ... alpine
+
+  .. echo "hello world!"
+  .
+
+  pretty "light_green" "\nRan 1 assert(s)\n"
+}
+
+test_mkdkr_return_error() {
+  # shellcheck disable=SC1091
+  source .mkdkr
+  unset MKDKR_JOB_NAME
+
+  NAME="simple_instance"
+  .... "${NAME}"
+
+  ... alpine
+
+  (.. noooooo)&
+
+  .
+
+  pretty "light_green" "\nRan 1 assert(s)\n"
+}
+
+test_mkdkr_arguments() {
+  # shellcheck disable=SC1091
+  source .mkdkr
+  unset MKDKR_JOB_NAME
+
+  NAME="simple_instance"
+  .... "${NAME}"
+
+  ... ubuntu
+
+  .. apt-get update -qq
+  .. apt-get install htop -y
+  .
+
+  pretty "light_green" "\nRan 1 assert(s)\n"
+}
+
+test_mkdkr_line-break() {
+  # shellcheck disable=SC1091
+  source .mkdkr
+  unset MKDKR_JOB_NAME
+
+  NAME="simple_instance"
+  .... "${NAME}"
+
+  ... alpine
+
+  .. apk add \
+    curl \
+    htop \
+    bash
+
+  .
+
+  pretty "light_green" "\nRan 1 assert(s)\n"
+}
+
+test_mkdkr_escape() {
+  # shellcheck disable=SC1091
+  source .mkdkr
+  unset MKDKR_JOB_NAME
+
+  NAME="simple_instance"
+  .... "${NAME}"
+
+  ... debian
+
+  .. apt-get update \&\& \
+    apt-get install \
+      curl \
+      htop -y
+
+  .
+
+  pretty "light_green" "\nRan 1 assert(s)\n"
+}
+
+test_mkdkr_pipe() {
+  # shellcheck disable=SC1091
+  source .mkdkr
+  unset MKDKR_JOB_NAME
+
+  NAME="simple_instance"
+  .... "${NAME}"
+
+  ... alpine
+
+  .. ls -la \| wc -l
+
+  .
+
+  pretty "light_green" "\nRan 1 assert(s)\n"
+}
+
+test_mkdkr_redirect_internal() {
+  # shellcheck disable=SC1091
+  source .mkdkr
+  unset MKDKR_JOB_NAME
+
+  NAME="simple_instance"
+  .... "${NAME}"
+
+  ... alpine
+
+  .. ls -la \> /tmp/my-file
+
+  .
+
+  pretty "light_green" "\nRan 1 assert(s)\n"
+}
+
+test_mkdkr_get_output() {
+  # shellcheck disable=SC1091
+  source .mkdkr
+  unset MKDKR_JOB_NAME
+
+  NAME="simple_instance"
+  .... "${NAME}"
+
+  ... alpine
+
+  OUT=$(.. ls -la)
+
+  echo $OUT
+
+  .
+
+  pretty "light_green" "\nRan 1 assert(s)\n"
+}
+
+
+test_mkdkr_print_env_var() {
+  # shellcheck disable=SC1091
+  source .mkdkr
+  unset MKDKR_JOB_NAME
+
+  NAME="simple_instance"
+  .... "${NAME}"
+
+  ... alpine \
+    --env "name=foo" \
+    --env "last=bar" \
+    --env "fullname=foo bar"
+
+  .. echo '$name'
+  .. echo '$last'
+  .. echo '$fullname'
+
+  .
+
+  pretty "light_green" "\nRan 1 assert(s)\n"
+}
+
+# shellcheck disable=SC1091
+. ./shunit2

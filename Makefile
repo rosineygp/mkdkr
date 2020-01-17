@@ -31,6 +31,7 @@ unit:
 	.. apk add bash jq
 	.. ./unit_job_name
 	.. ./unit_create_instance
+	.. ./unit_run_command
 
 DOCKER_BIN=https://download.docker.com/linux/static/stable/x86_64/docker-19.03.5.tgz
 
@@ -43,6 +44,7 @@ coverage:
 	.. tar -zxvf /tmp/docker.tgz --strip=1 -C /usr/local/bin/
 	.. kcov --exclude-path=shunit2 coverage unit_job_name
 	.. kcov --exclude-path=shunit2 coverage unit_create_instance
+	.. kcov --exclude-path=shunit2 coverage unit_run_command
 	.. './cover > coverage/coverage.json'
 	... node:12 \
 		-e SURGE_LOGIN='$(SURGE_LOGIN)' \
