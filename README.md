@@ -6,6 +6,7 @@
 
 # mkdkr
 
+[![Build Status](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Factions-badge.atrox.dev%2Frosineygp%2Fmkdkr%2Fbadge%3Fref%3Dmaster&style=flat)](https://actions-badge.atrox.dev/rosineygp/mkdkr/goto?ref=master)
 [![Build Status](https://travis-ci.org/rosineygp/mkdkr.svg?branch=master)](https://travis-ci.org/rosineygp/mkdkr)
 [![pipeline status](https://gitlab.com/rosiney.gp/mkdkr/badges/master/pipeline.svg)](https://gitlab.com/rosiney.gp/mkdkr/commits/master)
 [![CircleCI](https://circleci.com/gh/rosineygp/mkdkr/tree/master.svg?style=svg)](https://circleci.com/gh/rosineygp/mkdkr/tree/master)
@@ -23,7 +24,7 @@ Super small and powerful framework for build CI pipeline, scripted with Makefile
 - All power of make, docker and bash
 - Shipping and switch among CI engines like 
 [Circle CI](https://circleci.com/gh/rosineygp/mkdkr),
-[GitHub Actions](https://github.com/rosineygp/mkdkr/runs/374344269), 
+[GitHub Actions](https://actions-badge.atrox.dev/rosineygp/mkdkr/goto?ref=master), 
 [Gitlab-ci](https://gitlab.com/rosiney.gp/mkdkr/pipelines), Jenkins, [Travis](https://travis-ci.org/rosineygp/mkdkr/builds).. and more
 - Clean and elegant code syntax
 
