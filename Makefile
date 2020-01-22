@@ -1,14 +1,4 @@
-.EXPORT_ALL_VARIABLES:
-.ONESHELL:
-SHELL = /bin/bash
-
-define . =
-	source .mkdkr
-	$(eval MKDKR_JOB_NAME=$(shell source .mkdkr; .... $(@)))
-	trap '.' EXIT
-endef
-
-# END OF MAKE DEFINITIONS, CREATE YOUR JOBS BELOW
+include $(shell bash .mkdkr init)
 
 commitlint:
 	@$(.)

@@ -78,16 +78,7 @@ Create a file with name Makefile and paste the following content
 
 ```Makefile
 # Required header
-.EXPORT_ALL_VARIABLES:
-.ONESHELL:
-SHELL = /bin/bash
-
-define . =
-	source .mkdkr
-	$(eval MKDKR_JOB_NAME=$(shell source .mkdkr; .... $(@)))
-	trap '.' EXIT
-endef
-# end of header
+include $(shell bash .mkdkr init)
 
 job:                                # job name
 	@$(.)                       # required: load mkdkr and create unique job name
