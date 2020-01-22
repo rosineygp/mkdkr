@@ -49,6 +49,20 @@ _implicit_job() {
   fi
 }
 
+_header() {
+  cat <<EOF
+.EXPORT_ALL_VARIABLES:
+.ONESHELL:
+SHELL = /bin/bash
+
+define . =
+	source .mkdkr
+	\$(eval MKDKR_JOB_NAME=\$(shell source .mkdkr; .... \$(@)))
+	trap . EXIT
+endef
+EOF
+}
+
 ....() {
   if [ -z "${MKDKR_JOB_NAME}" ]; then
     _MKDKR_JOB_NAME=$(echo "${1}_$(cat /proc/sys/kernel/random/uuid)" | sed 's/\//_/g')
@@ -126,3 +140,14 @@ _implicit_job() {
     docker ps | grep "${MKDKR_JOB_NAME}" | awk '{print $1}' | xargs docker rm -f
   fi
 }
+
+if [ "$1" == "header" ]; then
+
+  FILENAME="/tmp/.mkdkr_header_$(md5sum .mkdkr | awk '{ print $1 }').mk"
+
+  if [ ! -f "$FILENAME" ]; then
+    _header >"$FILENAME"
+  fi
+
+  echo "$FILENAME"
+fi
