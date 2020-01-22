@@ -1,4 +1,4 @@
-include $(shell bash .mkdkr header)
+include $(shell bash .mkdkr init)
 
 commitlint:
 	@$(.)

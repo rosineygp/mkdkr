@@ -141,7 +141,7 @@ EOF
   fi
 }
 
-if [ "$1" == "header" ]; then
+if [ "$1" == "init" ]; then
 
   FILENAME="/tmp/.mkdkr_header_$(md5sum .mkdkr | awk '{ print $1 }').mk"
 

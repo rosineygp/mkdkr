@@ -78,7 +78,7 @@ Create a file with name Makefile and paste the following content
 
 ```Makefile
 # Required header
-include $(shell bash .mkdkr header)
+include $(shell bash .mkdkr init)
 
 job:                                # job name
 	@$(.)                       # required: load mkdkr and create unique job name
