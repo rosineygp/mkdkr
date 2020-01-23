@@ -56,8 +56,8 @@ _header() {
 SHELL = /bin/bash
 
 define . =
-	source .mkdkr
-	\$(eval MKDKR_JOB_NAME=\$(shell source .mkdkr; .... \$(@)))
+	. .mkdkr
+	\$(eval MKDKR_JOB_NAME=\$(shell . .mkdkr; .... \$(@)))
 	trap . EXIT
 endef
 EOF
