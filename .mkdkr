@@ -143,11 +143,19 @@ EOF
 
 if [ "$1" == "init" ]; then
 
-  FILENAME="/tmp/.mkdkr_header_$(md5sum .mkdkr | awk '{ print $1 }').mk"
+  TMP_DIR="/tmp/.mkdkr"
 
-  if [ ! -f "$FILENAME" ]; then
-    _header >"$FILENAME"
+  if [ ! -d "${TMP_DIR}" ]; then
+    mkdir -p "${TMP_DIR}"
+  else
+    find "${TMP_DIR}" -name "mkdkr_header_*.mk" -type f -mmin +1440 -delete
   fi
 
-  echo "$FILENAME"
+  _MKDKR_INCLUDES="/tmp/.mkdkr/mkdkr_header_$(cat /proc/sys/kernel/random/uuid).mk"
+
+  if [ ! -f "${_MKDKR_INCLUDES}" ]; then
+    _header > "${_MKDKR_INCLUDES}"
+  fi
+
+  echo "${_MKDKR_INCLUDES}"
 fi
