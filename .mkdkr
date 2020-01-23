@@ -22,7 +22,7 @@ pretty() {
     ["white"]='\e[1;37m'
   )
   key=${1:-white}
-  echo -e "${colors[${key}]}${*:2}\e[0m"
+  echo -e "${colors[${key}]}${*:2}\e[0m" > /dev/fd/2
 }
 
 _image() {
