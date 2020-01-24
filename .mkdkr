@@ -58,6 +58,7 @@ SHELL = /bin/bash
 define . =
 	. .mkdkr
 	\$(eval MKDKR_JOB_NAME=\$(shell . .mkdkr; .... \$(@)))
+  \$(eval MKDKR_JOB_STDOUT=".tmp/\${MKDKR_JOB_NAME}.log")
 	trap . EXIT
 endef
 EOF
@@ -125,7 +126,11 @@ EOF
 
   pretty "green" ".. ${*}"
 
-  docker exec -i ${CONTAINER_NAME} ${MKDKR_SHELL:-sh} -c "$*"
+  if [ ! -d ".tmp" ]; then
+    mkdir .tmp
+  fi
+
+  docker exec -i ${CONTAINER_NAME} ${MKDKR_SHELL:-sh} -c "$*" | tee ".tmp/${MKDKR_JOB_NAME}.log"
   EXIT_CODE=$?
   if [ "${EXIT_CODE}" != "0" ]; then
     .
@@ -138,6 +143,8 @@ EOF
   if [ "${ALIVE[0]}" != "" ]; then
     pretty "green" "."
     docker ps | grep "${MKDKR_JOB_NAME}" | awk '{print $1}' | xargs docker rm -f
+    rm ".tmp/${MKDKR_JOB_NAME}.log"
+    rmdir .tmp &> /dev/null || true
   fi
 }
 
