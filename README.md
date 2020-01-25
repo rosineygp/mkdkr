@@ -56,6 +56,7 @@ Table of contents
   * [Shell](#shell)
   * [Trap](#trap)
   * [Implicit Job](#implicit-job)
+  * [Sdtout](#stdout)
   * [Pipelines](#pipelines)
 * [Generators](#generators)
   * [Gitlab CI](#gitlab-ci)
@@ -322,6 +323,35 @@ implicit-job:
 
 [Makefile](examples/implicit-job.mk)
 
+## Stdout
+
+Get last command output
+
+Use to filter or apply some logic in last command executed (also outside container)
+
+```Makefile
+stdout:
+	@$(.)
+	... alpine
+	.. echo "hello mkdkr!"
+	cat "$(MKDKR_JOB_STDOUT)"
+```
+
+> `$(MKDKR_JOB_STDOUT)` return path of file
+
+```Makefile
+stdout:
+	@$(.)
+	... debian
+	.. apt-get update
+	.. apt-get install curl -y
+	.. dpkg -l
+	$(stdout) | grep -i curl && echo "INSTALLED"
+```
+> `$(stdout)` return output file using cat
+
+[Makefile](examples/stdout.mk)
+
 ## Pipeline
 
 Group of jobs for parallel and organization execution
@@ -370,6 +400,7 @@ gitlab:
 |----|-------|-----------|
 |MKDKR_TTL|3600|The time limit to a job or service run|
 |MKDKR_SHELL|sh|Change to another shell eg. bash, csh|
+|MKDKR_JOB_STDOUT|last stdout|path of file, generated with last stdout output|
 |MKDKR_JOB_NAME*|(job\|service)\_target-name\_(uuid)|Unique job name, used as container name suffix|
 
 > - to overwrite the values use: `export <var>=<value>`
