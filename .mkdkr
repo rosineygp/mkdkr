@@ -147,7 +147,7 @@ EOF
   if [ "${ALIVE[0]}" != "" ]; then
     pretty "green" "."
     docker ps | grep "${MKDKR_JOB_NAME}" | awk '{print $1}' | xargs docker rm -f
-    rm ".tmp/${MKDKR_JOB_NAME}.log"
+    rm "${PWD}/.tmp/${MKDKR_JOB_NAME}.log"
     rmdir .tmp &> /dev/null || true
   fi
 }
