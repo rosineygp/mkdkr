@@ -43,5 +43,8 @@ jobs:
       name: implicit-job
       script: make implicit-job
     - stage: scenarios
+      name: stdout
+      script: make stdout
+    - stage: scenarios
       name: pipeline
       script: make examples/pipeline

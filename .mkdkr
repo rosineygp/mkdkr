@@ -58,8 +58,12 @@ SHELL = /bin/bash
 define . =
 	. .mkdkr
 	\$(eval MKDKR_JOB_NAME=\$(shell . .mkdkr; .... \$(@)))
-  \$(eval MKDKR_JOB_STDOUT=".tmp/\${MKDKR_JOB_NAME}.log")
+  \$(eval MKDKR_JOB_STDOUT="${PWD}/.tmp/\${MKDKR_JOB_NAME}.log")
 	trap . EXIT
+endef
+
+define stdout =
+if [ -f \$(MKDKR_JOB_STDOUT) ]; then cat \$(MKDKR_JOB_STDOUT); fi
 endef
 EOF
 }
@@ -130,7 +134,7 @@ EOF
     mkdir .tmp
   fi
 
-  docker exec -i ${CONTAINER_NAME} ${MKDKR_SHELL:-sh} -c "$*" | tee ".tmp/${MKDKR_JOB_NAME}.log"
+  docker exec -i ${CONTAINER_NAME} ${MKDKR_SHELL:-sh} -c "$*" | tee "${PWD}/.tmp/${MKDKR_JOB_NAME}.log"
   EXIT_CODE=$?
   if [ "${EXIT_CODE}" != "0" ]; then
     .

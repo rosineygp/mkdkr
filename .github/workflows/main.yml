@@ -31,5 +31,7 @@ jobs:
       run: make implicit-job
     - name: escapes
       run: make escapes
+    - name: stdout
+      run: make stdout
     - name: pipeline
       run: make examples/pipeline

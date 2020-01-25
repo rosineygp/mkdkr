@@ -71,6 +71,11 @@ escapes:
   script:
   - make escapes
 
+stdout:
+  stage: scenarios
+  script:
+  - make stdout
+
 pipeline:
     stage: scenarios
     script:

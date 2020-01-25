@@ -64,13 +64,16 @@ shell:
 trap:
 	make --silent -f examples/trap.mk
 
+stdout:
+		make --silent -f examples/stdout.mk all
+
 implicit-job:
 	make --silent -f examples/implicit-job.mk
 
 examples/pipeline:
 	@cd examples && make --silent -f pipeline.mk pipeline
 
-scenarios: simple multi-images service dind escapes shell trap implicit-job examples/pipeline
+scenarios: simple multi-images service dind escapes shell trap implicit-job stdout examples/pipeline
 
 brainfuck:
 	@$(.)

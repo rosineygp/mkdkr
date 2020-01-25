@@ -39,5 +39,8 @@ jobs:
         name: escapes
         command: make escapes
     - run:
+        name: stdout
+        command: make stdout
+    - run:
         name: pipeline
         command: make examples/pipeline
