@@ -60,6 +60,7 @@ define . =
 	\$(eval MKDKR_JOB_NAME=\$(shell . .mkdkr; .... \$(@)))
   \$(eval MKDKR_JOB_STDOUT="${PWD}/.tmp/\${MKDKR_JOB_NAME}.log")
 	trap . EXIT
+  pretty "orange" "\$(@)"
 endef
 
 define stdout =
