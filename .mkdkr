@@ -22,7 +22,7 @@ pretty() {
     ["white"]='\e[1;37m'
   )
   key=${1:-white}
-  echo -e "${colors[${key}]}${*:2}\e[0m" > /dev/fd/2
+  echo -e "${colors[${key}]}${*:2}\e[0m" >&2
 }
 
 _image() {
@@ -60,7 +60,7 @@ define . =
 	\$(eval MKDKR_JOB_NAME=\$(shell . .mkdkr; .... \$(@)))
   \$(eval MKDKR_JOB_STDOUT="${PWD}/.tmp/\${MKDKR_JOB_NAME}.log")
 	trap . EXIT
-  pretty "orange" "\$(@)"
+  pretty "orange" "\n\$(@)\n"
 endef
 
 define stdout =
