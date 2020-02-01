@@ -32,7 +32,7 @@ _image() {
 _remove_running_job() {
   if [ "$(docker ps | grep job_${MKDKR_JOB_NAME})" != "" ]; then
     pretty "purple" "image changed, from: $(_image job_${MKDKR_JOB_NAME}) to: ${IMAGE}"
-    docker rm -f "job_${MKDKR_JOB_NAME}"
+    docker rm -f "job_${MKDKR_JOB_NAME}" >&2
   fi
 }
 
@@ -101,7 +101,7 @@ EOF
       --workdir "${PWD}" \
       $ARGS \
       --name "service_${MKDKR_JOB_NAME}" \
-      "${IMAGE}"
+      "${IMAGE}" >&2
   else
     if [ "${TYPE}" == "privileged" ]; then
       PRIVILEGED=(--privileged -v /var/run/docker.sock:/var/run/docker.sock)
@@ -120,7 +120,7 @@ EOF
       ${PRIVILEGED[@]} \
       ${SERVICES[@]} \
       --name "job_${MKDKR_JOB_NAME}" \
-      "${IMAGE}" sleep "${MKDKR_TTL:-3600}"
+      "${IMAGE}" sleep "${MKDKR_TTL:-3600}" >&2
   fi
   IFS=$OLDIFS
 }
@@ -147,7 +147,7 @@ EOF
   ALIVE=$(docker ps | grep "${MKDKR_JOB_NAME}" | awk '{print $1}')
   if [ "${ALIVE[0]}" != "" ]; then
     pretty "green" "."
-    docker ps | grep "${MKDKR_JOB_NAME}" | awk '{print $1}' | xargs docker rm -f
+    docker ps | grep "${MKDKR_JOB_NAME}" | awk '{print $1}' | xargs -i{} docker rm -f {} >&2
     rm "${PWD}/.tmp/${MKDKR_JOB_NAME}.log"
     rmdir .tmp &> /dev/null || true
   fi
