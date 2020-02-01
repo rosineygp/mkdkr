@@ -44,10 +44,8 @@ Table of contents
   * [Result](#result)
 * [Reason](#reason)
 * [Dot Functions](#dot-functions)
-  * [••••](#-4-dots)
   * [•••](#-3-dots)
   * [••](#-2-dots)
-  * [•](#-1-dot)
 * [Examples](#examples)
   * [Simple](#simple)
   * [Service](#service)
@@ -127,31 +125,11 @@ Build pipeline for a dedicated platform can take a lot of time to learn and test
 
 ```Makefile
 job:
-	....
 	...
 	..
-	.
 ```
 
 > yes, just dots
-
-## •••• 4 dots
-
-[auto] Create a unique job name.
-
-**Parameters:**
-- String, MKDKR_JOB_NAME: If not exist set a MKDKR_JOB_NAME otherwise return current MKDKR_JOB_NAME.
-
-**Return:**
-- String, MKDKR_JOB_NAME
-
-> Automatically load after call `@$(.)`.
-
-**Usage**
-
-```Bash
-.... my-awesome-job		# name a job
-```
 
 ## ••• 3 dots
 
@@ -204,24 +182,6 @@ job:
 .. 'ls -la > myfile'           # run a command inside container and redirect output to container
 .. 'apt-get update && \
     apt-get install -y curl'   # just need '' cause && redirect outside container
-```
-
-## • 1 dot
-
-[optional] Destroy all containers initialized in a job.
-
-> At end of job it is called implicitly.
-
-**Parameters:**
-- None
-
-**Return:**
-- String, Container Id
-
-**Usage**
-
-```Bash
-.   # Kill 'Em All
 ```
 
 # Examples
