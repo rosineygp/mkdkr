@@ -136,7 +136,7 @@ EOF
   fi
 
   docker exec -i ${CONTAINER_NAME} ${MKDKR_SHELL:-sh} -c "$*" | tee "${PWD}/.tmp/${MKDKR_JOB_NAME}.log"
-  EXIT_CODE=$?
+  EXIT_CODE="${PIPESTATUS[0]}"
   if [ "${EXIT_CODE}" != "0" ]; then
     .
     exit "${EXIT_CODE}"
