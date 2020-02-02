@@ -15,6 +15,7 @@ image: docker:19
 before_script:
   - apk add make
   - apk add bash
+  - apk add git
 
 commitlint:
   stage: lint
