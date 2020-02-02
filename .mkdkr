@@ -149,7 +149,7 @@ EOF
     pretty "green" "."
     docker ps | grep "${MKDKR_JOB_NAME}" | awk '{print $1}' | xargs -i{} docker rm -f {} >&2
     rm "${PWD}/.tmp/${MKDKR_JOB_NAME}.log"
-    rmdir .tmp &> /dev/null || true
+    rmdir .tmp &>/dev/null || true
   fi
 }
 
@@ -166,8 +166,50 @@ if [ "$1" == "init" ]; then
   _MKDKR_INCLUDES="/tmp/.mkdkr/mkdkr_header_$(cat /proc/sys/kernel/random/uuid).mk"
 
   if [ ! -f "${_MKDKR_INCLUDES}" ]; then
-    _header > "${_MKDKR_INCLUDES}"
+    _header >"${_MKDKR_INCLUDES}"
   fi
 
-  echo "${_MKDKR_INCLUDES}"
+  # include from remote git
+  declare -a _MKDKR_INCLUDES_LIST=()
+
+  if [ -f mkdkr.csv ]; then
+    pretty "orange" "\ninclude\n"
+    while IFS= read -r LINE; do
+      PARAMS=($(echo "$LINE" | tr "," " "))
+      ALIAS="${PARAMS[0]}"
+
+      if [ -z "${PARAMS[1]}" ]; then
+        echo "Needs git path to clone for: ${ALIAS}"
+        exit 1
+      fi
+
+      REPOS="${PARAMS[1]}"
+      CHECKOUT="master"
+      FILE="main.mk"
+
+      if [ "${PARAMS[2]}" ]; then
+        CHECKOUT="${PARAMS[2]}"
+      fi
+
+      if [ "${PARAMS[3]}" ]; then
+        FILE="${PARAMS[3]}"
+      fi
+
+      mkdir -p .tmp/includes
+
+      if [ -d ".tmp/includes/${ALIAS}" ]; then
+        pretty "light_cyan" "update, alias: ${ALIAS}, repos: ${REPOS}, checkout: ${CHECKOUT}, file: ${FILE}"
+
+        git -C "${PWD}/.tmp/includes/${ALIAS}/" reset --hard "origin/${CHECKOUT}" >&2
+        git -C "${PWD}/.tmp/includes/${ALIAS}/" pull --depth "${MKDKR_INCLUDE_CLONE_DEPTH:-1}" origin "$CHECKOUT" >&2
+      else
+        pretty "light_cyan" "clone, alias: ${ALIAS}, repos: ${REPOS}, checkout: ${CHECKOUT}, file: ${FILE}"
+        git clone "${REPOS}" --branch "${CHECKOUT}" --depth "${MKDKR_INCLUDE_CLONE_DEPTH:-1}" "${PWD}/.tmp/includes/${ALIAS}" >&2
+      fi
+
+      _MKDKR_INCLUDES_LIST+=("${PWD}/.tmp/includes/${ALIAS}/${FILE}")
+    done < <(grep -v '^ *#' <mkdkr.csv)
+  fi
+
+  echo "${_MKDKR_INCLUDES} ${_MKDKR_INCLUDES_LIST[*]}"
 fi

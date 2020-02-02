@@ -19,12 +19,12 @@
 
 Super small and powerful framework for build CI pipeline, scripted with Makefile and isolated with docker.
 
-- Dependencies: [ [make](https://www.gnu.org/software/make/manual/make.html), [docker](https://www.docker.com/), [bash](https://www.gnu.org/software/bash/) ]
+- Dependencies: [ [make](https://www.gnu.org/software/make/manual/make.html), [docker](https://www.docker.com/), [bash](https://www.gnu.org/software/bash/), [git](https://git-scm.com/) ]
 - Two files only (Makefile and .mkdkr), less garbage on your repo
 - All power of make, docker and bash
-- Shipping and switch among CI engines like 
+- Shipping and switch among CI engines like
 [Circle CI](https://circleci.com/gh/rosineygp/mkdkr),
-[GitHub Actions](https://actions-badge.atrox.dev/rosineygp/mkdkr/goto?ref=master), 
+[GitHub Actions](https://actions-badge.atrox.dev/rosineygp/mkdkr/goto?ref=master),
 [Gitlab-ci](https://gitlab.com/rosiney.gp/mkdkr/pipelines), Jenkins, [Travis](https://travis-ci.org/rosineygp/mkdkr/builds).. and more
 - Clean and elegant code syntax
 
@@ -46,6 +46,11 @@ Table of contents
 * [Dot Functions](#dot-functions)
   * [•••](#-3-dots)
   * [••](#-2-dots)
+* [Includes](#includes)
+	* [Explicit](#explicit)
+	* [Implicit](#implicit)
+	* [mkdkr.csv](#mkdkr.csv)
+	* [Collection](#collection)
 * [Examples](#examples)
   * [Simple](#simple)
   * [Service](#service)
@@ -133,7 +138,7 @@ job:
 
 ## ••• 3 dots
 
-[optional**] Create a docker container, it can set as simple job, service or privileged job.
+Create a docker container, it can set as **simple** job, **service** or **privileged** job.
 
 **Parameters:**
 - String, ACTION: Actions is the mode that container will run it can be a:
@@ -152,21 +157,32 @@ job:
 **Usage**
 
 ```Bash
-... job alpine                  # simple job
-... ubuntu:18.04                # if it's a job, pass action [job] is not required
+# simple job
+... job alpine
+
+# if it's a job, pass action [job] is not required
+... ubuntu:18.04
+
+# container with parameters
 ... centeos:7 \
     --cpus 2 \
     --memory 1024MB \
-    -e PASSWORD=$$PASSWORD      # container parameters
-... service nginx               # create a service
-... privileged docker:19        # create a job with docker demon access
+    -e PASSWORD=$$PASSWORD
+
+# create a service
+... service nginx
+
+# create a job with docker demon access
+... privileged docker:19
 ```
 
 > \*\* Required when is a service or a privileged container
 
 ## •• 2 dots
 
-[required] Execute a command inside docker container [job or privileged].
+Execute a command inside docker container [**job** or **privileged**].
+
+> Is not possible to execute commands in a **service**.
 
 **Parameters:**
 - String|Array, command: any sh command eg. 'apk add nodejs'
@@ -177,12 +193,99 @@ job:
 **Usage**
 
 ```Bash
-.. apk add curl                # run a command inside container
-.. ls -la > myfile             # run a command inside container and redirect output to host
-.. 'ls -la > myfile'           # run a command inside container and redirect output to container
+
+# run a command inside container
+.. apk add curl
+
+# avoid escape to host bash, escapes also can be used (eg. \&\&)
 .. 'apt-get update && \
-    apt-get install -y curl'   # just need '' cause && redirect outside container
+    apt-get install -y curl'
+
+# run a command inside container and redirect output to host
+.. ls -la > myfile
+
+# run a command inside container and redirect output to container
+.. 'ls -la > myfile'
 ```
+
+# Includes
+
+Is possible create jobs or fragments of jobs and reuse it in another projects, like a code package library.
+
+There are two major behavior of includes:
+
+## Explicit
+
+> Recommend
+
+A fragment of job (eg. `define`) and needs to be called explicitly to work.
+
+```Makefile
+TAG=latest
+
+define docker_build =
+	@$(.)
+	... privileged docker:19
+	.. docker build -t $(REGISTRY)/$(PROJECT)/$(REPOS):$(TAG) .
+endef
+```
+All definitions will be load at start of makefile, after it is possible to call at your custom job.
+
+```Makefile
+my-custom-build:
+	$(docker-build)
+```
+
+## Implicit
+
+Just a full job in another project.
+
+```Makefile
+TAG=latest
+
+docker_build:
+	@$(.)
+	... privileged docker:19
+	.. docker build -t $(REGISTRY)/$(PROJECT)/$(REPOS):$(TAG) .
+```
+
+The jobs will be load at start and can be called directly.
+
+```shell
+make docker_build
+```
+
+> - No needs to implement the job at main Makefile.
+> - Very useful for similar projects.
+
+## mkdkr.csv
+
+A file with name `mkdkr.csv`, that contains the list of remote includes.
+
+Needs to be at same place o main Makefile.
+
+```csv
+commitlint,https://github.com/rosineygp/mkdkr_commitlint.git,master,main.mk
+docker,https://github.com/rosineygp/mkdkr_docker.git
+```
+
+The file contains four values per line in following order
+
+|#|Name|Definition|
+|-|----|----------|
+|1|alias *|unique identifier of include and clone folder destiny|
+|2|reference *|any git clone reference|
+|3|checkout|branch, tag or hash that git can checkout (default master)|
+|4|file|the fragment of Makefile that will be included (default main.mk)|
+
+> \* required
+
+## Collection
+
+* [docker](https://github.com/rosineygp/mkdkr_docker)
+* [commit lint](https://github.com/rosineygp/mkdkr_commitlint)
+
+> Small collection, use it as example
 
 # Examples
 
@@ -360,8 +463,9 @@ gitlab:
 |----|-------|-----------|
 |MKDKR_TTL|3600|The time limit to a job or service run|
 |MKDKR_SHELL|sh|Change to another shell eg. bash, csh|
-|MKDKR_JOB_STDOUT|last stdout|path of file, generated with last stdout output|
+|MKDKR_JOB_STDOUT|last stdout|Path of file, generated with last stdout output|
 |MKDKR_JOB_NAME*|(job\|service)\_target-name\_(uuid)|Unique job name, used as container name suffix|
+|MKDKR_INCLUDE_CLONE_DEPTH|1|In the most of case you no need change history for includes|
 
 > - to overwrite the values use: `export <var>=<value>`
-> - \* auto generated 
+> - \* auto generated
