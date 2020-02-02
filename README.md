@@ -22,9 +22,9 @@ Super small and powerful framework for build CI pipeline, scripted with Makefile
 - Dependencies: [ [make](https://www.gnu.org/software/make/manual/make.html), [docker](https://www.docker.com/), [bash](https://www.gnu.org/software/bash/), [git](https://git-scm.com/) ]
 - Two files only (Makefile and .mkdkr), less garbage on your repo
 - All power of make, docker and bash
-- Shipping and switch among CI engines like 
+- Shipping and switch among CI engines like
 [Circle CI](https://circleci.com/gh/rosineygp/mkdkr),
-[GitHub Actions](https://actions-badge.atrox.dev/rosineygp/mkdkr/goto?ref=master), 
+[GitHub Actions](https://actions-badge.atrox.dev/rosineygp/mkdkr/goto?ref=master),
 [Gitlab-ci](https://gitlab.com/rosiney.gp/mkdkr/pipelines), Jenkins, [Travis](https://travis-ci.org/rosineygp/mkdkr/builds).. and more
 - Clean and elegant code syntax
 
@@ -138,7 +138,7 @@ job:
 
 ## ••• 3 dots
 
-[optional**] Create a docker container, it can set as simple job, service or privileged job.
+Create a docker container, it can set as **simple** job, **service** or **privileged** job.
 
 **Parameters:**
 - String, ACTION: Actions is the mode that container will run it can be a:
@@ -157,21 +157,32 @@ job:
 **Usage**
 
 ```Bash
-... job alpine                  # simple job
-... ubuntu:18.04                # if it's a job, pass action [job] is not required
+# simple job
+... job alpine
+
+# if it's a job, pass action [job] is not required
+... ubuntu:18.04
+
+# container with parameters
 ... centeos:7 \
     --cpus 2 \
     --memory 1024MB \
-    -e PASSWORD=$$PASSWORD      # container parameters
-... service nginx               # create a service
-... privileged docker:19        # create a job with docker demon access
+    -e PASSWORD=$$PASSWORD
+
+# create a service
+... service nginx
+
+# create a job with docker demon access
+... privileged docker:19
 ```
 
 > \*\* Required when is a service or a privileged container
 
 ## •• 2 dots
 
-[required] Execute a command inside docker container [job or privileged].
+Execute a command inside docker container [**job** or **privileged**].
+
+> Is not possible to execute commands in a **service**.
 
 **Parameters:**
 - String|Array, command: any sh command eg. 'apk add nodejs'
@@ -182,11 +193,19 @@ job:
 **Usage**
 
 ```Bash
-.. apk add curl                # run a command inside container
-.. ls -la > myfile             # run a command inside container and redirect output to host
-.. 'ls -la > myfile'           # run a command inside container and redirect output to container
+
+# run a command inside container
+.. apk add curl
+
+# avoid escape to host bash, escapes also can be used (eg. \&\&)
 .. 'apt-get update && \
-    apt-get install -y curl'   # just need '' cause && redirect outside container
+    apt-get install -y curl'
+
+# run a command inside container and redirect output to host
+.. ls -la > myfile
+
+# run a command inside container and redirect output to container
+.. 'ls -la > myfile'
 ```
 
 # Includes
@@ -449,4 +468,4 @@ gitlab:
 |MKDKR_INCLUDE_CLONE_DEPTH|1|In the most of case you no need change history for includes|
 
 > - to overwrite the values use: `export <var>=<value>`
-> - \* auto generated 
+> - \* auto generated
