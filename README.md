@@ -19,7 +19,7 @@
 
 Super small and powerful framework for build CI pipeline, scripted with Makefile and isolated with docker.
 
-- Dependencies: [ [make](https://www.gnu.org/software/make/manual/make.html), [docker](https://www.docker.com/), [bash](https://www.gnu.org/software/bash/) ]
+- Dependencies: [ [make](https://www.gnu.org/software/make/manual/make.html), [docker](https://www.docker.com/), [bash](https://www.gnu.org/software/bash/), [git](https://git-scm.com/) ]
 - Two files only (Makefile and .mkdkr), less garbage on your repo
 - All power of make, docker and bash
 - Shipping and switch among CI engines like 
@@ -46,6 +46,11 @@ Table of contents
 * [Dot Functions](#dot-functions)
   * [•••](#-3-dots)
   * [••](#-2-dots)
+* [Includes](#includes)
+	* [Explicit](#explicit)
+	* [Implicit](#implicit)
+	* [mkdkr.csv](#mkdkr.csv)
+	* [Collection](#collection)
 * [Examples](#examples)
   * [Simple](#simple)
   * [Service](#service)
@@ -183,6 +188,85 @@ job:
 .. 'apt-get update && \
     apt-get install -y curl'   # just need '' cause && redirect outside container
 ```
+
+# Includes
+
+Is possible create jobs or fragments of jobs and reuse it in another projects, like a code package library.
+
+There are two major behavior of includes:
+
+## Explicit
+
+> Recommend
+
+A fragment of job (eg. `define`) and needs to be called explicitly to work.
+
+```Makefile
+TAG=latest
+
+define docker_build =
+	@$(.)
+	... privileged docker:19
+	.. docker build -t $(REGISTRY)/$(PROJECT)/$(REPOS):$(TAG) .
+endef
+```
+All definitions will be load at start of makefile, after it is possible to call at your custom job.
+
+```Makefile
+my-custom-build:
+	$(docker-build)
+```
+
+## Implicit
+
+Just a full job in another project.
+
+```Makefile
+TAG=latest
+
+docker_build:
+	@$(.)
+	... privileged docker:19
+	.. docker build -t $(REGISTRY)/$(PROJECT)/$(REPOS):$(TAG) .
+```
+
+The jobs will be load at start and can be called directly.
+
+```shell
+make docker_build
+```
+
+> - No needs to implement the job at main Makefile.
+> - Very useful for similar projects.
+
+## mkdkr.csv
+
+A file with name `mkdkr.csv`, that contains the list of remote includes.
+
+Needs to be at same place o main Makefile.
+
+```csv
+commitlint,https://github.com/rosineygp/mkdkr_commitlint.git,master,main.mk
+docker,https://github.com/rosineygp/mkdkr_docker.git
+```
+
+The file contains four values per line in following order
+
+|#|Name|Definition|
+|-|----|----------|
+|1|alias *|unique identifier of include and clone folder destiny|
+|2|reference *|any git clone reference|
+|3|checkout|branch, tag or hash that git can checkout (default master)|
+|4|file|the fragment of Makefile that will be included (default main.mk)|
+
+> \* required
+
+## Collection
+
+* [docker](https://github.com/rosineygp/mkdkr_docker)
+* [commit lint](https://github.com/rosineygp/mkdkr_commitlint)
+
+> Small collection, use it as example
 
 # Examples
 
@@ -360,8 +444,9 @@ gitlab:
 |----|-------|-----------|
 |MKDKR_TTL|3600|The time limit to a job or service run|
 |MKDKR_SHELL|sh|Change to another shell eg. bash, csh|
-|MKDKR_JOB_STDOUT|last stdout|path of file, generated with last stdout output|
+|MKDKR_JOB_STDOUT|last stdout|Path of file, generated with last stdout output|
 |MKDKR_JOB_NAME*|(job\|service)\_target-name\_(uuid)|Unique job name, used as container name suffix|
+|MKDKR_INCLUDE_CLONE_DEPTH|1|In the most of case you no need change history for includes|
 
 > - to overwrite the values use: `export <var>=<value>`
 > - \* auto generated 
