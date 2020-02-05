@@ -55,11 +55,14 @@ _header() {
 .ONESHELL:
 SHELL = /bin/bash
 
+MKDKR_BRANCH_NAME=$MKDKR_BRANCH_NAME
+MKDKR_BRANCH_NAME_SLUG=$MKDKR_BRANCH_NAME_SLUG
+
 define . =
-	. .mkdkr
-	\$(eval MKDKR_JOB_NAME=\$(shell . .mkdkr; .... \$(@)))
+  . .mkdkr
+  \$(eval MKDKR_JOB_NAME=\$(shell . .mkdkr; .... \$(@)))
   \$(eval MKDKR_JOB_STDOUT="${PWD}/.tmp/\${MKDKR_JOB_NAME}.log")
-	trap . EXIT
+  trap . EXIT
   pretty "orange" "\n\$(@)\n"
 endef
 
@@ -161,6 +164,14 @@ if [ "$1" == "init" ]; then
     mkdir -p "${TMP_DIR}"
   else
     find "${TMP_DIR}" -name "mkdkr_header_*.mk" -type f -mmin +1440 -delete
+  fi
+
+  MKDKR_BRANCH_NAME="none"
+  MKDKR_BRANCH_NAME_SLUG="none"
+
+  if [ "$(git rev-parse --is-inside-work-tree)" == true ]; then
+    MKDKR_BRANCH_NAME="$(git rev-parse --abbrev-ref HEAD)"
+    MKDKR_BRANCH_NAME_SLUG="$(echo $MKDKR_BRANCH_NAME | sed -r 's/\/|_/-/g' | tr '[:upper:]' '[:lower:]')"
   fi
 
   _MKDKR_INCLUDES="/tmp/.mkdkr/mkdkr_header_$(cat /proc/sys/kernel/random/uuid).mk"
