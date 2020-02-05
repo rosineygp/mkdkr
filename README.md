@@ -466,6 +466,8 @@ gitlab:
 |MKDKR_JOB_STDOUT|last stdout|Path of file, generated with last stdout output|
 |MKDKR_JOB_NAME*|(job\|service)\_target-name\_(uuid)|Unique job name, used as container name suffix|
 |MKDKR_INCLUDE_CLONE_DEPTH|1|In the most of case you no need change history for includes|
+|MKDKR_BRANCH_NAME|"none"|Return current git branch, if it exist|
+|MKDKR_BRANCH_NAME_SLUG|"none"|Return current git branch, if it exist, with safe values|
 
 > - to overwrite the values use: `export <var>=<value>`
 > - \* auto generated
