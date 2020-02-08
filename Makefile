@@ -1,8 +1,5 @@
 include $(shell bash .mkdkr init)
 
-commitlint:
-	$(commitlint)
-
 shellcheck:
 	@$(.)
 	... koalaman/shellcheck-alpine:v0.4.6
