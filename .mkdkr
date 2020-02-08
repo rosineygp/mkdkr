@@ -210,9 +210,8 @@ if [ "$1" == "init" ]; then
 
       if [ -d ".tmp/includes/${ALIAS}" ]; then
         pretty "light_cyan" "update, alias: ${ALIAS}, repos: ${REPOS}, checkout: ${CHECKOUT}, file: ${FILE}"
-
-        git -C "${PWD}/.tmp/includes/${ALIAS}/" reset --hard "origin/${CHECKOUT}" >&2
         git -C "${PWD}/.tmp/includes/${ALIAS}/" pull --depth "${MKDKR_INCLUDE_CLONE_DEPTH:-1}" origin "$CHECKOUT" >&2
+        git -C "${PWD}/.tmp/includes/${ALIAS}/" reset --hard "origin/${CHECKOUT}" >&2
       else
         pretty "light_cyan" "clone, alias: ${ALIAS}, repos: ${REPOS}, checkout: ${CHECKOUT}, file: ${FILE}"
         git clone "${REPOS}" --branch "${CHECKOUT}" --depth "${MKDKR_INCLUDE_CLONE_DEPTH:-1}" "${PWD}/.tmp/includes/${ALIAS}" >&2
