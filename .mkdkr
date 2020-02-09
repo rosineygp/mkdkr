@@ -50,6 +50,28 @@ _implicit_job() {
   fi
 }
 
+_branch_or_tag_name() {
+  _BRANCH=""
+  if [ "$GITHUB_ACTIONS" == "true" ]; then
+    _BRANCH="$(echo $GITHUB_REF | cut -d'/' -f3-)"
+  elif [ "$GITLAB_CI" == "true" ]; then
+    _BRANCH="$CI_COMMIT_REF_NAME"
+  elif [ "$JENKINS_URL" != "" ]; then
+    _BRANCH="$GIT_BRANCH"
+  elif [ "$TRAVIS" == "true" ]; then
+    _BRANCH="$TRAVIS_BRANCH"
+  elif [ "$CIRCLECI" == "true" ]; then
+    if [ "$CIRCLE_TAG" != "" ]; then
+      _BRANCH="$CIRCLE_TAG"
+    else
+      _BRANCH="$CIRCLE_BRANCH"
+    fi
+  elif [ "$(git rev-parse --is-inside-work-tree)" == true ]; then
+    _BRANCH="$(git rev-parse --abbrev-ref HEAD)"
+  fi
+  echo "$_BRANCH"
+}
+
 _header() {
   cat <<EOF
 .EXPORT_ALL_VARIABLES:
@@ -156,15 +178,10 @@ if [ "$1" == "init" ]; then
 
   mkdir -p "${TMP_DIR}"
 
-  MKDKR_BRANCH_NAME="none"
-  MKDKR_BRANCH_NAME_SLUG="none"
-
   find "${TMP_DIR}" -name "mkdkr_header_*.mk" -type f -mmin +60 -delete
 
-  if [ "$(git rev-parse --is-inside-work-tree)" == true ]; then
-    MKDKR_BRANCH_NAME="$(git rev-parse --abbrev-ref HEAD)"
-    MKDKR_BRANCH_NAME_SLUG="$(echo $MKDKR_BRANCH_NAME | sed -r 's/\/|_/-/g' | tr '[:upper:]' '[:lower:]')"
-  fi
+  MKDKR_BRANCH_NAME="$(_branch_or_tag_name)"
+  MKDKR_BRANCH_NAME_SLUG="$(echo $MKDKR_BRANCH_NAME | sed -r 's/\/|_/-/g' | tr '[:upper:]' '[:lower:]')"
 
   _MKDKR_INCLUDES="${TMP_DIR}/mkdkr_header_$(cat /proc/sys/kernel/random/uuid).mk"
 
