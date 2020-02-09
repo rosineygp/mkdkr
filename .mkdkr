@@ -158,13 +158,9 @@ EOF
 
 if [ "$1" == "init" ]; then
 
-  TMP_DIR="/tmp/.mkdkr"
+  TMP_DIR="${PWD}/.tmp"
 
-  if [ ! -d "${TMP_DIR}" ]; then
-    mkdir -p "${TMP_DIR}"
-  else
-    find "${TMP_DIR}" -name "mkdkr_header_*.mk" -type f -mmin +1440 -delete
-  fi
+  mkdir -p "${TMP_DIR}"
 
   MKDKR_BRANCH_NAME="none"
   MKDKR_BRANCH_NAME_SLUG="none"
@@ -174,7 +170,7 @@ if [ "$1" == "init" ]; then
     MKDKR_BRANCH_NAME_SLUG="$(echo $MKDKR_BRANCH_NAME | sed -r 's/\/|_/-/g' | tr '[:upper:]' '[:lower:]')"
   fi
 
-  _MKDKR_INCLUDES="/tmp/.mkdkr/mkdkr_header_$(cat /proc/sys/kernel/random/uuid).mk"
+  _MKDKR_INCLUDES="${TMP_DIR}/mkdkr_header_$(cat /proc/sys/kernel/random/uuid).mk"
 
   if [ ! -f "${_MKDKR_INCLUDES}" ]; then
     _header >"${_MKDKR_INCLUDES}"
@@ -206,15 +202,15 @@ if [ "$1" == "init" ]; then
         FILE="${PARAMS[3]}"
       fi
 
-      mkdir -p .tmp/includes
+      mkdir -p "${TMP_DIR}/includes"
 
       if [ -d ".tmp/includes/${ALIAS}" ]; then
         pretty "light_cyan" "update, alias: ${ALIAS}, repos: ${REPOS}, checkout: ${CHECKOUT}, file: ${FILE}"
-        git -C "${PWD}/.tmp/includes/${ALIAS}/" pull --depth "${MKDKR_INCLUDE_CLONE_DEPTH:-1}" origin "$CHECKOUT" >&2
-        git -C "${PWD}/.tmp/includes/${ALIAS}/" reset --hard "origin/${CHECKOUT}" >&2
+        git -C "${TMP_DIR}/includes/${ALIAS}/" pull --depth "${MKDKR_INCLUDE_CLONE_DEPTH:-1}" origin "$CHECKOUT" >&2
+        git -C "${TMP_DIR}/includes/${ALIAS}/" reset --hard "origin/${CHECKOUT}" >&2
       else
         pretty "light_cyan" "clone, alias: ${ALIAS}, repos: ${REPOS}, checkout: ${CHECKOUT}, file: ${FILE}"
-        git clone "${REPOS}" --branch "${CHECKOUT}" --depth "${MKDKR_INCLUDE_CLONE_DEPTH:-1}" "${PWD}/.tmp/includes/${ALIAS}" >&2
+        git clone "${REPOS}" --branch "${CHECKOUT}" --depth "${MKDKR_INCLUDE_CLONE_DEPTH:-1}" "${TMP_DIR}/includes/${ALIAS}" >&2
       fi
 
       _MKDKR_INCLUDES_LIST+=("${PWD}/.tmp/includes/${ALIAS}/${FILE}")
