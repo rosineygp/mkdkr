@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 declare -A colors
+TMP_DIR="${PWD}/.tmp"
 
 pretty() {
   colors+=(
@@ -61,7 +62,7 @@ MKDKR_BRANCH_NAME_SLUG=$MKDKR_BRANCH_NAME_SLUG
 define . =
   . .mkdkr
   \$(eval MKDKR_JOB_NAME=\$(shell . .mkdkr; .... \$(@)))
-  \$(eval MKDKR_JOB_STDOUT="${PWD}/.tmp/\${MKDKR_JOB_NAME}.log")
+  \$(eval MKDKR_JOB_STDOUT="${TMP_DIR}/\${MKDKR_JOB_NAME}.log")
   trap . EXIT
   pretty "orange" "\n\$(@)\n"
 endef
@@ -134,11 +135,7 @@ EOF
 
   pretty "green" ".. ${*}"
 
-  if [ ! -d ".tmp" ]; then
-    mkdir .tmp
-  fi
-
-  docker exec -i ${CONTAINER_NAME} ${MKDKR_SHELL:-sh} -c "$*" | tee "${PWD}/.tmp/${MKDKR_JOB_NAME}.log"
+  docker exec -i ${CONTAINER_NAME} ${MKDKR_SHELL:-sh} -c "$*" | tee "${TMP_DIR}/${MKDKR_JOB_NAME}.log"
   EXIT_CODE="${PIPESTATUS[0]}"
   if [ "${EXIT_CODE}" != "0" ]; then
     .
@@ -151,30 +148,25 @@ EOF
   if [ "${ALIVE[0]}" != "" ]; then
     pretty "green" "."
     docker ps | grep "${MKDKR_JOB_NAME}" | awk '{print $1}' | xargs -i{} docker rm -f {} >&2
-    rm "${PWD}/.tmp/${MKDKR_JOB_NAME}.log"
-    rmdir .tmp &>/dev/null || true
+    rm "${TMP_DIR}/${MKDKR_JOB_NAME}.log"
   fi
 }
 
 if [ "$1" == "init" ]; then
 
-  TMP_DIR="/tmp/.mkdkr"
-
-  if [ ! -d "${TMP_DIR}" ]; then
-    mkdir -p "${TMP_DIR}"
-  else
-    find "${TMP_DIR}" -name "mkdkr_header_*.mk" -type f -mmin +1440 -delete
-  fi
+  mkdir -p "${TMP_DIR}"
 
   MKDKR_BRANCH_NAME="none"
   MKDKR_BRANCH_NAME_SLUG="none"
+
+  find "${TMP_DIR}" -name "mkdkr_header_*.mk" -type f -mmin +60 -delete
 
   if [ "$(git rev-parse --is-inside-work-tree)" == true ]; then
     MKDKR_BRANCH_NAME="$(git rev-parse --abbrev-ref HEAD)"
     MKDKR_BRANCH_NAME_SLUG="$(echo $MKDKR_BRANCH_NAME | sed -r 's/\/|_/-/g' | tr '[:upper:]' '[:lower:]')"
   fi
 
-  _MKDKR_INCLUDES="/tmp/.mkdkr/mkdkr_header_$(cat /proc/sys/kernel/random/uuid).mk"
+  _MKDKR_INCLUDES="${TMP_DIR}/mkdkr_header_$(cat /proc/sys/kernel/random/uuid).mk"
 
   if [ ! -f "${_MKDKR_INCLUDES}" ]; then
     _header >"${_MKDKR_INCLUDES}"
@@ -206,18 +198,18 @@ if [ "$1" == "init" ]; then
         FILE="${PARAMS[3]}"
       fi
 
-      mkdir -p .tmp/includes
+      mkdir -p "${TMP_DIR}/includes"
 
-      if [ -d ".tmp/includes/${ALIAS}" ]; then
+      if [ -d "${TMP_DIR}/includes/${ALIAS}" ]; then
         pretty "light_cyan" "update, alias: ${ALIAS}, repos: ${REPOS}, checkout: ${CHECKOUT}, file: ${FILE}"
-        git -C "${PWD}/.tmp/includes/${ALIAS}/" pull --depth "${MKDKR_INCLUDE_CLONE_DEPTH:-1}" origin "$CHECKOUT" >&2
-        git -C "${PWD}/.tmp/includes/${ALIAS}/" reset --hard "origin/${CHECKOUT}" >&2
+        git -C "${TMP_DIR}/includes/${ALIAS}/" pull --depth "${MKDKR_INCLUDE_CLONE_DEPTH:-1}" origin "$CHECKOUT" >&2
+        git -C "${TMP_DIR}/includes/${ALIAS}/" reset --hard "origin/${CHECKOUT}" >&2
       else
         pretty "light_cyan" "clone, alias: ${ALIAS}, repos: ${REPOS}, checkout: ${CHECKOUT}, file: ${FILE}"
-        git clone "${REPOS}" --branch "${CHECKOUT}" --depth "${MKDKR_INCLUDE_CLONE_DEPTH:-1}" "${PWD}/.tmp/includes/${ALIAS}" >&2
+        git clone "${REPOS}" --branch "${CHECKOUT}" --depth "${MKDKR_INCLUDE_CLONE_DEPTH:-1}" "${TMP_DIR}/includes/${ALIAS}" >&2
       fi
 
-      _MKDKR_INCLUDES_LIST+=("${PWD}/.tmp/includes/${ALIAS}/${FILE}")
+      _MKDKR_INCLUDES_LIST+=("${TMP_DIR}/includes/${ALIAS}/${FILE}")
     done < <(grep -v '^ *#' <mkdkr.csv)
   fi
 
