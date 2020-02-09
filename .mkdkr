@@ -155,16 +155,19 @@ EOF
 if [ "$1" == "init" ]; then
 
   mkdir -p "${TMP_DIR}"
-
-  MKDKR_BRANCH_NAME="none"
-  MKDKR_BRANCH_NAME_SLUG="none"
-
+  
   find "${TMP_DIR}" -name "mkdkr_header_*.mk" -type f -mmin +60 -delete
 
-  if [ "$(git rev-parse --is-inside-work-tree)" == true ]; then
+  MKDKR_BRANCH_NAME=""
+  MKDKR_BRANCH_NAME_SLUG=""
+
+  if [ "$GITHUB_ACTIONS" == "true" ]; then
+    MKDKR_BRANCH_NAME="$(echo $GITHUB_REF | cut -d'/' -f3-)"
+  elif [ "$(git rev-parse --is-inside-work-tree)" == true ]; then
     MKDKR_BRANCH_NAME="$(git rev-parse --abbrev-ref HEAD)"
-    MKDKR_BRANCH_NAME_SLUG="$(echo $MKDKR_BRANCH_NAME | sed -r 's/\/|_/-/g' | tr '[:upper:]' '[:lower:]')"
   fi
+
+  MKDKR_BRANCH_NAME_SLUG="$(echo $MKDKR_BRANCH_NAME | sed -r 's/\/|_/-/g' | tr '[:upper:]' '[:lower:]')"
 
   _MKDKR_INCLUDES="${TMP_DIR}/mkdkr_header_$(cat /proc/sys/kernel/random/uuid).mk"
 
