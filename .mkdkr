@@ -155,7 +155,7 @@ EOF
 if [ "$1" == "init" ]; then
 
   mkdir -p "${TMP_DIR}"
-  
+
   find "${TMP_DIR}" -name "mkdkr_header_*.mk" -type f -mmin +60 -delete
 
   MKDKR_BRANCH_NAME=""
@@ -163,6 +163,8 @@ if [ "$1" == "init" ]; then
 
   if [ "$GITHUB_ACTIONS" == "true" ]; then
     MKDKR_BRANCH_NAME="$(echo $GITHUB_REF | cut -d'/' -f3-)"
+  elif [ "$GITLAB_CI" == "true" ]; then
+    MKDKR_BRANCH_NAME="$CI_COMMIT_REF_NAME"
   elif [ "$(git rev-parse --is-inside-work-tree)" == true ]; then
     MKDKR_BRANCH_NAME="$(git rev-parse --abbrev-ref HEAD)"
   fi
