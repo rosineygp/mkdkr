@@ -9,6 +9,11 @@ shellcheck:
 	.. shellcheck -e SC2181 -e SC2086 test/unit_create_instance
 	.. shellcheck test/cover
 
+show:
+	@$(.)
+	echo $(MKDKR_BRANCH_NAME)
+	echo $(MKDKR_BRANCH_NAME_SLUG)
+	
 unit:
 	@$(.)
 	... privileged docker:19 --workdir $(PWD)/test

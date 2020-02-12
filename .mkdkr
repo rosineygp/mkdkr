@@ -72,7 +72,56 @@ _branch_or_tag_name() {
   echo "$_BRANCH"
 }
 
-_header() {
+_branch_or_tag_name_slug() {
+  echo "${1}" | sed -r 's/\/|_/-/g' | tr '[:upper:]' '[:lower:]'
+}
+
+_remote_include() {
+  if [ -f mkdkr.csv ]; then
+    declare -a _MKDKR_INCLUDES_LIST=()
+
+    pretty "orange" "\ninclude\n"
+    while IFS= read -r LINE; do
+      PARAMS=($(echo "$LINE" | tr "," " "))
+      ALIAS="${PARAMS[0]}"
+
+      if [ -z "${PARAMS[1]}" ]; then
+        echo "Needs git path to clone for: ${ALIAS}"
+        exit 1
+      fi
+
+      REPOS="${PARAMS[1]}"
+      CHECKOUT="master"
+      FILE="main.mk"
+
+      if [ "${PARAMS[2]}" ]; then
+        CHECKOUT="${PARAMS[2]}"
+      fi
+
+      if [ "${PARAMS[3]}" ]; then
+        FILE="${PARAMS[3]}"
+      fi
+
+      mkdir -p "${TMP_DIR}/includes"
+
+      if [ -d "${TMP_DIR}/includes/${ALIAS}" ]; then
+        pretty "light_cyan" "update, alias: ${ALIAS}, repos: ${REPOS}, checkout: ${CHECKOUT}, file: ${FILE}"
+        git -C "${TMP_DIR}/includes/${ALIAS}/" pull --depth "${MKDKR_INCLUDE_CLONE_DEPTH:-1}" origin "$CHECKOUT" >&2
+        git -C "${TMP_DIR}/includes/${ALIAS}/" reset --hard "origin/${CHECKOUT}" >&2
+      else
+        pretty "light_cyan" "clone, alias: ${ALIAS}, repos: ${REPOS}, checkout: ${CHECKOUT}, file: ${FILE}"
+        git clone "${REPOS}" --branch "${CHECKOUT}" --depth "${MKDKR_INCLUDE_CLONE_DEPTH:-1}" "${TMP_DIR}/includes/${ALIAS}" >&2
+      fi
+
+      _MKDKR_INCLUDES_LIST+=("${TMP_DIR}/includes/${ALIAS}/${FILE}")
+    done < <(grep -v '^ *#' <mkdkr.csv)
+
+    echo "${_MKDKR_INCLUDES_LIST[*]}"
+  fi
+
+}
+
+_header_render() {
   cat <<EOF
 .EXPORT_ALL_VARIABLES:
 .ONESHELL:
@@ -90,9 +139,22 @@ define . =
 endef
 
 define stdout =
-if [ -f \$(MKDKR_JOB_STDOUT) ]; then cat \$(MKDKR_JOB_STDOUT); fi
+  if [ -f \$(MKDKR_JOB_STDOUT) ]; then cat \$(MKDKR_JOB_STDOUT); fi
 endef
 EOF
+}
+
+_header() {
+  if [ -d "${TMP_DIR}" ]; then
+    find "${TMP_DIR}" -name "mkdkr_header_*.mk" -type f -mmin +60 -delete
+  else
+    mkdir -p "${TMP_DIR}"
+  fi
+
+  _MKDKR_INCLUDE="${TMP_DIR}/mkdkr_header_$(cat /proc/sys/kernel/random/uuid).mk"
+  _header_render >"${_MKDKR_INCLUDE}"
+
+  echo "${_MKDKR_INCLUDE}"
 }
 
 ....() {
@@ -176,59 +238,8 @@ EOF
 
 if [ "$1" == "init" ]; then
 
-  mkdir -p "${TMP_DIR}"
-
-  find "${TMP_DIR}" -name "mkdkr_header_*.mk" -type f -mmin +60 -delete
-
   MKDKR_BRANCH_NAME="$(_branch_or_tag_name)"
-  MKDKR_BRANCH_NAME_SLUG="$(echo $MKDKR_BRANCH_NAME | sed -r 's/\/|_/-/g' | tr '[:upper:]' '[:lower:]')"
+  MKDKR_BRANCH_NAME_SLUG="$(_branch_or_tag_name_slug ${MKDKR_BRANCH_NAME})"
 
-  _MKDKR_INCLUDES="${TMP_DIR}/mkdkr_header_$(cat /proc/sys/kernel/random/uuid).mk"
-
-  if [ ! -f "${_MKDKR_INCLUDES}" ]; then
-    _header >"${_MKDKR_INCLUDES}"
-  fi
-
-  # include from remote git
-  declare -a _MKDKR_INCLUDES_LIST=()
-
-  if [ -f mkdkr.csv ]; then
-    pretty "orange" "\ninclude\n"
-    while IFS= read -r LINE; do
-      PARAMS=($(echo "$LINE" | tr "," " "))
-      ALIAS="${PARAMS[0]}"
-
-      if [ -z "${PARAMS[1]}" ]; then
-        echo "Needs git path to clone for: ${ALIAS}"
-        exit 1
-      fi
-
-      REPOS="${PARAMS[1]}"
-      CHECKOUT="master"
-      FILE="main.mk"
-
-      if [ "${PARAMS[2]}" ]; then
-        CHECKOUT="${PARAMS[2]}"
-      fi
-
-      if [ "${PARAMS[3]}" ]; then
-        FILE="${PARAMS[3]}"
-      fi
-
-      mkdir -p "${TMP_DIR}/includes"
-
-      if [ -d "${TMP_DIR}/includes/${ALIAS}" ]; then
-        pretty "light_cyan" "update, alias: ${ALIAS}, repos: ${REPOS}, checkout: ${CHECKOUT}, file: ${FILE}"
-        git -C "${TMP_DIR}/includes/${ALIAS}/" pull --depth "${MKDKR_INCLUDE_CLONE_DEPTH:-1}" origin "$CHECKOUT" >&2
-        git -C "${TMP_DIR}/includes/${ALIAS}/" reset --hard "origin/${CHECKOUT}" >&2
-      else
-        pretty "light_cyan" "clone, alias: ${ALIAS}, repos: ${REPOS}, checkout: ${CHECKOUT}, file: ${FILE}"
-        git clone "${REPOS}" --branch "${CHECKOUT}" --depth "${MKDKR_INCLUDE_CLONE_DEPTH:-1}" "${TMP_DIR}/includes/${ALIAS}" >&2
-      fi
-
-      _MKDKR_INCLUDES_LIST+=("${TMP_DIR}/includes/${ALIAS}/${FILE}")
-    done < <(grep -v '^ *#' <mkdkr.csv)
-  fi
-
-  echo "${_MKDKR_INCLUDES} ${_MKDKR_INCLUDES_LIST[*]}"
+  echo "$(_header) $(_remote_include)"
 fi
