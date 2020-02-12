@@ -72,6 +72,51 @@ _branch_or_tag_name() {
   echo "$_BRANCH"
 }
 
+_remote_include() {
+  if [ -f mkdkr.csv ]; then
+    declare -a _MKDKR_INCLUDES_LIST=()
+
+    pretty "orange" "\ninclude\n"
+    while IFS= read -r LINE; do
+      PARAMS=($(echo "$LINE" | tr "," " "))
+      ALIAS="${PARAMS[0]}"
+
+      if [ -z "${PARAMS[1]}" ]; then
+        echo "Needs git path to clone for: ${ALIAS}"
+        exit 1
+      fi
+
+      REPOS="${PARAMS[1]}"
+      CHECKOUT="master"
+      FILE="main.mk"
+
+      if [ "${PARAMS[2]}" ]; then
+        CHECKOUT="${PARAMS[2]}"
+      fi
+
+      if [ "${PARAMS[3]}" ]; then
+        FILE="${PARAMS[3]}"
+      fi
+
+      mkdir -p "${TMP_DIR}/includes"
+
+      if [ -d "${TMP_DIR}/includes/${ALIAS}" ]; then
+        pretty "light_cyan" "update, alias: ${ALIAS}, repos: ${REPOS}, checkout: ${CHECKOUT}, file: ${FILE}"
+        git -C "${TMP_DIR}/includes/${ALIAS}/" pull --depth "${MKDKR_INCLUDE_CLONE_DEPTH:-1}" origin "$CHECKOUT" >&2
+        git -C "${TMP_DIR}/includes/${ALIAS}/" reset --hard "origin/${CHECKOUT}" >&2
+      else
+        pretty "light_cyan" "clone, alias: ${ALIAS}, repos: ${REPOS}, checkout: ${CHECKOUT}, file: ${FILE}"
+        git clone "${REPOS}" --branch "${CHECKOUT}" --depth "${MKDKR_INCLUDE_CLONE_DEPTH:-1}" "${TMP_DIR}/includes/${ALIAS}" >&2
+      fi
+
+      _MKDKR_INCLUDES_LIST+=("${TMP_DIR}/includes/${ALIAS}/${FILE}")
+    done < <(grep -v '^ *#' <mkdkr.csv)
+
+    echo "${_MKDKR_INCLUDES_LIST[*]}"
+  fi
+
+}
+
 _header() {
   cat <<EOF
 .EXPORT_ALL_VARIABLES:
@@ -189,46 +234,5 @@ if [ "$1" == "init" ]; then
     _header >"${_MKDKR_INCLUDES}"
   fi
 
-  # include from remote git
-  declare -a _MKDKR_INCLUDES_LIST=()
-
-  if [ -f mkdkr.csv ]; then
-    pretty "orange" "\ninclude\n"
-    while IFS= read -r LINE; do
-      PARAMS=($(echo "$LINE" | tr "," " "))
-      ALIAS="${PARAMS[0]}"
-
-      if [ -z "${PARAMS[1]}" ]; then
-        echo "Needs git path to clone for: ${ALIAS}"
-        exit 1
-      fi
-
-      REPOS="${PARAMS[1]}"
-      CHECKOUT="master"
-      FILE="main.mk"
-
-      if [ "${PARAMS[2]}" ]; then
-        CHECKOUT="${PARAMS[2]}"
-      fi
-
-      if [ "${PARAMS[3]}" ]; then
-        FILE="${PARAMS[3]}"
-      fi
-
-      mkdir -p "${TMP_DIR}/includes"
-
-      if [ -d "${TMP_DIR}/includes/${ALIAS}" ]; then
-        pretty "light_cyan" "update, alias: ${ALIAS}, repos: ${REPOS}, checkout: ${CHECKOUT}, file: ${FILE}"
-        git -C "${TMP_DIR}/includes/${ALIAS}/" pull --depth "${MKDKR_INCLUDE_CLONE_DEPTH:-1}" origin "$CHECKOUT" >&2
-        git -C "${TMP_DIR}/includes/${ALIAS}/" reset --hard "origin/${CHECKOUT}" >&2
-      else
-        pretty "light_cyan" "clone, alias: ${ALIAS}, repos: ${REPOS}, checkout: ${CHECKOUT}, file: ${FILE}"
-        git clone "${REPOS}" --branch "${CHECKOUT}" --depth "${MKDKR_INCLUDE_CLONE_DEPTH:-1}" "${TMP_DIR}/includes/${ALIAS}" >&2
-      fi
-
-      _MKDKR_INCLUDES_LIST+=("${TMP_DIR}/includes/${ALIAS}/${FILE}")
-    done < <(grep -v '^ *#' <mkdkr.csv)
-  fi
-
-  echo "${_MKDKR_INCLUDES} ${_MKDKR_INCLUDES_LIST[*]}"
+  echo "${_MKDKR_INCLUDES} $(_remote_include)"
 fi
