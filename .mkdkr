@@ -72,6 +72,10 @@ _branch_or_tag_name() {
   echo "$_BRANCH"
 }
 
+_branch_or_tag_name_slug() {
+  echo "${1}" | sed -r 's/\/|_/-/g' | tr '[:upper:]' '[:lower:]'
+}
+
 _remote_include() {
   if [ -f mkdkr.csv ]; then
     declare -a _MKDKR_INCLUDES_LIST=()
@@ -117,7 +121,7 @@ _remote_include() {
 
 }
 
-_header() {
+_header_render() {
   cat <<EOF
 .EXPORT_ALL_VARIABLES:
 .ONESHELL:
@@ -135,9 +139,22 @@ define . =
 endef
 
 define stdout =
-if [ -f \$(MKDKR_JOB_STDOUT) ]; then cat \$(MKDKR_JOB_STDOUT); fi
+  if [ -f \$(MKDKR_JOB_STDOUT) ]; then cat \$(MKDKR_JOB_STDOUT); fi
 endef
 EOF
+}
+
+_header() {
+  if [ -d "${TMP_DIR}" ]; then
+    find "${TMP_DIR}" -name "mkdkr_header_*.mk" -type f -mmin +60 -delete
+  else
+    mkdir -p "${TMP_DIR}"
+  fi
+
+  _MKDKR_INCLUDE="${TMP_DIR}/mkdkr_header_$(cat /proc/sys/kernel/random/uuid).mk"
+  _header_render >"${_MKDKR_INCLUDE}"
+
+  echo "${_MKDKR_INCLUDE}"
 }
 
 ....() {
@@ -221,18 +238,8 @@ EOF
 
 if [ "$1" == "init" ]; then
 
-  mkdir -p "${TMP_DIR}"
-
-  find "${TMP_DIR}" -name "mkdkr_header_*.mk" -type f -mmin +60 -delete
-
   MKDKR_BRANCH_NAME="$(_branch_or_tag_name)"
-  MKDKR_BRANCH_NAME_SLUG="$(echo $MKDKR_BRANCH_NAME | sed -r 's/\/|_/-/g' | tr '[:upper:]' '[:lower:]')"
+  MKDKR_BRANCH_NAME_SLUG="$(_branch_or_tag_name_slug ${MKDKR_BRANCH_NAME})"
 
-  _MKDKR_INCLUDES="${TMP_DIR}/mkdkr_header_$(cat /proc/sys/kernel/random/uuid).mk"
-
-  if [ ! -f "${_MKDKR_INCLUDES}" ]; then
-    _header >"${_MKDKR_INCLUDES}"
-  fi
-
-  echo "${_MKDKR_INCLUDES} $(_remote_include)"
+  echo "$(_header) $(_remote_include)"
 fi
