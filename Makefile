@@ -7,6 +7,7 @@ shellcheck:
 	.. shellcheck generator/gitlab-ci
 	.. shellcheck -e SC2181 test/unit_job_name
 	.. shellcheck -e SC2181 -e SC2086 test/unit_create_instance
+	.. shellcheck -e SC2181 -e SC2086 -e SC1091 test/unit_branch_or_tag_name
 	.. shellcheck test/cover
 
 show:
@@ -17,10 +18,11 @@ show:
 unit:
 	@$(.)
 	... privileged docker:19 --workdir $(PWD)/test
-	.. apk add bash jq
+	.. apk add bash jq git
 	.. ./unit_job_name
 	.. ./unit_create_instance
 	.. ./unit_run_command
+	.. ./unit_branch_or_tag_name
 
 DOCKER_BIN=https://download.docker.com/linux/static/stable/x86_64/docker-19.03.5.tgz
 
@@ -28,12 +30,13 @@ coverage:
 	@$(.)
 	... privileged kcov/kcov:v31 --workdir $(PWD)/test
 	.. rm -rf coverage
-	.. 'apt-get update && apt-get install -y curl jq bc'
+	.. 'apt-get update && apt-get install -y curl jq bc git'
 	.. curl -s '$(DOCKER_BIN) > /tmp/docker.tgz'
 	.. tar -zxvf /tmp/docker.tgz --strip=1 -C /usr/local/bin/
 	.. kcov --exclude-path=shunit2 coverage unit_job_name
 	.. kcov --exclude-path=shunit2 coverage unit_create_instance
 	.. kcov --exclude-path=shunit2 coverage unit_run_command
+	.. kcov --exclude-path=shunit2 coverage unit_branch_or_tag_name
 	.. './cover > coverage/coverage.json'
 	... node:12 \
 		-e SURGE_LOGIN='$(SURGE_LOGIN)' \
