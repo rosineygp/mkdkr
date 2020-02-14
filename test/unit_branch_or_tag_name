@@ -1,0 +1,150 @@
+#!/bin/bash
+
+declare -a BRANCHES=("master" "dev" "feature/new-feat" "Camel/Case" "OláQueTal")
+
+test_mkdkr_branch_or_tag_name_local() {
+  source .mkdkr
+  BRANCH_NAME="$(_branch_or_tag_name)"
+
+  assertNotNull "$BRANCH_NAME"
+  [[ "$?" == "0" ]] && pretty "light_purple" "branch name is not null [ OK ]"
+
+}
+
+test_mkdkr_branch_or_tag_name_github() {
+  source .mkdkr
+  export GITHUB_ACTIONS="true"
+
+  for BRANCH in "${BRANCHES[@]}"; do
+    export GITHUB_REF="refs/heads/${BRANCH}"
+    BRANCH_NAME="$(_branch_or_tag_name)"
+
+    assertNotNull "$BRANCH_NAME"
+    [[ "$?" == "0" ]] && pretty "light_purple" "branch name is not null [ OK ]"
+    assertEquals "$BRANCH" "$BRANCH_NAME"
+    [[ "$?" == "0" ]] && pretty "light_purple" "output branch name is ok [ OK ]"
+  done
+
+  echo -e "\nRan\e[36m 10 \e[0masserts.\n"
+  unset GITHUB_ACTIONS
+}
+
+test_mkdkr_branch_or_tag_name_gitlab() {
+  source .mkdkr
+  export GITLAB_CI="true"
+
+  for BRANCH in "${BRANCHES[@]}"; do
+    export CI_COMMIT_REF_NAME="${BRANCH}"
+    BRANCH_NAME="$(_branch_or_tag_name)"
+
+    assertNotNull "$BRANCH_NAME"
+    [[ "$?" == "0" ]] && pretty "light_purple" "branch name is not null [ OK ]"
+    assertEquals "$BRANCH" "$BRANCH_NAME"
+    [[ "$?" == "0" ]] && pretty "light_purple" "output branch name is ok [ OK ]"
+  done
+
+  echo -e "\nRan\e[36m 10 \e[0masserts.\n"
+  unset GITLAB_CI
+}
+
+test_mkdkr_branch_or_tag_name_jenkins() {
+  source .mkdkr
+  export JENKINS_URL="https://jenkins.mkdkr.io"
+
+  for BRANCH in "${BRANCHES[@]}"; do
+    export GIT_BRANCH="${BRANCH}"
+    BRANCH_NAME="$(_branch_or_tag_name)"
+
+    assertNotNull "$BRANCH_NAME"
+    [[ "$?" == "0" ]] && pretty "light_purple" "branch name is not null [ OK ]"
+    assertEquals "$BRANCH" "$BRANCH_NAME"
+    [[ "$?" == "0" ]] && pretty "light_purple" "output branch name is ok [ OK ]"
+  done
+
+  echo -e "\nRan\e[36m 10 \e[0masserts.\n"
+  unset JENKINS_URL
+}
+
+test_mkdkr_branch_or_tag_name_travis() {
+  source .mkdkr
+  export TRAVIS="true"
+
+  for BRANCH in "${BRANCHES[@]}"; do
+    export TRAVIS_BRANCH="${BRANCH}"
+    BRANCH_NAME="$(_branch_or_tag_name)"
+
+    assertNotNull "$BRANCH_NAME"
+    [[ "$?" == "0" ]] && pretty "light_purple" "branch name is not null [ OK ]"
+    assertEquals "$BRANCH" "$BRANCH_NAME"
+    [[ "$?" == "0" ]] && pretty "light_purple" "output branch name is ok [ OK ]"
+  done
+
+  echo -e "\nRan\e[36m 10 \e[0masserts.\n"
+  unset TRAVIS
+}
+
+test_mkdkr_branch_or_tag_name_circleci_tag() {
+  source .mkdkr
+  export CIRCLECI="true"
+
+  for BRANCH in "${BRANCHES[@]}"; do
+
+    export CIRCLE_TAG="${BRANCH}"
+    BRANCH_NAME="$(_branch_or_tag_name)"
+
+    assertNotNull "$BRANCH_NAME"
+    [[ "$?" == "0" ]] && pretty "light_purple" "branch name is not null [ OK ]"
+    assertEquals "$BRANCH" "$BRANCH_NAME"
+    [[ "$?" == "0" ]] && pretty "light_purple" "output branch name is ok [ OK ]"
+  done
+
+  echo -e "\nRan\e[36m 10 \e[0masserts.\n"
+  unset CIRCLECI
+  unset CIRCLE_TAG
+}
+
+test_mkdkr_branch_or_tag_name_circleci_branch() {
+  source .mkdkr
+  export CIRCLECI="true"
+
+  for BRANCH in "${BRANCHES[@]}"; do
+
+    export CIRCLE_BRANCH="${BRANCH}"
+    BRANCH_NAME="$(_branch_or_tag_name)"
+
+    assertNotNull "$BRANCH_NAME"
+    [[ "$?" == "0" ]] && pretty "light_purple" "branch name is not null [ OK ]"
+    assertEquals "$BRANCH" "$BRANCH_NAME"
+    [[ "$?" == "0" ]] && pretty "light_purple" "output branch name is ok [ OK ]"
+  done
+
+  echo -e "\nRan\e[36m 10 \e[0masserts.\n"
+  unset CIRCLECI
+  unset CIRCLE_TAG
+  unset CIRCLECI
+}
+
+test_mkdkr_branch_or_tag_name_circleci_tag_and_branch() {
+  source .mkdkr
+  export CIRCLECI="true"
+
+  for BRANCH in "${BRANCHES[@]}"; do
+
+    export CIRCLE_TAG="${BRANCH}"
+    export CIRCLE_BRANCH="master"
+    BRANCH_NAME="$(_branch_or_tag_name)"
+
+    assertNotNull "$BRANCH_NAME"
+    [[ "$?" == "0" ]] && pretty "light_purple" "branch name is not null [ OK ]"
+    assertEquals "$BRANCH" "$BRANCH_NAME"
+    [[ "$?" == "0" ]] && pretty "light_purple" "output branch name is ok [ OK ]"
+  done
+
+  echo -e "\nRan\e[36m 10 \e[0masserts.\n"
+  unset CIRCLECI
+}
+
+
+
+# shellcheck disable=SC1091
+. ./shunit2
