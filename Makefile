@@ -9,6 +9,7 @@ shellcheck:
 	.. shellcheck -e SC2181 -e SC2086 test/unit_create_instance
 	.. shellcheck -e SC2181 -e SC2086 -e SC1091 test/unit_branch_or_tag_name
 	.. shellcheck -e SC2181 -e SC2086 -e SC1091 test/unit_branch_or_tag_name_slug
+	.. shellcheck -e SC2181 -e SC2086 -e SC1091 test/unit_remote_include
 	.. shellcheck test/cover
 
 show:
@@ -25,6 +26,7 @@ unit:
 	.. ./unit_run_command
 	.. ./unit_branch_or_tag_name
 	.. ./unit_branch_or_tag_name_slug
+	.. ./unit_remote_include
 
 DOCKER_BIN=https://download.docker.com/linux/static/stable/x86_64/docker-19.03.5.tgz
 
@@ -40,6 +42,7 @@ coverage:
 	.. kcov --exclude-path=shunit2 coverage unit_run_command
 	.. kcov --exclude-path=shunit2 coverage unit_branch_or_tag_name
 	.. kcov --exclude-path=shunit2 coverage unit_branch_or_tag_name_slug
+	.. kcov --exclude-path=shunit2 coverage unit_remote_include
 	.. './cover > coverage/coverage.json'
 	... node:12 \
 		-e SURGE_LOGIN='$(SURGE_LOGIN)' \
