@@ -219,6 +219,10 @@ _header() {
 
   pretty "green" ".. ${*}"
 
+  if [ ! -d "${TMP_DIR}" ]; then
+    mkdir -p "${TMP_DIR}"
+  fi 
+
   docker exec -i ${CONTAINER_NAME} ${MKDKR_SHELL:-sh} -c "$*" | tee "${TMP_DIR}/${MKDKR_JOB_NAME}.log"
   EXIT_CODE="${PIPESTATUS[0]}"
   if [ "${EXIT_CODE}" != "0" ]; then
@@ -232,7 +236,9 @@ _header() {
   if [ "${ALIVE[0]}" != "" ]; then
     pretty "green" "."
     docker ps | grep "${MKDKR_JOB_NAME}" | awk '{print $1}' | xargs -i{} docker rm -f {} >&2
-    rm "${TMP_DIR}/${MKDKR_JOB_NAME}.log"
+    if [ -f "${TMP_DIR}/${MKDKR_JOB_NAME}.log" ]; then
+      rm "${TMP_DIR}/${MKDKR_JOB_NAME}.log"
+    fi
   fi
 }
 
