@@ -1,0 +1,162 @@
+#!/bin/bash
+
+_cleanup() {
+
+  pretty "yellow" "cleanup"
+
+  if [ -f mkdkr.csv ]; then
+    rm mkdkr.csv
+  fi
+
+  if [ -d .tmp ]; then
+    rm -rf .tmp
+  fi
+}
+
+test_mkdkr_remote_include_empty() {
+  
+  _cleanup
+  source .mkdkr
+  
+  _remote_include
+  pretty "light_purple" "nothing happens [ OK ]"
+
+  echo -e "\nRan\e[36m 1 \e[0masserts.\n"
+}
+
+test_mkdkr_remote_include_incompleted_csv() {
+  _cleanup
+  source .mkdkr
+
+  echo "commitlint" > mkdkr.csv
+
+  (_remote_include)
+
+  CLONE="false"
+  if [ ! -d ".tmp/includes/commitlint/.git" ]; then
+    CLONE="true"
+  fi
+
+  assertEquals "true" "$CLONE"
+  [[ "$?" == "0" ]] && pretty "light_purple" "csv file wrong [ OK ]"
+
+  echo -e "\nRan\e[36m 1 \e[0masserts.\n"
+}
+
+test_mkdkr_remote_include_simple() {
+  _cleanup
+  source .mkdkr
+
+  echo "commitlint,https://github.com/rosineygp/mkdkr_commitlint.git" > mkdkr.csv
+
+  _remote_include
+
+  CLONE="false"
+  if [ -d ".tmp/includes/commitlint/.git" ]; then
+    CLONE="true"
+  fi
+
+  assertEquals "true" "$CLONE"
+  [[ "$?" == "0" ]] && pretty "light_purple" "remote include success [ OK ]"
+
+  BRANCH="$(git -C .tmp/includes/commitlint rev-parse --abbrev-ref HEAD)"
+  assertEquals "master" "$BRANCH"
+  [[ "$?" == "0" ]] && pretty "light_purple" "branch is master [ OK ]"  
+
+  echo -e "\nRan\e[36m 2 \e[0masserts.\n"
+}
+
+test_mkdkr_remote_include_tagged() {
+  _cleanup
+  source .mkdkr
+
+  echo "commitlint,https://github.com/rosineygp/mkdkr_commitlint.git,v0.3.4" > mkdkr.csv
+
+  _remote_include
+
+  CLONE="false"
+  if [ -d ".tmp/includes/commitlint/.git" ]; then
+    CLONE="true"
+  fi
+
+  assertEquals "true" "$CLONE"
+  [[ "$?" == "0" ]] && pretty "light_purple" "remote include success [ OK ]"
+
+  BRANCH="$(git -C .tmp/includes/commitlint rev-parse --abbrev-ref HEAD)"
+  assertEquals "HEAD" "$BRANCH"
+  [[ "$?" == "0" ]] && pretty "light_purple" "branch is head [ OK ]"  
+
+  echo -e "\nRan\e[36m 2 \e[0masserts.\n"
+}
+
+test_mkdkr_remote_include_missing_reference() {
+  _cleanup
+  source .mkdkr
+
+  echo "commitlint,https://github.com/rosineygp/mkdkr_commitlint.git,unknow" > mkdkr.csv
+
+  _remote_include
+
+  CLONE="false"
+  if [ -d ".tmp/includes/commitlint/.git" ]; then
+    CLONE="true"
+  fi
+
+  assertEquals "false" "$CLONE"
+  [[ "$?" == "0" ]] && pretty "light_purple" "missing reference not cloned [ OK ]"
+
+  echo -e "\nRan\e[36m 1 \e[0masserts.\n"
+}
+
+test_mkdkr_remote_include_named_reference() {
+  _cleanup
+  source .mkdkr
+
+  echo "commitlint,https://github.com/rosineygp/mkdkr_commitlint.git,master,testing.mk" > mkdkr.csv
+
+  INCLUDE_STRING="$(_remote_include)"
+
+  CLONE="false"
+  if [ -d ".tmp/includes/commitlint/.git" ]; then
+    CLONE="true"
+  fi
+
+  assertEquals "true" "$CLONE"
+  [[ "$?" == "0" ]] && pretty "light_purple" "remote include success [ OK ]"
+
+  BRANCH="$(git -C .tmp/includes/commitlint rev-parse --abbrev-ref HEAD)"
+  assertEquals "master" "$BRANCH"
+  [[ "$?" == "0" ]] && pretty "light_purple" "branch is master [ OK ]"
+
+  assertContains "$INCLUDE_STRING" "testing.mk"
+  [[ "$?" == "0" ]] && pretty "light_purple" "string contains custom file reference [ OK ]"
+
+  echo -e "\nRan\e[36m 3 \e[0masserts.\n"
+}
+
+test_mkdkr_remote_include_update_include() {
+  _cleanup
+  source .mkdkr
+
+  echo "commitlint,https://github.com/rosineygp/mkdkr_commitlint.git" > mkdkr.csv
+
+  _remote_include
+  _remote_include
+
+  CLONE="false"
+  if [ -d ".tmp/includes/commitlint/.git" ]; then
+    CLONE="true"
+  fi
+
+  assertEquals "true" "$CLONE"
+  [[ "$?" == "0" ]] && pretty "light_purple" "remote include success [ OK ]"
+
+  BRANCH="$(git -C .tmp/includes/commitlint rev-parse --abbrev-ref HEAD)"
+  assertEquals "master" "$BRANCH"
+  [[ "$?" == "0" ]] && pretty "light_purple" "branch is master [ OK ]"  
+
+  echo -e "\nRan\e[36m 2 \e[0masserts.\n"
+}
+
+# shellcheck disable=SC1091
+. ./shunit2
