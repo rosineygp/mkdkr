@@ -8,13 +8,14 @@ shellcheck:
 	.. shellcheck -e SC2181 test/unit_job_name
 	.. shellcheck -e SC2181 -e SC2086 test/unit_create_instance
 	.. shellcheck -e SC2181 -e SC2086 -e SC1091 test/unit_branch_or_tag_name
+	.. shellcheck -e SC2181 -e SC2086 -e SC1091 test/unit_branch_or_tag_name_slug
 	.. shellcheck test/cover
 
 show:
 	@$(.)
 	echo $(MKDKR_BRANCH_NAME)
 	echo $(MKDKR_BRANCH_NAME_SLUG)
-	
+
 unit:
 	@$(.)
 	... privileged docker:19 --workdir $(PWD)/test
@@ -23,6 +24,7 @@ unit:
 	.. ./unit_create_instance
 	.. ./unit_run_command
 	.. ./unit_branch_or_tag_name
+	.. ./unit_branch_or_tag_name_slug
 
 DOCKER_BIN=https://download.docker.com/linux/static/stable/x86_64/docker-19.03.5.tgz
 
@@ -37,6 +39,7 @@ coverage:
 	.. kcov --exclude-path=shunit2 coverage unit_create_instance
 	.. kcov --exclude-path=shunit2 coverage unit_run_command
 	.. kcov --exclude-path=shunit2 coverage unit_branch_or_tag_name
+	.. kcov --exclude-path=shunit2 coverage unit_branch_or_tag_name_slug
 	.. './cover > coverage/coverage.json'
 	... node:12 \
 		-e SURGE_LOGIN='$(SURGE_LOGIN)' \

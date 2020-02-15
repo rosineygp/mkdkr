@@ -1,0 +1,21 @@
+#!/bin/bash
+
+test_mkdkr_branch_or_tag_name_github() {
+  source .mkdkr
+  export GITHUB_ACTIONS="true"
+  export GITHUB_REF="refs/heads/feature/name_unsafe"
+  BRANCH_NAME="$(_branch_or_tag_name)"
+
+  BRANCH_NAME_SLUG="$(_branch_or_tag_name_slug $BRANCH_NAME)"
+
+  assertNotNull "$BRANCH_NAME"
+  [[ "$?" == "0" ]] && pretty "light_purple" "branch name is not null [ OK ]"
+  assertEquals "feature-name-unsafe" "$BRANCH_NAME_SLUG"
+  [[ "$?" == "0" ]] && pretty "light_purple" "output branch name is ok [ OK ]"
+
+  echo -e "\nRan\e[36m 2 \e[0masserts.\n"
+}
+
+
+# shellcheck disable=SC1091
+. ./shunit2
