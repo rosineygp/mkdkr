@@ -1,0 +1,8 @@
+#!/bin/bash
+
+./unit_job_name
+./unit_create_instance
+./unit_run_command
+./unit_branch_or_tag_name
+./unit_branch_or_tag_name_slug
+./unit_remote_include
