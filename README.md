@@ -42,6 +42,7 @@ Table of contents
   * [Create Makefile](#create-makefile)
   * [Execute](#execute)
   * [Result](#result)
+  * [Export](#export)
 * [Reason](#reason)
 * [Dot Functions](#dot-functions)
   * [•••](#-3-dots)
@@ -61,8 +62,6 @@ Table of contents
   * [Implicit Job](#implicit-job)
   * [Sdtout](#stdout)
   * [Pipelines](#pipelines)
-* [Generators](#generators)
-  * [Gitlab CI](#gitlab-ci)
 * [Environment Variables](#environment-variables)
 
 # Usage
@@ -112,6 +111,10 @@ hello mkdkr!              # output of command
 cdab4af95cec              # id(s) of container(s) removed
 
 ```
+
+## Export
+
+Run your current Makefile in another engine, like **travis** or **github actions**, use the dynamic include [exporter](https://github.com/rosineygp/mkdkr_exporter).
 
 # Reason
 
@@ -284,6 +287,7 @@ The file contains four values per line in following order
 
 * [docker](https://github.com/rosineygp/mkdkr_docker)
 * [commit lint](https://github.com/rosineygp/mkdkr_commitlint)
+* [exporter](https://github.com/rosineygp/mkdkr_exporter)
 
 > Small collection, use it as example
 
@@ -428,34 +432,6 @@ pipeline:
 ```
 
 [Makefile](examples/pipeline.mk)
-
-# Generators
-
-Create a scaffold to another pipeline engine.
-
-External pipeline:
-
-- [Circle CI](.circleci/config.yml)
-- [Github Actions](.github/workflows/main.yml)
-- [Gitlab CI](.gitlab-ci.yml)
-- [Travis](.travis.yml)
-
-## Gitlab CI
-
-```Makefile
-gitlab:
-	@$(.)
-	... rosiney/mkdkr
-	.. gitlab-ci \
-		lint=shellcheck \
-		scenarios=simple,service,dind > .gitlab-ci.yml
-```
-
-**Parameters:**
-- String(key)=String(job),String(job),...	The name of key is the **stage** and the **job(s)** is the values separated by comma.
-
-> - Ex. test=lint,syntax build=gcc deploy=k8s
-> - Avoid spaces, slashes or symbols it will keep compatibility with pipeline vendors.
 
 # Environment Variables
 
