@@ -1,12 +1,3 @@
-# this dockerfile is an example
-FROM python:3.6-alpine
+FROM alpine:3
 
-RUN pip install jinja2-cli[yaml] \
-  && apk --no-cache add bash \
-  && rm -rf /var/cache/apk/*
-
-COPY generator /generator
-
-WORKDIR /generator
-
-RUN ln -sf /generator/gitlab-ci /usr/local/bin/
+RUN echo "just a test"
