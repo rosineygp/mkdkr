@@ -4,7 +4,6 @@ shellcheck:
 	@$(.)
 	... koalaman/shellcheck-alpine:v0.4.6
 	.. shellcheck -e SC1088 -e SC2068 -e SC2086 .mkdkr
-	.. shellcheck generator/gitlab-ci
 	.. shellcheck -e SC2181 test/unit_job_name
 	.. shellcheck -e SC2181 -e SC2086 test/unit_create_instance
 	.. shellcheck -e SC2181 -e SC2086 -e SC1091 test/unit_branch_or_tag_name
@@ -78,12 +77,6 @@ brainfuck:
 	... privileged docker:19
 	.. apk add make bash
 	.. make pipeline
-
-generator/gitlab:
-	@$(.)
-	... rosineygp/mkdkr
-	.. gitlab-ci lint=shellcheck \
-		scenarios=small,service,dind > .gitlab-ci.yml
 
 pipeline:
 	make --silent commitlint
