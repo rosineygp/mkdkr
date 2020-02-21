@@ -3,13 +3,13 @@ include $(shell bash .mkdkr init)
 shellcheck:
 	@$(.)
 	... koalaman/shellcheck-alpine:v0.4.6
-	.. shellcheck -e SC1088 -e SC2068 -e SC2086 .mkdkr
-	.. shellcheck -e SC2181 test/unit_job_name
-	.. shellcheck -e SC2181 -e SC2086 test/unit_create_instance
-	.. shellcheck -e SC2181 -e SC2086 -e SC1091 test/unit_branch_or_tag_name
-	.. shellcheck -e SC2181 -e SC2086 -e SC1091 test/unit_branch_or_tag_name_slug
-	.. shellcheck -e SC2181 -e SC2086 -e SC1091 test/unit_remote_include
-	.. shellcheck test/cover
+	run: shellcheck -e SC1088 -e SC2068 -e SC2086 .mkdkr
+	run: shellcheck -e SC2181 test/unit_job_name
+	run: shellcheck -e SC2181 -e SC2086 test/unit_create_instance
+	run: shellcheck -e SC2181 -e SC2086 -e SC1091 test/unit_branch_or_tag_name
+	run: shellcheck -e SC2181 -e SC2086 -e SC1091 test/unit_branch_or_tag_name_slug
+	run: shellcheck -e SC2181 -e SC2086 -e SC1091 test/unit_remote_include
+	run: shellcheck test/cover
 
 show:
 	@$(.)

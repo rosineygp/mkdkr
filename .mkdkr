@@ -213,11 +213,10 @@ _job_uniq_name() {
   IFS=$OLDIFS
 }
 
-# shellcheck disable=SC1036
-..() {
+run:() {
   CONTAINER_NAME="job_${MKDKR_JOB_NAME}"
 
-  pretty "green" ".. ${*}"
+  pretty "green" "run: ${*}"
 
   if [ ! -d "${_MKDKR_TMP_DIR}" ]; then
     mkdir -p "${_MKDKR_TMP_DIR}"
