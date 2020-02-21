@@ -233,7 +233,7 @@ instance:() {
 
   _remove_running_job
 
-  _pretty "cyan" "instance: ${IMAGE} ${ARGS[*]}"
+  _pretty "cyan" "\ninstance: ${IMAGE} ${ARGS[*]}"
 
   SERVICE=$(_image "service_${MKDKR_JOB_NAME}" | sed 's/:.*//g;s/\//_/g')
   if [ "${SERVICE}" != "" ]; then
@@ -260,7 +260,7 @@ service:() {
 
   _remove_running_job
 
-  _pretty "cyan" "service: ${IMAGE} ${ARGS[*]}"
+  _pretty "cyan" "\nservice: ${IMAGE} ${ARGS[*]}"
 
   docker run --rm -d \
     -v "${PWD}":"${PWD}" \
@@ -280,7 +280,7 @@ dind:() {
 
   _remove_running_job
 
-  _pretty "cyan" "dind: ${IMAGE} ${ARGS[*]}"
+  _pretty "cyan" "\ndind: ${IMAGE} ${ARGS[*]}"
 
   SERVICE=$(_image "service_${MKDKR_JOB_NAME}" | sed 's/:.*//g;s/\//_/g')
   if [ "${SERVICE}" != "" ]; then
@@ -303,7 +303,7 @@ dind:() {
 run:() {
   CONTAINER_NAME="job_${MKDKR_JOB_NAME}"
 
-  _pretty "green" "run: ${*}"
+  _pretty "green" "\nrun: ${*}"
 
   if [ ! -d "${_MKDKR_TMP_DIR}" ]; then
     mkdir -p "${_MKDKR_TMP_DIR}"
