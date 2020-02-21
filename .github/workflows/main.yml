@@ -9,29 +9,11 @@ jobs:
 
     steps:
     - uses: actions/checkout@v1
-    - name: commitlint
-      run: make commitlint
+    - name: commit lint
+      run: make lint.commit
     - name: shellcheck
-      run: make shellcheck
-    - name: unit
-      run: make unit
-    - name: simple
-      run: make simple
-    - name: multi-images
-      run: make multi-images
+      run: make lint.shellcheck
     - name: service
-      run: make service
+      run: make test.service
     - name: dind
-      run: make dind
-    - name: shell
-      run: make shell
-    - name: trap
-      run: make trap
-    - name: implicit-job
-      run: make implicit-job
-    - name: escapes
-      run: make escapes
-    - name: stdout
-      run: make stdout
-    - name: pipeline
-      run: make examples/pipeline
+      run: make test.service
