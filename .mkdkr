@@ -134,7 +134,7 @@ define . =
   . .mkdkr
   \$(eval MKDKR_JOB_NAME=\$(shell . .mkdkr; _job_uniq_name \$(@)))
   \$(eval MKDKR_JOB_STDOUT="${_MKDKR_TMP_DIR}/\${MKDKR_JOB_NAME}.log")
-  trap . EXIT
+  trap _job_destroy EXIT
   pretty "orange" "\n\$(@)\n"
 endef
 
@@ -231,7 +231,7 @@ _job_uniq_name() {
   fi
 }
 
-.() {
+_job_destroy() {
   ALIVE=$(docker ps | grep "${MKDKR_JOB_NAME}" | awk '{print $1}')
   if [ "${ALIVE[0]}" != "" ]; then
     pretty "green" "."
