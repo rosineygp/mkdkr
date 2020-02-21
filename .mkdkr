@@ -256,6 +256,35 @@ service:() {
     $ARGS \
     --name "service_${MKDKR_JOB_NAME}" \
     "${IMAGE}" >&2
+
+  IFS=$OLDIFS
+}
+
+dind:() {
+  OLDIFS=$IFS
+  IFS='⠀' # Braille Pattern Blank (U+2800)
+  IMAGE="${1}"
+  ARGS="${*:2}"
+
+  _remove_running_job
+
+  pretty "cyan" "dind: ${IMAGE} ${ARGS[*]}"
+
+  SERVICE=$(_image "service_${MKDKR_JOB_NAME}" | sed 's/:.*//g;s/\//_/g')
+  if [ "${SERVICE}" != "" ]; then
+    SERVICES=(--link "service_${MKDKR_JOB_NAME}:${SERVICE}")
+  fi
+
+  docker run --rm -d \
+    -v "${PWD}":"${PWD}" \
+    --workdir "${PWD}" \
+    --entrypoint "" \
+    $ARGS \
+    --privileged -v /var/run/docker.sock:/var/run/docker.sock \
+    ${SERVICES[@]} \
+    --name "job_${MKDKR_JOB_NAME}" \
+    "${IMAGE}" sleep "${MKDKR_TTL:-3600}" >&2
+
   IFS=$OLDIFS
 }
 

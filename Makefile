@@ -18,6 +18,11 @@ srv:
 	run: apk add curl
 	run: curl -s nginx
 
+dd:
+	@$(.)
+	dind: docker:19
+	run: docker build -t rosiney/pylint .
+
 
 unit:
 	@$(.)
