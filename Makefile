@@ -11,10 +11,13 @@ shellcheck:
 	run: shellcheck -e SC2181 -e SC2086 -e SC1091 test/unit_remote_include
 	run: shellcheck test/cover
 
-show:
+srv:
 	@$(.)
-	echo $(MKDKR_BRANCH_NAME)
-	echo $(MKDKR_BRANCH_NAME_SLUG)
+	service: nginx
+	instance: alpine --link service_$$MKDKR_JOB_NAME:nginx
+	run: apk add curl
+	run: curl -s nginx
+
 
 unit:
 	@$(.)

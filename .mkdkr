@@ -240,6 +240,25 @@ instance:() {
   IFS=$OLDIFS
 }
 
+service:() {
+  OLDIFS=$IFS
+  IFS='⠀' # Braille Pattern Blank (U+2800)
+  IMAGE="${1}"
+  ARGS="${*:2}"
+
+  _remove_running_job
+
+  pretty "cyan" "service: ${IMAGE} ${ARGS[*]}"
+
+  docker run --rm -d \
+    -v "${PWD}":"${PWD}" \
+    --workdir "${PWD}" \
+    $ARGS \
+    --name "service_${MKDKR_JOB_NAME}" \
+    "${IMAGE}" >&2
+  IFS=$OLDIFS
+}
+
 run:() {
   CONTAINER_NAME="job_${MKDKR_JOB_NAME}"
 
