@@ -37,19 +37,6 @@ _remove_running_job() {
   fi
 }
 
-_implicit_job() {
-
-  TYPE="${1}"
-
-  if [ "${TYPE}" != "job" ] &&
-    [ "${TYPE}" != "service" ] &&
-    [ "${TYPE}" != "privileged" ]; then
-    echo true
-  else
-    echo false
-  fi
-}
-
 _branch_or_tag_name() {
   _BRANCH=""
   if [ "$GITHUB_ACTIONS" == "true" ]; then
@@ -176,54 +163,6 @@ _job_destroy() {
   fi
   _pretty "orange" "\ncompleted: $(echo $MKDKR_JOB_NAME | cut -d'_' -f1)"
   times
-}
-
-# shellcheck disable=SC1036
-...() {
-  OLDIFS=$IFS
-  IFS='⠀' # Braille Pattern Blank (U+2800)
-  TYPE="${1}"
-  IMAGE="${2}"
-  ARGS="${*:3}"
-
-  if [ "$(_implicit_job "${TYPE}")" == true ]; then
-    ARGS="${*:2}"
-    IMAGE="${TYPE}"
-    TYPE="job"
-  fi
-
-  _remove_running_job
-
-  _pretty "cyan" "... ${TYPE} ${IMAGE} ${ARGS[*]}"
-
-  if [ "${TYPE}" == "service" ]; then
-    docker run --rm -d \
-      -v "${PWD}":"${PWD}" \
-      --workdir "${PWD}" \
-      $ARGS \
-      --name "service_${MKDKR_JOB_NAME}" \
-      "${IMAGE}" >&2
-  else
-    if [ "${TYPE}" == "privileged" ]; then
-      PRIVILEGED=(--privileged -v /var/run/docker.sock:/var/run/docker.sock)
-    fi
-
-    SERVICE=$(_image "service_${MKDKR_JOB_NAME}" | sed 's/:.*//g;s/\//_/g')
-    if [ "${SERVICE}" != "" ]; then
-      SERVICES=(--link "service_${MKDKR_JOB_NAME}:${SERVICE}")
-    fi
-
-    docker run --rm -d \
-      -v "${PWD}":"${PWD}" \
-      --workdir "${PWD}" \
-      --entrypoint "" \
-      $ARGS \
-      ${PRIVILEGED[@]} \
-      ${SERVICES[@]} \
-      --name "job_${MKDKR_JOB_NAME}" \
-      "${IMAGE}" sleep "${MKDKR_TTL:-3600}" >&2
-  fi
-  IFS=$OLDIFS
 }
 
 instance:() {
