@@ -213,6 +213,33 @@ _job_uniq_name() {
   IFS=$OLDIFS
 }
 
+instance:() {
+  OLDIFS=$IFS
+  IFS='⠀' # Braille Pattern Blank (U+2800)
+  IMAGE="${1}"
+  ARGS="${*:2}"
+
+  _remove_running_job
+
+  pretty "cyan" "instance: ${IMAGE} ${ARGS[*]}"
+
+  SERVICE=$(_image "service_${MKDKR_JOB_NAME}" | sed 's/:.*//g;s/\//_/g')
+  if [ "${SERVICE}" != "" ]; then
+    SERVICES=(--link "service_${MKDKR_JOB_NAME}:${SERVICE}")
+  fi
+
+  docker run --rm -d \
+    -v "${PWD}":"${PWD}" \
+    --workdir "${PWD}" \
+    --entrypoint "" \
+    $ARGS \
+    ${SERVICES[@]} \
+    --name "job_${MKDKR_JOB_NAME}" \
+    "${IMAGE}" sleep "${MKDKR_TTL:-3600}" >&2
+
+  IFS=$OLDIFS
+}
+
 run:() {
   CONTAINER_NAME="job_${MKDKR_JOB_NAME}"
 
@@ -220,7 +247,7 @@ run:() {
 
   if [ ! -d "${_MKDKR_TMP_DIR}" ]; then
     mkdir -p "${_MKDKR_TMP_DIR}"
-  fi 
+  fi
 
   docker exec -i ${CONTAINER_NAME} ${MKDKR_SHELL:-sh} -c "$*" | tee "${_MKDKR_TMP_DIR}/${MKDKR_JOB_NAME}.log"
   EXIT_CODE="${PIPESTATUS[0]}"
