@@ -165,6 +165,17 @@ _job_uniq_name() {
   echo "${MKDKR_JOB_NAME}"
 }
 
+_job_destroy() {
+  ALIVE=$(docker ps | grep "${MKDKR_JOB_NAME}" | awk '{print $1}')
+  if [ "${ALIVE[0]}" != "" ]; then
+    pretty "green" "."
+    docker ps | grep "${MKDKR_JOB_NAME}" | awk '{print $1}' | xargs -i{} docker rm -f {} >&2
+    if [ -f "${_MKDKR_TMP_DIR}/${MKDKR_JOB_NAME}.log" ]; then
+      rm "${_MKDKR_TMP_DIR}/${MKDKR_JOB_NAME}.log"
+    fi
+  fi
+}
+
 # shellcheck disable=SC1036
 ...() {
   OLDIFS=$IFS
@@ -302,17 +313,6 @@ run:() {
   if [ "${EXIT_CODE}" != "0" ]; then
     .
     exit "${EXIT_CODE}"
-  fi
-}
-
-_job_destroy() {
-  ALIVE=$(docker ps | grep "${MKDKR_JOB_NAME}" | awk '{print $1}')
-  if [ "${ALIVE[0]}" != "" ]; then
-    pretty "green" "."
-    docker ps | grep "${MKDKR_JOB_NAME}" | awk '{print $1}' | xargs -i{} docker rm -f {} >&2
-    if [ -f "${_MKDKR_TMP_DIR}/${MKDKR_JOB_NAME}.log" ]; then
-      rm "${_MKDKR_TMP_DIR}/${MKDKR_JOB_NAME}.log"
-    fi
   fi
 }
 
