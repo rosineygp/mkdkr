@@ -175,6 +175,7 @@ _job_destroy() {
     fi
   fi
   _pretty "orange" "\ncompleted: $(echo $MKDKR_JOB_NAME | cut -d'_' -f1)"
+  times
 }
 
 # shellcheck disable=SC1036
