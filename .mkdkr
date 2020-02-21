@@ -132,7 +132,7 @@ MKDKR_BRANCH_NAME_SLUG=$MKDKR_BRANCH_NAME_SLUG
 
 define . =
   . .mkdkr
-  \$(eval MKDKR_JOB_NAME=\$(shell . .mkdkr; .... \$(@)))
+  \$(eval MKDKR_JOB_NAME=\$(shell . .mkdkr; _job_uniq_name \$(@)))
   \$(eval MKDKR_JOB_STDOUT="${_MKDKR_TMP_DIR}/\${MKDKR_JOB_NAME}.log")
   trap . EXIT
   pretty "orange" "\n\$(@)\n"
@@ -157,7 +157,7 @@ _header() {
   echo "${_MKDKR_INCLUDE}"
 }
 
-....() {
+_job_uniq_name() {
   if [ -z "${MKDKR_JOB_NAME}" ]; then
     _MKDKR_JOB_NAME=$(echo "${1}_$(cat /proc/sys/kernel/random/uuid)" | sed 's/\//_/g')
     export MKDKR_JOB_NAME="${_MKDKR_JOB_NAME}"
