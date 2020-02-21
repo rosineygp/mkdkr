@@ -86,7 +86,7 @@ _remote_include() {
       ALIAS="${PARAMS[0]}"
 
       if [ -z "${PARAMS[1]}" ]; then
-        echo "Needs git path to clone for: ${ALIAS}"
+        _pretty "include: needs git path to clone for: ${ALIAS}"
         exit 1
       fi
 
@@ -105,11 +105,11 @@ _remote_include() {
       mkdir -p "${_MKDKR_TMP_DIR}/includes"
 
       if [ -d "${_MKDKR_TMP_DIR}/includes/${ALIAS}" ]; then
-        _pretty "light_cyan" "update, alias: ${ALIAS}, repos: ${REPOS}, checkout: ${CHECKOUT}, file: ${FILE}"
+        _pretty "light_cyan" "update: ${ALIAS}\nrepos: ${REPOS}\ncheckout: ${CHECKOUT}\nfile: ${FILE}"
         git -C "${_MKDKR_TMP_DIR}/includes/${ALIAS}/" pull --depth "${MKDKR_INCLUDE_CLONE_DEPTH:-1}" origin "$CHECKOUT" >&2
         git -C "${_MKDKR_TMP_DIR}/includes/${ALIAS}/" reset --hard "origin/${CHECKOUT}" >&2
       else
-        _pretty "light_cyan" "clone, alias: ${ALIAS}, repos: ${REPOS}, checkout: ${CHECKOUT}, file: ${FILE}"
+        _pretty "light_cyan" "clone: ${ALIAS}\nrepos: ${REPOS}\ncheckout: ${CHECKOUT}\nfile: ${FILE}"
         git clone "${REPOS}" --branch "${CHECKOUT}" --depth "${MKDKR_INCLUDE_CLONE_DEPTH:-1}" "${_MKDKR_TMP_DIR}/includes/${ALIAS}" >&2
       fi
 
@@ -135,7 +135,7 @@ define . =
   \$(eval MKDKR_JOB_NAME=\$(shell . .mkdkr; _job_uniq_name \$(@)))
   \$(eval MKDKR_JOB_STDOUT="${_MKDKR_TMP_DIR}/\${MKDKR_JOB_NAME}.log")
   trap _job_destroy EXIT
-  _pretty "orange" "\n\$(@)\n"
+  _pretty "orange" "\nstart: \$(@)\n"
 endef
 
 define stdout =
@@ -168,12 +168,13 @@ _job_uniq_name() {
 _job_destroy() {
   ALIVE=$(docker ps | grep "${MKDKR_JOB_NAME}" | awk '{print $1}')
   if [ "${ALIVE[0]}" != "" ]; then
-    _pretty "green" "."
+    _pretty "cyan" "\ncleanup:"
     docker ps | grep "${MKDKR_JOB_NAME}" | awk '{print $1}' | xargs -i{} docker rm -f {} >&2
     if [ -f "${_MKDKR_TMP_DIR}/${MKDKR_JOB_NAME}.log" ]; then
       rm "${_MKDKR_TMP_DIR}/${MKDKR_JOB_NAME}.log"
     fi
   fi
+  _pretty "orange" "\ncompleted: $(echo $MKDKR_JOB_NAME | cut -d'_' -f1)"
 }
 
 # shellcheck disable=SC1036
