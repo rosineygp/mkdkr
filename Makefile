@@ -1,7 +1,7 @@
 include $(shell bash .mkdkr init)
 
 shellcheck:
-	@$(.)
+	@$(dkr)
 	instance: koalaman/shellcheck-alpine:v0.4.6
 	run: shellcheck -e SC1088 -e SC2068 -e SC2086 .mkdkr \|\| true
 	run: shellcheck -e SC2181 test/unit_job_name
@@ -12,14 +12,14 @@ shellcheck:
 	run: shellcheck test/cover
 
 srv:
-	@$(.)
+	@$(dkr)
 	service: nginx
 	instance: alpine --link service_$$MKDKR_JOB_NAME:nginx
 	run: apk add curl
 	run: curl -s nginx
 
 dd:
-	@$(.)
+	@$(dkr)
 	dind: docker:19
 	run: docker build -t rosiney/pylint .
 

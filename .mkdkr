@@ -117,7 +117,7 @@ SHELL = /bin/bash
 MKDKR_BRANCH_NAME=$MKDKR_BRANCH_NAME
 MKDKR_BRANCH_NAME_SLUG=$MKDKR_BRANCH_NAME_SLUG
 
-define . =
+define dkr =
   . .mkdkr
   \$(eval MKDKR_JOB_NAME=\$(shell . .mkdkr; _job_uniq_name \$(@)))
   \$(eval MKDKR_JOB_STDOUT="${_MKDKR_TMP_DIR}/\${MKDKR_JOB_NAME}.log")
