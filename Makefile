@@ -30,3 +30,7 @@ test.dind:
 	@$(dkr)
 	dind: docker:19
 	run: docker build -t rosiney/pylint .
+
+examples.simple:
+	make --silent -f examples/simple.mk simple
+	make --silent -f examples/simple.mk multi-images
