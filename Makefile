@@ -34,3 +34,8 @@ test.dind:
 examples.simple:
 	make --silent -f examples/simple.mk simple
 	make --silent -f examples/simple.mk multi-images
+
+examples.service:
+	make --silent -f examples/service.mk service
+	make --silent -f examples/service.mk link
+
