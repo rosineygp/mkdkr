@@ -30,3 +30,36 @@ test.dind:
 	@$(dkr)
 	dind: docker:19
 	run: docker build -t rosiney/pylint .
+
+examples.simple:
+	make --silent -f examples/simple.mk simple
+	make --silent -f examples/simple.mk multi-images
+
+examples.service:
+	make --silent -f examples/service.mk service
+	make --silent -f examples/service.mk link
+
+examples.dind:
+	make --silent -f examples/dind.mk dind
+
+examples.escapes:
+	make --silent -f examples/escapes.mk multiline
+	make --silent -f examples/escapes.mk logical_and
+	make --silent -f examples/escapes.mk pipes
+	make --silent -f examples/escapes.mk redirect_to_outside
+
+examples.stdout:
+	make --silent -f examples/stdout.mk from-filename
+	make --silent -f examples/stdout.mk from-function
+	make --silent -f examples/stdout.mk show-path
+	make --silent -f examples/stdout.mk parse-output
+	make --silent -f examples/stdout.mk from
+
+examples.shell:
+	make --silent -f examples/shell.mk shell
+
+examples.pipeline:
+	make -f examples/pipeline.mk test -j 3 --output-sync
+	make -f examples/pipeline.mk build
+	make -f examples/pipeline.mk pack
+	make -f examples/pipeline.mk deploy

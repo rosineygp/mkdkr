@@ -1,39 +1,33 @@
 include $(shell bash .mkdkr init)
 
-test_a:
-	@$(.)
-	... alpine
-	.. echo "test $(@)"
+test.mock_a:
+	@$(dkr)
+	instance: alpine
+	run: echo "test $(@)"
 
-test_b:
-	@$(.)
-	... alpine
-	.. echo "test $(@)"
+test.mock_b:
+	@$(dkr)
+	instance: alpine
+	run: echo "test $(@)"
 
-test_c:
-	@$(.)
-	... alpine
-	.. echo "test $(@)"
+test.mock_c:
+	@$(dkr)
+	instance: alpine
+	run: echo "test $(@)"
 
 build:
-	@$(.)
-	... alpine
-	.. echo "build $(@)"
+	@$(dkr)
+	instance: alpine
+	run: echo "build $(@)"
 
 pack:
-	@$(.)
-	... alpine
-	.. echo "pack $(@)"
+	@$(dkr)
+	instance: alpine
+	run: echo "pack $(@)"
 
 deploy:
-	@$(.)
-	... alpine
-	.. echo "stage: $(@)"
+	@$(dkr)
+	instance: alpine
+	run: echo "stage: $(@)"
 
-test: test_a test_b test_c
-
-pipeline:
-	make -f pipeline.mk test -j 3 --output-sync
-	make -f pipeline.mk build
-	make -f pipeline.mk pack
-	make -f pipeline.mk deploy
+test: test.mock_a test.mock_b test.mock_c
