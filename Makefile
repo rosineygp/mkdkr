@@ -57,3 +57,9 @@ examples.stdout:
 
 examples.shell:
 	make --silent -f examples/shell.mk shell
+
+examples.pipeline:
+	make -f examples/pipeline.mk test -j 3 --output-sync
+	make -f examples/pipeline.mk build
+	make -f examples/pipeline.mk pack
+	make -f examples/pipeline.mk deploy
