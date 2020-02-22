@@ -58,8 +58,6 @@ Table of contents
   * [DIND](#dind)
   * [Escapes](#escapes)
   * [Shell](#shell)
-  * [Trap](#trap)
-  * [Implicit Job](#implicit-job)
   * [Sdtout](#stdout)
   * [Pipelines](#pipelines)
 * [Environment Variables](#environment-variables)
@@ -84,10 +82,10 @@ Create a file with name Makefile and paste the following content
 # Required header
 include $(shell bash .mkdkr init)
 
-job:                                # job name
-	@$(.)                       # required: load mkdkr and create unique job name
-	... alpine                  # create a docker container using alpine image
-	.. echo "hello mkdkr!"      # execute a command inside container
+job:	                          # job name
+	@$(dkr)                       # required: load mkdkr and create unique job name
+	instance: alpine              # create a docker container using alpine image
+	run: echo "hello mkdkr!"      # execute a command inside container
 
 # if you want to test it remove all comments of job
 ```
@@ -219,17 +217,15 @@ There are two major behavior of includes:
 
 ## Explicit
 
-> Recommend
-
 A fragment of job (eg. `define`) and needs to be called explicitly to work.
 
 ```Makefile
 TAG=latest
 
 define docker_build =
-	@$(.)
-	... privileged docker:19
-	.. docker build -t $(REGISTRY)/$(PROJECT)/$(REPOS):$(TAG) .
+	@$(dkr)
+	dind: docker:19
+	run: docker build -t $(REGISTRY)/$(PROJECT)/$(REPOS):$(TAG) .
 endef
 ```
 All definitions will be load at start of makefile, after it is possible to call at your custom job.
@@ -247,9 +243,9 @@ Just a full job in another project.
 TAG=latest
 
 docker_build:
-	@$(.)
-	... privileged docker:19
-	.. docker build -t $(REGISTRY)/$(PROJECT)/$(REPOS):$(TAG) .
+	@$(dkr)
+	dind: docker:19
+	run: docker build -t $(REGISTRY)/$(PROJECT)/$(REPOS):$(TAG) .
 ```
 
 The jobs will be load at start and can be called directly.
@@ -297,9 +293,9 @@ The file contains four values per line in following order
 
 ```Makefile
 simple:
-	@$(.)
-	... job alpine
-	.. echo "hello mkdkr!"
+	@$(dkr)
+	instance: alpine
+	run: echo "hello mkdkr!"
 ```
 
 > Is possible to mix images during job, see in example
@@ -310,11 +306,11 @@ simple:
 
 ```Makefile
 service:
-	@$(.)
-	... service nginx
-	... alpine --link service_$$MKDKR_JOB_NAME:nginx
-	.. apk add curl
-	.. curl -s nginx
+	@$(dkr)
+	service: nginx
+	instance: alpine
+	run: apk add curl
+	run: curl -s nginx
 ```
 
 [Makefile](examples/service.mk)
@@ -325,9 +321,9 @@ Privileged job
 
 ```Makefile
 dind:
-	@$(.)
-	... privileged docker:19
-	.. docker build -t rosiney/pylint .
+	@$(dkr)
+	dind: docker:19
+	run: docker build -t project/repos .
 ```
 
 [Makefile](examples/dind.mk)
@@ -336,9 +332,9 @@ dind:
 
 ```Makefile
 pipes:
-	@$(.)
-	... ubuntu:18.04
-	.. "find . -iname '*.mk' -type f -exec cat {} \; | grep -c escapes"
+	@$(dkr)
+	instance: ubuntu:18.04
+	run: "find . -iname '*.mk' -type f -exec cat {} \; | grep -c escapes"
 ```
 
 > More examples at file
@@ -351,44 +347,15 @@ Switch to another shell
 
 ```Makefile
 shell:
-	@$(.)
-	... ubuntu
+	@$(dkr)
+	instance: ubuntu
 	export MKDKR_SHELL=bash
-	.. 'echo $$0'
+	run: 'echo $$0'
 ```
 
 > More examples at file
 
-## Trap
-
-Prevent keep container running when after error or exit.
-
-```Makefile
-broken:
-	@$(.)
-	... service nginx
-	... alpine
-	.. ps -ef
-```
-
-> Job finished without call **.**, now trap close it correctly.
-
-[Makefile](examples/trap.mk)
-
-## Implicit Job
-
-When start a new job if [action](#-3-dots) passed, it will create a container as a simple job.
-
-```Makefile
-implicit-job:
-	@$(.)
-	... alpine --memory 32MB
-	.. echo "hello nano job"
-```
-
-> implicit='Less code!'
-
-[Makefile](examples/implicit-job.mk)
+[Makefile](examples/shell.mk)
 
 ## Stdout
 
@@ -398,9 +365,9 @@ Use to filter or apply some logic in last command executed (also outside contain
 
 ```Makefile
 stdout:
-	@$(.)
-	... alpine
-	.. echo "hello mkdkr!"
+	@$(dkr)
+	instance: alpine
+	run: echo "hello mkdkr!"
 	cat "$(MKDKR_JOB_STDOUT)"
 ```
 
@@ -408,11 +375,11 @@ stdout:
 
 ```Makefile
 stdout:
-	@$(.)
-	... debian
-	.. apt-get update
-	.. apt-get install curl -y
-	.. dpkg -l
+	@$(dkr)
+	instance: debian
+	run: apt-get update
+	run: apt-get install curl -y
+	run: dpkg -l
 	$(stdout) | grep -i curl && echo "INSTALLED"
 ```
 > `$(stdout)` return output file using cat
