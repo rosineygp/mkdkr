@@ -54,4 +54,6 @@ examples.stdout:
 	make --silent -f examples/stdout.mk show-path
 	make --silent -f examples/stdout.mk parse-output
 	make --silent -f examples/stdout.mk from
-	
+
+examples.shell:
+	make --silent -f examples/shell.mk shell
