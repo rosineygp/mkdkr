@@ -39,3 +39,5 @@ examples.service:
 	make --silent -f examples/service.mk service
 	make --silent -f examples/service.mk link
 
+examples.dind:
+	make --silent -f examples/dind.mk dind
