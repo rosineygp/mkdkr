@@ -41,3 +41,9 @@ examples.service:
 
 examples.dind:
 	make --silent -f examples/dind.mk dind
+
+examples.escapes:
+	make --silent -f examples/escapes.mk multiline
+	make --silent -f examples/escapes.mk logical_and
+	make --silent -f examples/escapes.mk pipes
+	make --silent -f examples/escapes.mk redirect_to_outside

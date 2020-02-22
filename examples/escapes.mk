@@ -30,5 +30,3 @@ redirect_to_outside:
 	instance: ubuntu:18.04
 	run: dpkg -l > dpkg_report.txt
 	cat dpkg_report.txt            # outside container
-
-all: multiline logical_and pipes redirect_to_outside
