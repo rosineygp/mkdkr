@@ -25,7 +25,7 @@ Super small and powerful framework for build CI pipeline, scripted with Makefile
 - Shipping and switch among CI engines like
 [Circle CI](https://circleci.com/gh/rosineygp/mkdkr),
 [GitHub Actions](https://actions-badge.atrox.dev/rosineygp/mkdkr/goto?ref=master),
-[Gitlab-ci](https://gitlab.com/rosiney.gp/mkdkr/pipelines), Jenkins, [Travis](https://travis-ci.org/rosineygp/mkdkr/builds).. and more
+[Gitlab-ci](https://gitlab.com/rosiney.gp/mkdkr/pipelines), Jenkins, [Travis](https://travis-ci.org/rosineygp/mkdkr/builds).. and more [#using exporter](#export)
 - Clean and elegant code syntax
 
 <p align="center">
@@ -44,9 +44,12 @@ Table of contents
   * [Result](#result)
   * [Export](#export)
 * [Reason](#reason)
-* [Dot Functions](#dot-functions)
-  * [•••](#-3-dots)
-  * [••](#-2-dots)
+* [Functions](#functions)
+  * [@$(dkr)](#dkr)
+  * [instance:](#instance)
+  * [service:](#service)
+  * [dind:](#dind)
+  * [run:](#run)
 * [Includes](#includes)
 	* [Explicit](#explicit)
 	* [Implicit](#implicit)
@@ -83,11 +86,9 @@ Create a file with name Makefile and paste the following content
 include $(shell bash .mkdkr init)
 
 job:	                          # job name
-	@$(dkr)                       # required: load mkdkr and create unique job name
+	@$(dkr)                       # required: load mkdkr (docker layer)
 	instance: alpine              # create a docker container using alpine image
 	run: echo "hello mkdkr!"      # execute a command inside container
-
-# if you want to test it remove all comments of job
 ```
 
 ## Execute
@@ -100,14 +101,21 @@ make job
 ## Result
 
 ```bash
-# output
-... job alpine            # creating a docker container using alpine image
-cdab4af95cec...           # docker container id
-.. echo hello mkdkr!      # execute command inside container
-hello mkdkr!              # output of command
-.                         # destroy all containers related of this job
-cdab4af95cec              # id(s) of container(s) removed
+start: job
 
+
+instance: alpine 
+20498831fe05f5d33852313a55be42efd88b1fb38b463c686dbb0f2a735df45c
+
+run: echo hello mkdkr!
+hello mkdkr!
+
+cleanup:
+20498831fe05
+
+completed:
+0m0.007s 0m0.000s
+0m0.228s 0m0.179s
 ```
 
 ## Export
@@ -125,63 +133,85 @@ Build pipeline for a dedicated platform can take a lot of time to learn and test
   </a>
 </p>
 
-# Dot Functions
+# Functions
 
-**ATTENTION:** All functions are represented with **.(s)** It creates a beautiful code style like yaml, indents are not required.
+## @$(dkr)
+
+Load docker layer for mkdkr, use inside a target of Makefile.
 
 ```Makefile
-job:
-	...
-	..
+
+shell-only:
+	echo "my local shell job"
+
+mkdkr-job:
+	@$(dkr)            # load all deps of mkdkr
+	intance: alpine
+	run: echo "my mkdkr job"
 ```
 
-> yes, just dots
+## instance:
 
-## ••• 3 dots
+Create a docker container, without special privileges.
 
-Create a docker container, it can set as **simple** job, **service** or **privileged** job.
+```Makefile
+my-instance:
+	@$(dkr)
+	instance: ubuntu:20.04     # create a instance
+```
 
 **Parameters:**
-- String, ACTION: Actions is the mode that container will run it can be a:
-  - job **[default]**: simple docker container
-  - service: is like a job, but run in detached mode
-  - privileged: is a job but with docker socket access
 
-> if any action was passed, it will be a job
-
-- String, IMAGE *: any docker image name
+- String, DOCKER_IMAGE *: any docker image name
 - String|Array, ARGS: additional docker init args like (--cpus 1 --memory 64MB)
 
 **Return:**
 - String, Container Id
 
-**Usage**
+> Calling **instance:** twice, it will replace the last container.
 
-```Bash
-# simple job
-... job alpine
+## service:
 
-# if it's a job, pass action [job] is not required
-... ubuntu:18.04
+Create a docker container in detached mode. Useful to bring up a required service for a job, like a webserver or a database.
 
-# container with parameters
-... centeos:7 \
-    --cpus 2 \
-    --memory 1024MB \
-    -e PASSWORD=$$PASSWORD
-
-# create a service
-... service nginx
-
-# create a job with docker demon access
-... privileged docker:19
+```Makefile
+my-service:
+	@$(dkr)
+	service: nginx    # up a nginx
+	instance: alpine
 ```
 
-> \*\* Required when is a service or a privileged container
+**Parameters:**
 
-## •• 2 dots
+- String, DOCKER_IMAGE *: any docker image name
+- String|Array, ARGS: additional docker init args like (--cpus 1 --memory 64MB)
 
-Execute a command inside docker container [**job** or **privileged**].
+**Return:**
+- String, Container Id
+
+> instance or dind created after a service, will be automatically linked.
+
+## dind:
+
+Create a docker instance with daemon access. Useful to build docker images.
+
+```Makefile
+my-dind:
+	@$(dkr)
+	dind: docker:19
+	run: docker build -t my/dind .
+```
+**Parameters:**
+
+- String, DOCKER_IMAGE *: any docker image name
+- String|Array, ARGS: additional docker init args like (--cpus 1 --memory 64MB)
+
+**Return:**
+- String, Container Id
+
+## run:
+
+Execute a command inside docker container [**instance:** or **dind:**] (the last one).
 
 > Is not possible to execute commands in a **service**.
 
@@ -193,20 +223,23 @@ Execute a command inside docker container [**job** or **privileged**].
 
 **Usage**
 
-```Bash
+```Makefile
+my-runs:
+	@$(dkr)
+	instance: alpine
+	# run a command inside container
+	run: apk add curl
 
-# run a command inside container
-.. apk add curl
+	instance: debian
+	# avoid escape to host bash, escapes also can be used (eg. \&\&)
+	run: 'apt-get update && \
+			apt-get install -y curl'
 
-# avoid escape to host bash, escapes also can be used (eg. \&\&)
-.. 'apt-get update && \
-    apt-get install -y curl'
+	# run a command inside container and redirect output to host
+	run: ls -la > myfile
 
-# run a command inside container and redirect output to host
-.. ls -la > myfile
-
-# run a command inside container and redirect output to container
-.. 'ls -la > myfile'
+	# run a command inside container and redirect output to container
+	run: 'ls -la > myfile'
 ```
 
 # Includes
