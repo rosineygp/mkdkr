@@ -19,6 +19,12 @@ lint.shellcheck:
 	run: shellcheck -e SC2181 -e SC2086 -e SC1091 test/unit_remote_include
 	run: shellcheck test/cover
 
+test.unit:
+	@$(dkr)
+	dind: docker:19 --workdir $(PWD)/test
+	run: apk add bash jq git
+	run: ./unit
+
 examples.simple:
 	make --silent -f examples/simple.mk simple
 	make --silent -f examples/simple.mk multi-images
