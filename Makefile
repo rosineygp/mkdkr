@@ -11,7 +11,7 @@ lint.commit:
 lint.shellcheck:
 	@$(dkr)
 	instance: koalaman/shellcheck-alpine:v0.4.6
-	run: shellcheck -e SC1088 -e SC2068 -e SC2086 .mkdkr \|\| true
+	run: shellcheck -e SC2068 -e SC2086 .mkdkr
 	run: shellcheck -e SC2181 test/unit_job_name
 	run: shellcheck -e SC2181 -e SC2086 test/unit_create_instance
 	run: shellcheck -e SC2181 -e SC2086 -e SC1091 test/unit_branch_or_tag_name
@@ -19,17 +19,29 @@ lint.shellcheck:
 	run: shellcheck -e SC2181 -e SC2086 -e SC1091 test/unit_remote_include
 	run: shellcheck test/cover
 
-test.service:
+test.unit:
 	@$(dkr)
-	service: nginx
-	instance: alpine --link service_$$MKDKR_JOB_NAME:nginx
-	run: apk add curl
-	run: curl -s nginx
+	dind: docker:19 --workdir $(PWD)/test
+	run: apk add bash jq git
+	run: ./unit
 
-test.dind:
+DOCKER_BIN=https://download.docker.com/linux/static/stable/x86_64/docker-19.03.5.tgz
+
+coverage.report:
 	@$(dkr)
-	dind: docker:19
-	run: docker build -t rosiney/pylint .
+	dind: kcov/kcov:v31 --workdir $(PWD)/test
+	run: rm -rf coverage
+	run: 'apt-get update && apt-get install -y curl jq bc git'
+	run: curl -s '$(DOCKER_BIN) > /tmp/docker.tgz'
+	run: tar -zxvf /tmp/docker.tgz --strip=1 -C /usr/local/bin/
+	run: kcov --include-path=.mkdkr coverage unit
+	run: './cover > coverage/coverage.json'
+	instance: node:12 \
+		-e SURGE_LOGIN='$(SURGE_LOGIN)' \
+		-e SURGE_TOKEN=$$SURGE_TOKEN
+	run: cp .surgeignore ./test/coverage/
+	run: npm install -g surge
+	run: surge --project ./test/coverage --domain mkdkr.surge.sh
 
 examples.simple:
 	make --silent -f examples/simple.mk simple

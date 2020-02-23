@@ -7,19 +7,19 @@ test_mkdkr_job_name() {
     JOBS=("simple" "with/slash" "with\\backslash" "with_undercode" "012" "+=" "!@#$%^&*()_+{}'")
 
     for NAME in "${JOBS[@]}"; do
-        .... "$NAME" > /dev/null
+        _job_uniq_name "$NAME" > /dev/null
 
         assertNotNull "$MKDKR_JOB_NAME"
         [[ "$?" == "0" ]] && \
-            pretty "light_purple" "assert ${MKDKR_JOB_NAME} is not null [ OK ]"
+            _pretty "light_purple" "assert ${MKDKR_JOB_NAME} is not null [ OK ]"
 
         assertContains "$MKDKR_JOB_NAME" "$(echo "$NAME" | sed 's/\//_/g')"
         [[ "$?" == "0" ]] && \
-            pretty "light_purple" "assert ${MKDKR_JOB_NAME} contains current name [ OK ]"
+            _pretty "light_purple" "assert ${MKDKR_JOB_NAME} contains current name [ OK ]"
 
         assertEquals "$([[ "$MKDKR_JOB_NAME" =~ ^.*_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12} ]] && echo true )" "true"
         [[ "$?" == "0" ]] && \
-            pretty "light_purple" "assert ${MKDKR_JOB_NAME} contains uuid [ OK ]"
+            _pretty "light_purple" "assert ${MKDKR_JOB_NAME} contains uuid [ OK ]"
 
         unset MKDKR_JOB_NAME
 
@@ -35,16 +35,16 @@ test_output_return() {
     source .mkdkr
     unset MKDKR_JOB_NAME
     NAME="test_output_return"
-    OUT_NAME=$(.... "$NAME")
+    OUT_NAME=$(_job_uniq_name "$NAME")
 
     assertNotNull "$OUT_NAME"
     [[ "$?" == "0" ]] && \
-        pretty "light_purple" "assert ${OUT_NAME} return output [ OK ]"
+        _pretty "light_purple" "assert ${OUT_NAME} return output [ OK ]"
 
     # shellcheck disable=SC1001
     assertEquals "$([[ "$OUT_NAME" =~ ^.*_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12} ]] && echo true )" "true"
     [[ "$?" == "0" ]] && \
-        pretty "light_purple" "assert ${OUT_NAME} contains uuid [ OK ]"
+        _pretty "light_purple" "assert ${OUT_NAME} contains uuid [ OK ]"
 
     echo -e "\nRan\e[36m 2 \e[0masserts."
 }
@@ -55,15 +55,15 @@ test_keep_session_name() {
     source .mkdkr
 
     unset MKDKR_JOB_NAME
-    .... "first_mkdkr_job_name"
+    _job_uniq_name "first_mkdkr_job_name"
 
     _FIRST_MKDKR_JOB_NAME="$MKDKR_JOB_NAME"
 
-    .... "new_mkdkr_job_name"
+    _job_uniq_name "new_mkdkr_job_name"
 
     assertEquals "$MKDKR_JOB_NAME" "$_FIRST_MKDKR_JOB_NAME"
     [[ "$?" == "0" ]] && \
-        pretty "light_purple" "assert ${MKDKR_JOB_NAME} last MKDKR_JOB_NAME not changed [ OK ]"
+        _pretty "light_purple" "assert ${MKDKR_JOB_NAME} last MKDKR_JOB_NAME not changed [ OK ]"
 
     echo -e "\nRan\e[36m 1 \e[0masserts."
 }
