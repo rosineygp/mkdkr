@@ -161,7 +161,7 @@ _job_destroy() {
       rm "${_MKDKR_TMP_DIR}/${MKDKR_JOB_NAME}.log"
     fi
   fi
-  _pretty "orange" "\ncompleted"
+  _pretty "orange" "\ncompleted:"
   times
 }
 
