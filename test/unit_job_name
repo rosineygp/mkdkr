@@ -7,7 +7,7 @@ test_mkdkr_job_name() {
     JOBS=("simple" "with/slash" "with\\backslash" "with_undercode" "012" "+=" "!@#$%^&*()_+{}'")
 
     for NAME in "${JOBS[@]}"; do
-        .... "$NAME" > /dev/null
+        _job_uniq_name "$NAME" > /dev/null
 
         assertNotNull "$MKDKR_JOB_NAME"
         [[ "$?" == "0" ]] && \
@@ -35,7 +35,7 @@ test_output_return() {
     source .mkdkr
     unset MKDKR_JOB_NAME
     NAME="test_output_return"
-    OUT_NAME=$(.... "$NAME")
+    OUT_NAME=$(_job_uniq_name "$NAME")
 
     assertNotNull "$OUT_NAME"
     [[ "$?" == "0" ]] && \
@@ -55,11 +55,11 @@ test_keep_session_name() {
     source .mkdkr
 
     unset MKDKR_JOB_NAME
-    .... "first_mkdkr_job_name"
+    _job_uniq_name "first_mkdkr_job_name"
 
     _FIRST_MKDKR_JOB_NAME="$MKDKR_JOB_NAME"
 
-    .... "new_mkdkr_job_name"
+    _job_uniq_name "new_mkdkr_job_name"
 
     assertEquals "$MKDKR_JOB_NAME" "$_FIRST_MKDKR_JOB_NAME"
     [[ "$?" == "0" ]] && \
