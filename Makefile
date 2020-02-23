@@ -25,6 +25,24 @@ test.unit:
 	run: apk add bash jq git
 	run: ./unit
 
+DOCKER_BIN=https://download.docker.com/linux/static/stable/x86_64/docker-19.03.5.tgz
+
+coverage.report:
+	@$(dkr)
+	dind: kcov/kcov:v31 --workdir $(PWD)/test
+	run: rm -rf coverage
+	run: 'apt-get update && apt-get install -y curl jq bc git'
+	run: curl -s '$(DOCKER_BIN) > /tmp/docker.tgz'
+	run: tar -zxvf /tmp/docker.tgz --strip=1 -C /usr/local/bin/
+	run: kcov --include-path=.mkdkr coverage unit
+	run: './cover > coverage/coverage.json'
+	instance: node:12 \
+		-e SURGE_LOGIN='$(SURGE_LOGIN)' \
+		-e SURGE_TOKEN=$$SURGE_TOKEN
+	run: cp .surgeignore ./test/coverage/
+	run: npm install -g surge
+	run: surge --project ./test/coverage --domain mkdkr.surge.sh
+
 examples.simple:
 	make --silent -f examples/simple.mk simple
 	make --silent -f examples/simple.mk multi-images
