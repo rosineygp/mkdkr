@@ -13,7 +13,7 @@ test_mkdkr_run_simple() {
   .. echo "hello world!"
   .
 
-  pretty "light_green" "\nRan 1 assert(s)\n"
+  _pretty "light_green" "\nRan 1 assert(s)\n"
 }
 
 test_mkdkr_return_error() {
@@ -30,7 +30,7 @@ test_mkdkr_return_error() {
 
   .
 
-  pretty "light_green" "\nRan 1 assert(s)\n"
+  _pretty "light_green" "\nRan 1 assert(s)\n"
 }
 
 test_mkdkr_arguments() {
@@ -47,7 +47,7 @@ test_mkdkr_arguments() {
   .. apt-get install htop -y
   .
 
-  pretty "light_green" "\nRan 1 assert(s)\n"
+  _pretty "light_green" "\nRan 1 assert(s)\n"
 }
 
 test_mkdkr_line-break() {
@@ -67,7 +67,7 @@ test_mkdkr_line-break() {
 
   .
 
-  pretty "light_green" "\nRan 1 assert(s)\n"
+  _pretty "light_green" "\nRan 1 assert(s)\n"
 }
 
 test_mkdkr_escape() {
@@ -87,7 +87,7 @@ test_mkdkr_escape() {
 
   .
 
-  pretty "light_green" "\nRan 1 assert(s)\n"
+  _pretty "light_green" "\nRan 1 assert(s)\n"
 }
 
 test_mkdkr_pipe() {
@@ -104,7 +104,7 @@ test_mkdkr_pipe() {
 
   .
 
-  pretty "light_green" "\nRan 1 assert(s)\n"
+  _pretty "light_green" "\nRan 1 assert(s)\n"
 }
 
 test_mkdkr_redirect_internal() {
@@ -121,7 +121,7 @@ test_mkdkr_redirect_internal() {
 
   .
 
-  pretty "light_green" "\nRan 1 assert(s)\n"
+  _pretty "light_green" "\nRan 1 assert(s)\n"
 }
 
 test_mkdkr_get_output() {
@@ -140,7 +140,7 @@ test_mkdkr_get_output() {
 
   .
 
-  pretty "light_green" "\nRan 1 assert(s)\n"
+  _pretty "light_green" "\nRan 1 assert(s)\n"
 }
 
 
@@ -163,7 +163,7 @@ test_mkdkr_print_env_var() {
 
   .
 
-  pretty "light_green" "\nRan 1 assert(s)\n"
+  _pretty "light_green" "\nRan 1 assert(s)\n"
 }
 
 # shellcheck disable=SC1091

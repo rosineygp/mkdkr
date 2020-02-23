@@ -3,23 +3,23 @@
 _helper_instance() {
   assertEquals "$(docker inspect ${1}_${MKDKR_JOB_NAME} | jq .[0].State.Running)" true
   [[ "$?" == "0" ]] &&
-    pretty "light_purple" "container is running [ OK ]"
+    _pretty "light_purple" "container is running [ OK ]"
 
   assertEquals "$(docker inspect ${1}_${MKDKR_JOB_NAME} | jq .[0].Config.Cmd[0])" "${3}"
   [[ "$?" == "0" ]] &&
-    pretty "light_purple" "cmd is ${2} [ OK ]"
+    _pretty "light_purple" "cmd is ${2} [ OK ]"
 
   assertEquals "$(docker inspect ${1}_${MKDKR_JOB_NAME} | jq .[0].Config.Image)" "${2}"
   [[ "$?" == "0" ]] &&
-    pretty "light_purple" "container image is ${2} [ OK ]"
+    _pretty "light_purple" "container image is ${2} [ OK ]"
 
   assertEquals "$(docker inspect ${1}_${MKDKR_JOB_NAME} | jq .[0].Config.Entrypoint)" 'null'
   [[ "$?" == "0" ]] &&
-    pretty "light_purple" "container entrypoint is null [ OK ]"
+    _pretty "light_purple" "container entrypoint is null [ OK ]"
 
   assertNotNull "$(docker inspect ${1}_${MKDKR_JOB_NAME} | jq .[0].Config.WorkingDir)"
   [[ "$?" == "0" ]] &&
-    pretty "light_purple" "container workdir exist [ OK ]"
+    _pretty "light_purple" "container workdir exist [ OK ]"
 }
 
 test_mkdkr_create_instance() {
@@ -36,7 +36,7 @@ test_mkdkr_create_instance() {
 
   .
 
-  pretty "light_green" "\nRan 5 assert(s)\n"
+  _pretty "light_green" "\nRan 5 assert(s)\n"
 }
 
 test_mkdkr_create_instance_job() {
@@ -53,7 +53,7 @@ test_mkdkr_create_instance_job() {
 
   .
 
-  pretty "light_green" "\nRan 5 assert(s)\n"
+  _pretty "light_green" "\nRan 5 assert(s)\n"
 
 }
 
@@ -71,7 +71,7 @@ test_mkdkr_create_instance_service() {
 
   .
 
-  pretty "light_green" "\nRan 5 assert(s)\n"
+  _pretty "light_green" "\nRan 5 assert(s)\n"
 }
 
 test_mkdkr_create_instance_privileged() {
@@ -88,7 +88,7 @@ test_mkdkr_create_instance_privileged() {
 
   .
 
-  pretty "light_green" "\nRan 5 assert(s)\n"
+  _pretty "light_green" "\nRan 5 assert(s)\n"
 }
 
 test_mkdkr_create_instance_idempotent() {
@@ -130,15 +130,15 @@ test_test_mkdkr_create_service_and_job() {
 
   assertNotEquals "$(docker inspect job_${MKDKR_JOB_NAME} | jq .[0].HostConfig.Links[0])" 'null'
   [[ "$?" == "0" ]] &&
-    pretty "light_purple" "linked with service [ OK ]"
+    _pretty "light_purple" "linked with service [ OK ]"
 
   assertContains "$(docker inspect job_${MKDKR_JOB_NAME} | jq .[0].HostConfig.Links[0])" "nginx"
   [[ "$?" == "0" ]] &&
-    pretty "light_purple" "alias linked name [ OK ]"
+    _pretty "light_purple" "alias linked name [ OK ]"
 
   .
 
-  pretty "light_green" "\nRan 12 assert(s)\n"
+  _pretty "light_green" "\nRan 12 assert(s)\n"
 
 }
 
@@ -163,19 +163,19 @@ test_mkdkr_create_instance_with_parameters() {
 
   assertEquals "$(docker inspect job_${MKDKR_JOB_NAME} | jq .[0].HostConfig.NanoCpus)" "1000000000"
   [[ "$?" == "0" ]] &&
-    pretty "light_purple" "cpu restriction [ OK ]"
+    _pretty "light_purple" "cpu restriction [ OK ]"
 
   assertEquals "$(docker inspect job_${MKDKR_JOB_NAME} | jq .[0].HostConfig.Memory)" "33554432"
   [[ "$?" == "0" ]] &&
-    pretty "light_purple" "memory restriction [ OK ]"
+    _pretty "light_purple" "memory restriction [ OK ]"
 
   assertEquals "$(docker inspect job_${MKDKR_JOB_NAME} | jq '.[0].Config.Env | length')" 5
   [[ "$?" == "0" ]] &&
-    pretty "light_purple" "count env vars == 5 [ OK ]"
+    _pretty "light_purple" "count env vars == 5 [ OK ]"
 
   .
 
-  pretty "light_green" "\nRan 8 assert(s)\n"
+  _pretty "light_green" "\nRan 8 assert(s)\n"
 
 }
 

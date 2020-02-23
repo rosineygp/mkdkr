@@ -7,7 +7,7 @@ test_mkdkr_branch_or_tag_name_local() {
   BRANCH_NAME="$(_branch_or_tag_name)"
 
   assertNotNull "$BRANCH_NAME"
-  [[ "$?" == "0" ]] && pretty "light_purple" "branch name is not null [ OK ]"
+  [[ "$?" == "0" ]] && _pretty "light_purple" "branch name is not null [ OK ]"
 
 }
 
@@ -20,9 +20,9 @@ test_mkdkr_branch_or_tag_name_github() {
     BRANCH_NAME="$(_branch_or_tag_name)"
 
     assertNotNull "$BRANCH_NAME"
-    [[ "$?" == "0" ]] && pretty "light_purple" "branch name is not null [ OK ]"
+    [[ "$?" == "0" ]] && _pretty "light_purple" "branch name is not null [ OK ]"
     assertEquals "$BRANCH" "$BRANCH_NAME"
-    [[ "$?" == "0" ]] && pretty "light_purple" "output branch name is ok [ OK ]"
+    [[ "$?" == "0" ]] && _pretty "light_purple" "output branch name is ok [ OK ]"
   done
 
   echo -e "\nRan\e[36m 10 \e[0masserts.\n"
@@ -38,9 +38,9 @@ test_mkdkr_branch_or_tag_name_gitlab() {
     BRANCH_NAME="$(_branch_or_tag_name)"
 
     assertNotNull "$BRANCH_NAME"
-    [[ "$?" == "0" ]] && pretty "light_purple" "branch name is not null [ OK ]"
+    [[ "$?" == "0" ]] && _pretty "light_purple" "branch name is not null [ OK ]"
     assertEquals "$BRANCH" "$BRANCH_NAME"
-    [[ "$?" == "0" ]] && pretty "light_purple" "output branch name is ok [ OK ]"
+    [[ "$?" == "0" ]] && _pretty "light_purple" "output branch name is ok [ OK ]"
   done
 
   echo -e "\nRan\e[36m 10 \e[0masserts.\n"
@@ -56,9 +56,9 @@ test_mkdkr_branch_or_tag_name_jenkins() {
     BRANCH_NAME="$(_branch_or_tag_name)"
 
     assertNotNull "$BRANCH_NAME"
-    [[ "$?" == "0" ]] && pretty "light_purple" "branch name is not null [ OK ]"
+    [[ "$?" == "0" ]] && _pretty "light_purple" "branch name is not null [ OK ]"
     assertEquals "$BRANCH" "$BRANCH_NAME"
-    [[ "$?" == "0" ]] && pretty "light_purple" "output branch name is ok [ OK ]"
+    [[ "$?" == "0" ]] && _pretty "light_purple" "output branch name is ok [ OK ]"
   done
 
   echo -e "\nRan\e[36m 10 \e[0masserts.\n"
@@ -74,9 +74,9 @@ test_mkdkr_branch_or_tag_name_travis() {
     BRANCH_NAME="$(_branch_or_tag_name)"
 
     assertNotNull "$BRANCH_NAME"
-    [[ "$?" == "0" ]] && pretty "light_purple" "branch name is not null [ OK ]"
+    [[ "$?" == "0" ]] && _pretty "light_purple" "branch name is not null [ OK ]"
     assertEquals "$BRANCH" "$BRANCH_NAME"
-    [[ "$?" == "0" ]] && pretty "light_purple" "output branch name is ok [ OK ]"
+    [[ "$?" == "0" ]] && _pretty "light_purple" "output branch name is ok [ OK ]"
   done
 
   echo -e "\nRan\e[36m 10 \e[0masserts.\n"
@@ -93,9 +93,9 @@ test_mkdkr_branch_or_tag_name_circleci_tag() {
     BRANCH_NAME="$(_branch_or_tag_name)"
 
     assertNotNull "$BRANCH_NAME"
-    [[ "$?" == "0" ]] && pretty "light_purple" "branch name is not null [ OK ]"
+    [[ "$?" == "0" ]] && _pretty "light_purple" "branch name is not null [ OK ]"
     assertEquals "$BRANCH" "$BRANCH_NAME"
-    [[ "$?" == "0" ]] && pretty "light_purple" "output branch name is ok [ OK ]"
+    [[ "$?" == "0" ]] && _pretty "light_purple" "output branch name is ok [ OK ]"
   done
 
   echo -e "\nRan\e[36m 10 \e[0masserts.\n"
@@ -113,9 +113,9 @@ test_mkdkr_branch_or_tag_name_circleci_branch() {
     BRANCH_NAME="$(_branch_or_tag_name)"
 
     assertNotNull "$BRANCH_NAME"
-    [[ "$?" == "0" ]] && pretty "light_purple" "branch name is not null [ OK ]"
+    [[ "$?" == "0" ]] && _pretty "light_purple" "branch name is not null [ OK ]"
     assertEquals "$BRANCH" "$BRANCH_NAME"
-    [[ "$?" == "0" ]] && pretty "light_purple" "output branch name is ok [ OK ]"
+    [[ "$?" == "0" ]] && _pretty "light_purple" "output branch name is ok [ OK ]"
   done
 
   echo -e "\nRan\e[36m 10 \e[0masserts.\n"
@@ -135,9 +135,9 @@ test_mkdkr_branch_or_tag_name_circleci_tag_and_branch() {
     BRANCH_NAME="$(_branch_or_tag_name)"
 
     assertNotNull "$BRANCH_NAME"
-    [[ "$?" == "0" ]] && pretty "light_purple" "branch name is not null [ OK ]"
+    [[ "$?" == "0" ]] && _pretty "light_purple" "branch name is not null [ OK ]"
     assertEquals "$BRANCH" "$BRANCH_NAME"
-    [[ "$?" == "0" ]] && pretty "light_purple" "output branch name is ok [ OK ]"
+    [[ "$?" == "0" ]] && _pretty "light_purple" "output branch name is ok [ OK ]"
   done
 
   echo -e "\nRan\e[36m 10 \e[0masserts.\n"
