@@ -9,11 +9,10 @@ jobs:
 
     steps:
     - uses: actions/checkout@v1
-    - name: commit lint
+    - name: lint commit
       run: make lint.commit
-    - name: shellcheck
+    - name: lint shellcheck
       run: make lint.shellcheck
-    - name: service
-      run: make test.service
-    - name: dind
-      run: make test.service
+    - name: test unit
+      run: make test.unit
+
