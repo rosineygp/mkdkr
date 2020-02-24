@@ -4,7 +4,7 @@
   </a>
 </p>
 
-# mkdkr [UNSTABLE]
+# mkdkr
 
 [![Build Status](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Factions-badge.atrox.dev%2Frosineygp%2Fmkdkr%2Fbadge%3Fref%3Dmaster&style=flat)](https://actions-badge.atrox.dev/rosineygp/mkdkr/goto?ref=master)
 [![Build Status](https://travis-ci.org/rosineygp/mkdkr.svg?branch=master)](https://travis-ci.org/rosineygp/mkdkr)
@@ -451,7 +451,7 @@ pipeline:
 
 # Migration
 
-Migration from release-0.26, just execute in your project the following script.
+Migration from release-0.26, just execute the following script on your terminal at root of your project.
 
 ```bash
 curl https://raw.githubusercontent.com/rosineygp/mkdkr/master/.mkdkr > .mkdkr
