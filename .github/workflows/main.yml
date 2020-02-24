@@ -1,3 +1,6 @@
+# pipeline autogen by mkdkr_exporter
+# https://gitlab.com/rosiney.gp/mkdkr_exporter
+
 name: CI
 
 on: [push]
@@ -9,29 +12,23 @@ jobs:
 
     steps:
     - uses: actions/checkout@v1
-    - name: commitlint
-      run: make commitlint
-    - name: shellcheck
-      run: make shellcheck
-    - name: unit
-      run: make unit
-    - name: simple
-      run: make simple
-    - name: multi-images
-      run: make multi-images
-    - name: service
-      run: make service
-    - name: dind
-      run: make dind
-    - name: shell
-      run: make shell
-    - name: trap
-      run: make trap
-    - name: implicit-job
-      run: make implicit-job
-    - name: escapes
-      run: make escapes
-    - name: stdout
-      run: make stdout
-    - name: pipeline
-      run: make examples/pipeline
+    - name: lint commit
+      run: make lint.commit
+    - name: lint shellcheck
+      run: make lint.shellcheck
+    - name: test unit
+      run: make test.unit
+    - name: examples simple
+      run: make examples.simple
+    - name: examples service
+      run: make examples.service
+    - name: examples dind
+      run: make examples.dind
+    - name: examples escapes
+      run: make examples.escapes
+    - name: examples stdout
+      run: make examples.stdout
+    - name: examples shell
+      run: make examples.shell
+    - name: examples pipeline
+      run: make examples.pipeline

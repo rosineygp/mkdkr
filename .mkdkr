@@ -3,7 +3,7 @@
 declare -A colors
 _MKDKR_TMP_DIR="${PWD}/.tmp"
 
-pretty() {
+_pretty() {
   colors+=(
     ["black"]='\e[0;30m'
     ["red"]='\e[0;31m'
@@ -32,21 +32,8 @@ _image() {
 
 _remove_running_job() {
   if [ "$(docker ps | grep job_${MKDKR_JOB_NAME})" != "" ]; then
-    pretty "purple" "image changed, from: $(_image job_${MKDKR_JOB_NAME}) to: ${IMAGE}"
+    _pretty "purple" "image changed, from: $(_image job_${MKDKR_JOB_NAME}) to: ${IMAGE}"
     docker rm -f "job_${MKDKR_JOB_NAME}" >&2
-  fi
-}
-
-_implicit_job() {
-
-  TYPE="${1}"
-
-  if [ "${TYPE}" != "job" ] &&
-    [ "${TYPE}" != "service" ] &&
-    [ "${TYPE}" != "privileged" ]; then
-    echo true
-  else
-    echo false
   fi
 }
 
@@ -80,13 +67,13 @@ _remote_include() {
   if [ -f mkdkr.csv ]; then
     declare -a _MKDKR_INCLUDES_LIST=()
 
-    pretty "orange" "\ninclude\n"
+    _pretty "orange" "\ninclude\n"
     while IFS= read -r LINE; do
       PARAMS=($(echo "$LINE" | tr "," " "))
       ALIAS="${PARAMS[0]}"
 
       if [ -z "${PARAMS[1]}" ]; then
-        echo "Needs git path to clone for: ${ALIAS}"
+        _pretty "include: needs git path to clone for: ${ALIAS}"
         exit 1
       fi
 
@@ -105,11 +92,11 @@ _remote_include() {
       mkdir -p "${_MKDKR_TMP_DIR}/includes"
 
       if [ -d "${_MKDKR_TMP_DIR}/includes/${ALIAS}" ]; then
-        pretty "light_cyan" "update, alias: ${ALIAS}, repos: ${REPOS}, checkout: ${CHECKOUT}, file: ${FILE}"
+        _pretty "light_cyan" "update: ${ALIAS}\nrepos: ${REPOS}\ncheckout: ${CHECKOUT}\nfile: ${FILE}"
         git -C "${_MKDKR_TMP_DIR}/includes/${ALIAS}/" pull --depth "${MKDKR_INCLUDE_CLONE_DEPTH:-1}" origin "$CHECKOUT" >&2
         git -C "${_MKDKR_TMP_DIR}/includes/${ALIAS}/" reset --hard "origin/${CHECKOUT}" >&2
       else
-        pretty "light_cyan" "clone, alias: ${ALIAS}, repos: ${REPOS}, checkout: ${CHECKOUT}, file: ${FILE}"
+        _pretty "light_cyan" "clone: ${ALIAS}\nrepos: ${REPOS}\ncheckout: ${CHECKOUT}\nfile: ${FILE}"
         git clone "${REPOS}" --branch "${CHECKOUT}" --depth "${MKDKR_INCLUDE_CLONE_DEPTH:-1}" "${_MKDKR_TMP_DIR}/includes/${ALIAS}" >&2
       fi
 
@@ -130,12 +117,12 @@ SHELL = /bin/bash
 MKDKR_BRANCH_NAME=$MKDKR_BRANCH_NAME
 MKDKR_BRANCH_NAME_SLUG=$MKDKR_BRANCH_NAME_SLUG
 
-define . =
+define dkr =
   . .mkdkr
-  \$(eval MKDKR_JOB_NAME=\$(shell . .mkdkr; .... \$(@)))
+  \$(eval MKDKR_JOB_NAME=\$(shell . .mkdkr; _job_uniq_name \$(@)))
   \$(eval MKDKR_JOB_STDOUT="${_MKDKR_TMP_DIR}/\${MKDKR_JOB_NAME}.log")
-  trap . EXIT
-  pretty "orange" "\n\$(@)\n"
+  trap _job_destroy EXIT
+  _pretty "orange" "\nstart: \$(@)\n"
 endef
 
 define stdout =
@@ -157,7 +144,7 @@ _header() {
   echo "${_MKDKR_INCLUDE}"
 }
 
-....() {
+_job_uniq_name() {
   if [ -z "${MKDKR_JOB_NAME}" ]; then
     _MKDKR_JOB_NAME=$(echo "${1}_$(cat /proc/sys/kernel/random/uuid)" | sed 's/\//_/g')
     export MKDKR_JOB_NAME="${_MKDKR_JOB_NAME}"
@@ -165,80 +152,108 @@ _header() {
   echo "${MKDKR_JOB_NAME}"
 }
 
-# shellcheck disable=SC1036
-...() {
+_job_destroy() {
+  ALIVE=$(docker ps | grep "${MKDKR_JOB_NAME}" | awk '{print $1}')
+  if [ "${ALIVE[0]}" != "" ]; then
+    _pretty "cyan" "\ncleanup:"
+    docker ps | grep "${MKDKR_JOB_NAME}" | awk '{print $1}' | xargs -i{} docker rm -f {} >&2
+    if [ -f "${_MKDKR_TMP_DIR}/${MKDKR_JOB_NAME}.log" ]; then
+      rm "${_MKDKR_TMP_DIR}/${MKDKR_JOB_NAME}.log"
+    fi
+  fi
+  _pretty "orange" "\ncompleted:"
+  times
+}
+
+instance:() {
   OLDIFS=$IFS
   IFS='⠀' # Braille Pattern Blank (U+2800)
-  TYPE="${1}"
-  IMAGE="${2}"
-  ARGS="${*:3}"
-
-  if [ "$(_implicit_job "${TYPE}")" == true ]; then
-    ARGS="${*:2}"
-    IMAGE="${TYPE}"
-    TYPE="job"
-  fi
+  IMAGE="${1}"
+  ARGS="${*:2}"
 
   _remove_running_job
 
-  pretty "cyan" "... ${TYPE} ${IMAGE} ${ARGS[*]}"
+  _pretty "cyan" "\ninstance: ${IMAGE} ${ARGS[*]}"
 
-  if [ "${TYPE}" == "service" ]; then
-    docker run --rm -d \
-      -v "${PWD}":"${PWD}" \
-      --workdir "${PWD}" \
-      $ARGS \
-      --name "service_${MKDKR_JOB_NAME}" \
-      "${IMAGE}" >&2
-  else
-    if [ "${TYPE}" == "privileged" ]; then
-      PRIVILEGED=(--privileged -v /var/run/docker.sock:/var/run/docker.sock)
-    fi
-
-    SERVICE=$(_image "service_${MKDKR_JOB_NAME}" | sed 's/:.*//g;s/\//_/g')
-    if [ "${SERVICE}" != "" ]; then
-      SERVICES=(--link "service_${MKDKR_JOB_NAME}:${SERVICE}")
-    fi
-
-    docker run --rm -d \
-      -v "${PWD}":"${PWD}" \
-      --workdir "${PWD}" \
-      --entrypoint "" \
-      $ARGS \
-      ${PRIVILEGED[@]} \
-      ${SERVICES[@]} \
-      --name "job_${MKDKR_JOB_NAME}" \
-      "${IMAGE}" sleep "${MKDKR_TTL:-3600}" >&2
+  SERVICE=$(_image "service_${MKDKR_JOB_NAME}" | sed 's/:.*//g;s/\//_/g')
+  if [ "${SERVICE}" != "" ]; then
+    SERVICES=(--link "service_${MKDKR_JOB_NAME}:${SERVICE}")
   fi
+
+  docker run --rm -d \
+    -v "${PWD}":"${PWD}" \
+    --workdir "${PWD}" \
+    --entrypoint "" \
+    $ARGS \
+    ${SERVICES[@]} \
+    --name "job_${MKDKR_JOB_NAME}" \
+    "${IMAGE}" sleep "${MKDKR_TTL:-3600}" >&2
+
   IFS=$OLDIFS
 }
 
-# shellcheck disable=SC1036
-..() {
+service:() {
+  OLDIFS=$IFS
+  IFS='⠀' # Braille Pattern Blank (U+2800)
+  IMAGE="${1}"
+  ARGS="${*:2}"
+
+  _remove_running_job
+
+  _pretty "cyan" "\nservice: ${IMAGE} ${ARGS[*]}"
+
+  docker run --rm -d \
+    -v "${PWD}":"${PWD}" \
+    --workdir "${PWD}" \
+    $ARGS \
+    --name "service_${MKDKR_JOB_NAME}" \
+    "${IMAGE}" >&2
+
+  IFS=$OLDIFS
+}
+
+dind:() {
+  OLDIFS=$IFS
+  IFS='⠀' # Braille Pattern Blank (U+2800)
+  IMAGE="${1}"
+  ARGS="${*:2}"
+
+  _remove_running_job
+
+  _pretty "cyan" "\ndind: ${IMAGE} ${ARGS[*]}"
+
+  SERVICE=$(_image "service_${MKDKR_JOB_NAME}" | sed 's/:.*//g;s/\//_/g')
+  if [ "${SERVICE}" != "" ]; then
+    SERVICES=(--link "service_${MKDKR_JOB_NAME}:${SERVICE}")
+  fi
+
+  docker run --rm -d \
+    -v "${PWD}":"${PWD}" \
+    --workdir "${PWD}" \
+    --entrypoint "" \
+    $ARGS \
+    --privileged -v /var/run/docker.sock:/var/run/docker.sock \
+    ${SERVICES[@]} \
+    --name "job_${MKDKR_JOB_NAME}" \
+    "${IMAGE}" sleep "${MKDKR_TTL:-3600}" >&2
+
+  IFS=$OLDIFS
+}
+
+run:() {
   CONTAINER_NAME="job_${MKDKR_JOB_NAME}"
 
-  pretty "green" ".. ${*}"
+  _pretty "green" "\nrun: ${*}"
 
   if [ ! -d "${_MKDKR_TMP_DIR}" ]; then
     mkdir -p "${_MKDKR_TMP_DIR}"
-  fi 
+  fi
 
   docker exec -i ${CONTAINER_NAME} ${MKDKR_SHELL:-sh} -c "$*" | tee "${_MKDKR_TMP_DIR}/${MKDKR_JOB_NAME}.log"
   EXIT_CODE="${PIPESTATUS[0]}"
   if [ "${EXIT_CODE}" != "0" ]; then
     .
     exit "${EXIT_CODE}"
-  fi
-}
-
-.() {
-  ALIVE=$(docker ps | grep "${MKDKR_JOB_NAME}" | awk '{print $1}')
-  if [ "${ALIVE[0]}" != "" ]; then
-    pretty "green" "."
-    docker ps | grep "${MKDKR_JOB_NAME}" | awk '{print $1}' | xargs -i{} docker rm -f {} >&2
-    if [ -f "${_MKDKR_TMP_DIR}/${MKDKR_JOB_NAME}.log" ]; then
-      rm "${_MKDKR_TMP_DIR}/${MKDKR_JOB_NAME}.log"
-    fi
   fi
 }
 

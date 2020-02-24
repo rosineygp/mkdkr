@@ -6,14 +6,14 @@ test_mkdkr_run_simple() {
   unset MKDKR_JOB_NAME
 
   NAME="simple_instance"
-  .... "${NAME}"
+  _job_uniq_name "${NAME}"
 
-  ... alpine
+  instance: alpine
 
-  .. echo "hello world!"
-  .
+  run: echo "hello world!"
+  _job_destroy
 
-  pretty "light_green" "\nRan 1 assert(s)\n"
+  _pretty "light_green" "\nRan 1 assert(s)\n"
 }
 
 test_mkdkr_return_error() {
@@ -22,15 +22,15 @@ test_mkdkr_return_error() {
   unset MKDKR_JOB_NAME
 
   NAME="simple_instance"
-  .... "${NAME}"
+  _job_uniq_name "${NAME}"
 
-  ... alpine
+  instance: alpine
 
-  (.. noooooo)&
+  (run: noooooo)&
 
-  .
+  _job_destroy
 
-  pretty "light_green" "\nRan 1 assert(s)\n"
+  _pretty "light_green" "\nRan 1 assert(s)\n"
 }
 
 test_mkdkr_arguments() {
@@ -39,15 +39,15 @@ test_mkdkr_arguments() {
   unset MKDKR_JOB_NAME
 
   NAME="simple_instance"
-  .... "${NAME}"
+  _job_uniq_name "${NAME}"
 
-  ... ubuntu
+  instance: ubuntu
 
-  .. apt-get update -qq
-  .. apt-get install htop -y
-  .
+  run: apt-get update -qq
+  run: apt-get install htop -y
+  _job_destroy
 
-  pretty "light_green" "\nRan 1 assert(s)\n"
+  _pretty "light_green" "\nRan 1 assert(s)\n"
 }
 
 test_mkdkr_line-break() {
@@ -56,18 +56,18 @@ test_mkdkr_line-break() {
   unset MKDKR_JOB_NAME
 
   NAME="simple_instance"
-  .... "${NAME}"
+  _job_uniq_name "${NAME}"
 
-  ... alpine
+  instance: alpine
 
-  .. apk add \
+  run: apk add \
     curl \
     htop \
     bash
 
-  .
+  _job_destroy
 
-  pretty "light_green" "\nRan 1 assert(s)\n"
+  _pretty "light_green" "\nRan 1 assert(s)\n"
 }
 
 test_mkdkr_escape() {
@@ -76,18 +76,18 @@ test_mkdkr_escape() {
   unset MKDKR_JOB_NAME
 
   NAME="simple_instance"
-  .... "${NAME}"
+  _job_uniq_name "${NAME}"
 
-  ... debian
+  instance: debian
 
-  .. apt-get update \&\& \
+  run: apt-get update \&\& \
     apt-get install \
       curl \
       htop -y
 
-  .
+  _job_destroy
 
-  pretty "light_green" "\nRan 1 assert(s)\n"
+  _pretty "light_green" "\nRan 1 assert(s)\n"
 }
 
 test_mkdkr_pipe() {
@@ -96,15 +96,15 @@ test_mkdkr_pipe() {
   unset MKDKR_JOB_NAME
 
   NAME="simple_instance"
-  .... "${NAME}"
+  _job_uniq_name "${NAME}"
 
-  ... alpine
+  instance: alpine
 
-  .. ls -la \| wc -l
+  run: ls -la \| wc -l
 
-  .
+  _job_destroy
 
-  pretty "light_green" "\nRan 1 assert(s)\n"
+  _pretty "light_green" "\nRan 1 assert(s)\n"
 }
 
 test_mkdkr_redirect_internal() {
@@ -113,15 +113,15 @@ test_mkdkr_redirect_internal() {
   unset MKDKR_JOB_NAME
 
   NAME="simple_instance"
-  .... "${NAME}"
+  _job_uniq_name "${NAME}"
 
-  ... alpine
+  instance: alpine
 
-  .. ls -la \> /tmp/my-file
+  run: ls -la \> /tmp/my-file
 
-  .
+  _job_destroy
 
-  pretty "light_green" "\nRan 1 assert(s)\n"
+  _pretty "light_green" "\nRan 1 assert(s)\n"
 }
 
 test_mkdkr_get_output() {
@@ -130,17 +130,17 @@ test_mkdkr_get_output() {
   unset MKDKR_JOB_NAME
 
   NAME="simple_instance"
-  .... "${NAME}"
+  _job_uniq_name "${NAME}"
 
-  ... alpine
+  instance: alpine
 
-  OUT=$(.. ls -la)
+  OUT=$(run: ls -la)
 
   echo $OUT
 
-  .
+  _job_destroy
 
-  pretty "light_green" "\nRan 1 assert(s)\n"
+  _pretty "light_green" "\nRan 1 assert(s)\n"
 }
 
 
@@ -150,20 +150,20 @@ test_mkdkr_print_env_var() {
   unset MKDKR_JOB_NAME
 
   NAME="simple_instance"
-  .... "${NAME}"
+  _job_uniq_name "${NAME}"
 
-  ... alpine \
+  instance: alpine \
     --env "name=foo" \
     --env "last=bar" \
     --env "fullname=foo bar"
 
-  .. echo '$name'
-  .. echo '$last'
-  .. echo '$fullname'
+  run: echo '$name'
+  run: echo '$last'
+  run: echo '$fullname'
 
-  .
+  _job_destroy
 
-  pretty "light_green" "\nRan 1 assert(s)\n"
+  _pretty "light_green" "\nRan 1 assert(s)\n"
 }
 
 # shellcheck disable=SC1091

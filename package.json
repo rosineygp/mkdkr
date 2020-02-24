@@ -35,7 +35,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "make shellcheck",
+      "pre-commit": "make lint.shellcheck",
       "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
     }  
   }

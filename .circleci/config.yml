@@ -6,41 +6,32 @@ jobs:
     steps:
     - checkout
     - run:
-        name: commitlint
-        command: make commitlint
+        name: lint commit
+        command: make lint.commit
     - run:
-        name: shellcheck
-        command: make shellcheck
+        name: lint shellcheck
+        command: make lint.shellcheck
     - run:
-        name: unit
-        command: make unit
+        name: test unit
+        command: make test.unit
     - run:
-        name: simple
-        command: make simple
+        name: examples simple
+        command: make examples.simple
     - run:
-        name: multi-images
-        command: make multi-images
+        name: examples service
+        command: make examples.service
     - run:
-        name: service
-        command: make service
+        name: examples dind
+        command: make examples.dind
     - run:
-        name: dind
-        command: make dind
+        name: examples escapes
+        command: make examples.escapes
     - run:
-        name: shell
-        command: make shell
+        name: examples stdout
+        command: make examples.stdout
     - run:
-        name: trap
-        command: make trap
+        name: examples shell
+        command: make examples.shell
     - run:
-        name: implicit-job
-        command: make implicit-job
-    - run:
-        name: escapes
-        command: make escapes
-    - run:
-        name: stdout
-        command: make stdout
-    - run:
-        name: pipeline
-        command: make examples/pipeline
+        name: examples pipeline
+        command: make examples.pipeline

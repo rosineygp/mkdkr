@@ -2,7 +2,7 @@
 
 _cleanup() {
 
-  pretty "yellow" "cleanup"
+  _pretty "yellow" "cleanup"
 
   if [ -f mkdkr.csv ]; then
     rm mkdkr.csv
@@ -19,7 +19,7 @@ test_mkdkr_remote_include_empty() {
   source .mkdkr
   
   _remote_include
-  pretty "light_purple" "nothing happens [ OK ]"
+  _pretty "light_purple" "nothing happens [ OK ]"
 
   echo -e "\nRan\e[36m 1 \e[0masserts.\n"
 }
@@ -38,7 +38,7 @@ test_mkdkr_remote_include_incompleted_csv() {
   fi
 
   assertEquals "true" "$CLONE"
-  [[ "$?" == "0" ]] && pretty "light_purple" "csv file wrong [ OK ]"
+  [[ "$?" == "0" ]] && _pretty "light_purple" "csv file wrong [ OK ]"
 
   echo -e "\nRan\e[36m 1 \e[0masserts.\n"
 }
@@ -57,11 +57,11 @@ test_mkdkr_remote_include_simple() {
   fi
 
   assertEquals "true" "$CLONE"
-  [[ "$?" == "0" ]] && pretty "light_purple" "remote include success [ OK ]"
+  [[ "$?" == "0" ]] && _pretty "light_purple" "remote include success [ OK ]"
 
   BRANCH="$(git -C .tmp/includes/commitlint rev-parse --abbrev-ref HEAD)"
   assertEquals "master" "$BRANCH"
-  [[ "$?" == "0" ]] && pretty "light_purple" "branch is master [ OK ]"  
+  [[ "$?" == "0" ]] && _pretty "light_purple" "branch is master [ OK ]"  
 
   echo -e "\nRan\e[36m 2 \e[0masserts.\n"
 }
@@ -80,11 +80,11 @@ test_mkdkr_remote_include_tagged() {
   fi
 
   assertEquals "true" "$CLONE"
-  [[ "$?" == "0" ]] && pretty "light_purple" "remote include success [ OK ]"
+  [[ "$?" == "0" ]] && _pretty "light_purple" "remote include success [ OK ]"
 
   BRANCH="$(git -C .tmp/includes/commitlint rev-parse --abbrev-ref HEAD)"
   assertEquals "HEAD" "$BRANCH"
-  [[ "$?" == "0" ]] && pretty "light_purple" "branch is head [ OK ]"  
+  [[ "$?" == "0" ]] && _pretty "light_purple" "branch is head [ OK ]"  
 
   echo -e "\nRan\e[36m 2 \e[0masserts.\n"
 }
@@ -103,7 +103,7 @@ test_mkdkr_remote_include_missing_reference() {
   fi
 
   assertEquals "false" "$CLONE"
-  [[ "$?" == "0" ]] && pretty "light_purple" "missing reference not cloned [ OK ]"
+  [[ "$?" == "0" ]] && _pretty "light_purple" "missing reference not cloned [ OK ]"
 
   echo -e "\nRan\e[36m 1 \e[0masserts.\n"
 }
@@ -122,14 +122,14 @@ test_mkdkr_remote_include_named_reference() {
   fi
 
   assertEquals "true" "$CLONE"
-  [[ "$?" == "0" ]] && pretty "light_purple" "remote include success [ OK ]"
+  [[ "$?" == "0" ]] && _pretty "light_purple" "remote include success [ OK ]"
 
   BRANCH="$(git -C .tmp/includes/commitlint rev-parse --abbrev-ref HEAD)"
   assertEquals "master" "$BRANCH"
-  [[ "$?" == "0" ]] && pretty "light_purple" "branch is master [ OK ]"
+  [[ "$?" == "0" ]] && _pretty "light_purple" "branch is master [ OK ]"
 
   assertContains "$INCLUDE_STRING" "testing.mk"
-  [[ "$?" == "0" ]] && pretty "light_purple" "string contains custom file reference [ OK ]"
+  [[ "$?" == "0" ]] && _pretty "light_purple" "string contains custom file reference [ OK ]"
 
   echo -e "\nRan\e[36m 3 \e[0masserts.\n"
 }
@@ -149,11 +149,11 @@ test_mkdkr_remote_include_update_include() {
   fi
 
   assertEquals "true" "$CLONE"
-  [[ "$?" == "0" ]] && pretty "light_purple" "remote include success [ OK ]"
+  [[ "$?" == "0" ]] && _pretty "light_purple" "remote include success [ OK ]"
 
   BRANCH="$(git -C .tmp/includes/commitlint rev-parse --abbrev-ref HEAD)"
   assertEquals "master" "$BRANCH"
-  [[ "$?" == "0" ]] && pretty "light_purple" "branch is master [ OK ]"  
+  [[ "$?" == "0" ]] && _pretty "light_purple" "branch is master [ OK ]"  
 
   echo -e "\nRan\e[36m 2 \e[0masserts.\n"
 }

@@ -1,3 +1,6 @@
+# pipeline autogen by mkdkr_exporter
+# https://gitlab.com/rosiney.gp/mkdkr_exporter
+
 language: minimal
 
 dist: bionic
@@ -11,40 +14,32 @@ before_install:
 jobs:
   include:
     - stage: lint
-      name: commitlint
-      script: make commitlint
+      name: lint commit
+      script: make lint.commit
     - stage: lint
-      name: shellcheck
-      script: make shellcheck
-    - stage: unit
-      name: make unit
-    - stage: scenarios
-      name: simple
-      script: make simple
-    - stage: scenarios
-      name: multi-images
-      script: make multi-images
-    - stage: scenarios
-      name: service
-      script: make service
-    - stage: scenarios
-      name: dind
-      script: make dind
-    - stage: scenarios
-      name: shell
-      script: make shell
-    - stage: scenarios
-      name: escapes
-      script: make escapes
-    - stage: scenarios
-      name: trap
-      script: make trap
-    - stage: scenarios
-      name: implicit-job
-      script: make implicit-job
-    - stage: scenarios
-      name: stdout
-      script: make stdout
-    - stage: scenarios
-      name: pipeline
-      script: make examples/pipeline
+      name: lint shellcheck
+      script: make lint.shellcheck
+    - stage: test
+      name: test unit
+      script: make test.unit
+    - stage: examples
+      name: examples simple
+      script: make examples.simple
+    - stage: examples
+      name: examples service
+      script: make examples.service
+    - stage: examples
+      name: examples dind
+      script: make examples.dind
+    - stage: examples
+      name: examples escapes
+      script: make examples.escapes
+    - stage: examples
+      name: examples stdout
+      script: make examples.stdout
+    - stage: examples
+      name: examples shell
+      script: make examples.shell
+    - stage: examples
+      name: examples pipeline
+      script: make examples.pipeline

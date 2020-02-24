@@ -1,19 +1,19 @@
 include $(shell bash .mkdkr init)
 
 service:
-	@$(.)
-	... service nginx
-	... alpine --link service_$$MKDKR_JOB_NAME:nginx
-	.. apk add curl
-	.. curl -s nginx
+	@$(dkr)
+	service: nginx
+	instance: alpine --link service_$$MKDKR_JOB_NAME:nginx
+	run: apk add curl
+	run: curl -s nginx
 
 link:
-	@$(.)
-	... service nginx
-	... alpine
-	.. apk add curl
-	.. curl -s nginx
-	... ubuntu:18.04
-	.. apt-get update
-	.. apt-get install curl -y
-	.. curl -s nginx
+	@$(dkr)
+	service: nginx
+	instance: alpine
+	run: apk add curl
+	run: curl -s nginx
+	instance: ubuntu:18.04
+	run: apt-get update
+	run: apt-get install curl -y
+	run: curl -s nginx

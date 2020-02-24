@@ -1,7 +1,10 @@
+# pipeline autogen by mkdkr_exporter
+# https://gitlab.com/rosiney.gp/mkdkr_exporter
+
 stages:
   - lint
-  - unit
-  - scenarios
+  - test
+  - examples
 
 services:
   - docker:19.03.1-dind
@@ -13,71 +16,54 @@ variables:
 image: docker:19
 
 before_script:
-  - apk add make
-  - apk add bash
-  - apk add git
+  - apk add make bash git
 
-commitlint:
+lint commit:
   stage: lint
   script:
-  - make commitlint
+  - make lint.commit
 
-shellcheck:
+lint shellcheck:
   stage: lint
   script:
-  - make shellcheck
+  - make lint.shellcheck
 
-unit:
-  stage: unit
+test unit:
+  stage: test
   script:
-  - make unit
+  - make test.unit
 
-simple:
-  stage: scenarios
+examples simple:
+  stage: examples
   script:
-  - make simple
+  - make examples.simple
 
-multi-images:
-  stage: scenarios
+examples service:
+  stage: examples
   script:
-  - make multi-images
+  - make examples.service
 
-service:
-  stage: scenarios
+examples dind:
+  stage: examples
   script:
-  - make service
+  - make examples.dind
 
-dind:
-  stage: scenarios
+examples escapes:
+  stage: examples
   script:
-  - make dind
+  - make examples.escapes
 
-shell:
-  stage: scenarios
+examples stdout:
+  stage: examples
   script:
-  - make shell
+  - make examples.stdout
 
-trap:
-  stage: scenarios
+examples shell:
+  stage: examples
   script:
-  - make trap
+  - make examples.shell
 
-implicit-job:
-  stage: scenarios
+examples pipeline:
+  stage: examples
   script:
-  - make implicit-job
-
-escapes:
-  stage: scenarios
-  script:
-  - make escapes
-
-stdout:
-  stage: scenarios
-  script:
-  - make stdout
-
-pipeline:
-    stage: scenarios
-    script:
-    - make examples/pipeline
+  - make examples.pipeline
