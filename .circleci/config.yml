@@ -1,0 +1,37 @@
+version: 2.1
+jobs:
+  build:
+    machine:
+      image: ubuntu-1604:201903-01
+    steps:
+    - checkout
+    - run:
+        name: lint commit
+        command: make lint.commit
+    - run:
+        name: lint shellcheck
+        command: make lint.shellcheck
+    - run:
+        name: test unit
+        command: make test.unit
+    - run:
+        name: examples simple
+        command: make examples.simple
+    - run:
+        name: examples service
+        command: make examples.service
+    - run:
+        name: examples dind
+        command: make examples.dind
+    - run:
+        name: examples escapes
+        command: make examples.escapes
+    - run:
+        name: examples stdout
+        command: make examples.stdout
+    - run:
+        name: examples shell
+        command: make examples.shell
+    - run:
+        name: examples pipeline
+        command: make examples.pipeline
