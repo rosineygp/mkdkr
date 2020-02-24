@@ -1,0 +1,69 @@
+# pipeline autogen by mkdkr_exporter
+# https://gitlab.com/rosiney.gp/mkdkr_exporter
+
+stages:
+  - lint
+  - test
+  - examples
+
+services:
+  - docker:19.03.1-dind
+
+variables:
+  DOCKER_HOST: tcp://docker:2376
+  DOCKER_TLS_CERTDIR: "/certs"
+
+image: docker:19
+
+before_script:
+  - apk add make bash git
+
+lint commit:
+  stage: lint
+  script:
+  - make lint.commit
+
+lint shellcheck:
+  stage: lint
+  script:
+  - make lint.shellcheck
+
+test unit:
+  stage: test
+  script:
+  - make test.unit
+
+examples simple:
+  stage: examples
+  script:
+  - make examples.simple
+
+examples service:
+  stage: examples
+  script:
+  - make examples.service
+
+examples dind:
+  stage: examples
+  script:
+  - make examples.dind
+
+examples escapes:
+  stage: examples
+  script:
+  - make examples.escapes
+
+examples stdout:
+  stage: examples
+  script:
+  - make examples.stdout
+
+examples shell:
+  stage: examples
+  script:
+  - make examples.shell
+
+examples pipeline:
+  stage: examples
+  script:
+  - make examples.pipeline
