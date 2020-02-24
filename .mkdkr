@@ -252,7 +252,7 @@ run:() {
   docker exec -i ${CONTAINER_NAME} ${MKDKR_SHELL:-sh} -c "$*" | tee "${_MKDKR_TMP_DIR}/${MKDKR_JOB_NAME}.log"
   EXIT_CODE="${PIPESTATUS[0]}"
   if [ "${EXIT_CODE}" != "0" ]; then
-    .
+    _job_destroy
     exit "${EXIT_CODE}"
   fi
 }
