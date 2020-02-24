@@ -64,6 +64,7 @@ Table of contents
   * [Sdtout](#stdout)
   * [Pipelines](#pipelines)
 * [Environment Variables](#environment-variables)
+* [Migration](#migration)
 
 # Usage
 
@@ -224,7 +225,7 @@ Execute a command inside docker container [**instance:** or **dind:**] (the last
 **Usage**
 
 ```Makefile
-my-runs:
+my-run:
 	@$(dkr)
 	instance: alpine
 	# run a command inside container
@@ -447,3 +448,22 @@ pipeline:
 
 > - to overwrite the values use: `export <var>=<value>`
 > - \* auto generated
+
+# Migration
+
+Migration from release-0.26, just execute in your project the following script.
+
+```bash
+curl https://raw.githubusercontent.com/rosineygp/mkdkr/master/.mkdkr > .mkdkr
+
+mkdkr_migration() {
+  sed -i 's/\.\.\.\ job/instance:\ /g;s/\.\.\.\ service/service:\ /g;s/\.\.\.\ privileged/dind:\ /g;s/\.\.\.\ /instance:\ /g;s/\.\.\ /run:\ /g;s/@\$(\.)/@\$(dkr)/g' ${1}
+}
+
+export -f mkdkr_migration
+
+mkdkr_migration Makefile
+
+find . -iname *.mk -exec bash -c 'mkdkr_migration "$0"' {} \;
+
+```
