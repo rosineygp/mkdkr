@@ -26,6 +26,30 @@ _pretty() {
   echo -e "${colors[${key}]}${*:2}\e[0m" >&2
 }
 
+# https://github.com/dylanaraps/pure-bash-bible#generate-a-uuid-v4
+_uuid() {
+  C="89ab"
+
+  for ((N = 0; N < 16; ++N)); do
+    B="$((RANDOM % 256))"
+
+    case "$N" in
+    6) printf '4%x' "$((B % 16))" ;;
+    8) printf '%c%x' "${C:$RANDOM%${#C}:1}" "$((B % 16))" ;;
+
+    3 | 5 | 7 | 9)
+      printf '%02x-' "$B"
+      ;;
+
+    *)
+      printf '%02x' "$B"
+      ;;
+    esac
+  done
+
+  printf '\n'
+}
+
 _image() {
   docker ps | grep "${1}" | awk '{print $2}'
 }
@@ -60,7 +84,7 @@ _branch_or_tag_name() {
 }
 
 _branch_or_tag_name_slug() {
-  echo "${1}" | sed -r 's/\/|_/-/g' | tr '[:upper:]' '[:lower:]'
+  echo "${1}" | sed -E 's/\/|_/-/g' | tr '[:upper:]' '[:lower:]'
 }
 
 _remote_include() {
@@ -138,7 +162,7 @@ _header() {
     mkdir -p "${_MKDKR_TMP_DIR}"
   fi
 
-  _MKDKR_INCLUDE="${_MKDKR_TMP_DIR}/mkdkr_header_$(cat /proc/sys/kernel/random/uuid).mk"
+  _MKDKR_INCLUDE="${_MKDKR_TMP_DIR}/mkdkr_header_$(_uuid).mk"
   _header_render >"${_MKDKR_INCLUDE}"
 
   echo "${_MKDKR_INCLUDE}"
@@ -146,7 +170,7 @@ _header() {
 
 _job_uniq_name() {
   if [ -z "${MKDKR_JOB_NAME}" ]; then
-    _MKDKR_JOB_NAME=$(echo "${1}_$(cat /proc/sys/kernel/random/uuid)" | sed 's/\//_/g')
+    _MKDKR_JOB_NAME=$(echo "${1}_$(_uuid)" | sed 's/\//_/g')
     export MKDKR_JOB_NAME="${_MKDKR_JOB_NAME}"
   fi
   echo "${MKDKR_JOB_NAME}"
