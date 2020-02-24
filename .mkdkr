@@ -84,7 +84,7 @@ _branch_or_tag_name() {
 }
 
 _branch_or_tag_name_slug() {
-  echo "${1}" | sed -r 's/\/|_/-/g' | tr '[:upper:]' '[:lower:]'
+  echo "${1}" | sed -E 's/\/|_/-/g' | tr '[:upper:]' '[:lower:]'
 }
 
 _remote_include() {
