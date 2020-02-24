@@ -1,0 +1,45 @@
+# pipeline autogen by mkdkr_exporter
+# https://gitlab.com/rosiney.gp/mkdkr_exporter
+
+language: minimal
+
+dist: bionic
+
+services:
+  - docker
+
+before_install:
+  - sudo apt-get install -y make
+
+jobs:
+  include:
+    - stage: lint
+      name: lint commit
+      script: make lint.commit
+    - stage: lint
+      name: lint shellcheck
+      script: make lint.shellcheck
+    - stage: test
+      name: test unit
+      script: make test.unit
+    - stage: examples
+      name: examples simple
+      script: make examples.simple
+    - stage: examples
+      name: examples service
+      script: make examples.service
+    - stage: examples
+      name: examples dind
+      script: make examples.dind
+    - stage: examples
+      name: examples escapes
+      script: make examples.escapes
+    - stage: examples
+      name: examples stdout
+      script: make examples.stdout
+    - stage: examples
+      name: examples shell
+      script: make examples.shell
+    - stage: examples
+      name: examples pipeline
+      script: make examples.pipeline
