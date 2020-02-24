@@ -12,8 +12,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v1
-    - name: coverage
-      run: make coverage
+    - name: coverage report
+      run: make _coverage.report
       env:
         SURGE_LOGIN: ${{ secrets.SURGE_LOGIN }}
         SURGE_TOKEN: ${{ secrets.SURGE_TOKEN }}

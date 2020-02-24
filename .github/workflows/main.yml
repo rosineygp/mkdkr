@@ -1,3 +1,6 @@
+# pipeline autogen by mkdkr_exporter
+# https://gitlab.com/rosiney.gp/mkdkr_exporter
+
 name: CI
 
 on: [push]
@@ -15,4 +18,17 @@ jobs:
       run: make lint.shellcheck
     - name: test unit
       run: make test.unit
-
+    - name: examples simple
+      run: make examples.simple
+    - name: examples service
+      run: make examples.service
+    - name: examples dind
+      run: make examples.dind
+    - name: examples escapes
+      run: make examples.escapes
+    - name: examples stdout
+      run: make examples.stdout
+    - name: examples shell
+      run: make examples.shell
+    - name: examples pipeline
+      run: make examples.pipeline

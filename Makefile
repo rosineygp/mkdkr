@@ -27,7 +27,7 @@ test.unit:
 
 DOCKER_BIN=https://download.docker.com/linux/static/stable/x86_64/docker-19.03.5.tgz
 
-coverage.report:
+_coverage.report:
 	@$(dkr)
 	dind: kcov/kcov:v31 --workdir $(PWD)/test
 	run: rm -rf coverage
