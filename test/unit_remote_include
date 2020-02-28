@@ -33,7 +33,7 @@ test_mkdkr_remote_include_incompleted_csv() {
   (_remote_include)
 
   CLONE="false"
-  if [ ! -d ".tmp/includes/commitlint/.git" ]; then
+  if [ "$(find .tmp/includes -maxdepth 1 -type d -name 'commitlint*' | wc -l )" == "0" ]; then
     CLONE="true"
   fi
 
@@ -52,18 +52,15 @@ test_mkdkr_remote_include_simple() {
   _remote_include
 
   CLONE="false"
-  if [ -d ".tmp/includes/commitlint/.git" ]; then
+
+  if [ "$(find .tmp/includes -maxdepth 1 -type d -name 'commitlint*' | wc -l )" != "0" ]; then
     CLONE="true"
   fi
 
   assertEquals "true" "$CLONE"
   [[ "$?" == "0" ]] && _pretty "light_purple" "remote include success [ OK ]"
 
-  BRANCH="$(git -C .tmp/includes/commitlint rev-parse --abbrev-ref HEAD)"
-  assertEquals "master" "$BRANCH"
-  [[ "$?" == "0" ]] && _pretty "light_purple" "branch is master [ OK ]"  
-
-  echo -e "\nRan\e[36m 2 \e[0masserts.\n"
+  echo -e "\nRan\e[36m 1 \e[0masserts.\n"
 }
 
 test_mkdkr_remote_include_tagged() {
@@ -74,19 +71,14 @@ test_mkdkr_remote_include_tagged() {
 
   _remote_include
 
-  CLONE="false"
-  if [ -d ".tmp/includes/commitlint/.git" ]; then
+  if [ "$(find .tmp/includes -maxdepth 1 -type d -name 'commitlint*' | wc -l )" != "0" ]; then
     CLONE="true"
   fi
 
   assertEquals "true" "$CLONE"
   [[ "$?" == "0" ]] && _pretty "light_purple" "remote include success [ OK ]"
 
-  BRANCH="$(git -C .tmp/includes/commitlint rev-parse --abbrev-ref HEAD)"
-  assertEquals "HEAD" "$BRANCH"
-  [[ "$?" == "0" ]] && _pretty "light_purple" "branch is head [ OK ]"  
-
-  echo -e "\nRan\e[36m 2 \e[0masserts.\n"
+  echo -e "\nRan\e[36m 1 \e[0masserts.\n"
 }
 
 test_mkdkr_remote_include_missing_reference() {
@@ -98,7 +90,7 @@ test_mkdkr_remote_include_missing_reference() {
   _remote_include
 
   CLONE="false"
-  if [ -d ".tmp/includes/commitlint/.git" ]; then
+  if [ "$(find .tmp/includes -maxdepth 1 -type d -name 'commitlint*' | wc -l )" != "0" ]; then
     CLONE="true"
   fi
 
@@ -117,43 +109,15 @@ test_mkdkr_remote_include_named_reference() {
   INCLUDE_STRING="$(_remote_include)"
 
   CLONE="false"
-  if [ -d ".tmp/includes/commitlint/.git" ]; then
+  if [ "$(find .tmp/includes -maxdepth 1 -type d -name 'commitlint*' | wc -l )" != "0" ]; then
     CLONE="true"
   fi
 
   assertEquals "true" "$CLONE"
   [[ "$?" == "0" ]] && _pretty "light_purple" "remote include success [ OK ]"
-
-  BRANCH="$(git -C .tmp/includes/commitlint rev-parse --abbrev-ref HEAD)"
-  assertEquals "master" "$BRANCH"
-  [[ "$?" == "0" ]] && _pretty "light_purple" "branch is master [ OK ]"
 
   assertContains "$INCLUDE_STRING" "testing.mk"
   [[ "$?" == "0" ]] && _pretty "light_purple" "string contains custom file reference [ OK ]"
-
-  echo -e "\nRan\e[36m 3 \e[0masserts.\n"
-}
-
-test_mkdkr_remote_include_update_include() {
-  _cleanup
-  source .mkdkr
-
-  echo "commitlint,https://github.com/rosineygp/mkdkr_commitlint.git" > mkdkr.csv
-
-  _remote_include
-  _remote_include
-
-  CLONE="false"
-  if [ -d ".tmp/includes/commitlint/.git" ]; then
-    CLONE="true"
-  fi
-
-  assertEquals "true" "$CLONE"
-  [[ "$?" == "0" ]] && _pretty "light_purple" "remote include success [ OK ]"
-
-  BRANCH="$(git -C .tmp/includes/commitlint rev-parse --abbrev-ref HEAD)"
-  assertEquals "master" "$BRANCH"
-  [[ "$?" == "0" ]] && _pretty "light_purple" "branch is master [ OK ]"  
 
   echo -e "\nRan\e[36m 2 \e[0masserts.\n"
 }
