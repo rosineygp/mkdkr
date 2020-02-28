@@ -115,16 +115,13 @@ _remote_include() {
 
       mkdir -p "${_MKDKR_TMP_DIR}/includes"
 
-      if [ -d "${_MKDKR_TMP_DIR}/includes/${ALIAS}" ]; then
-        _pretty "light_cyan" "update: ${ALIAS}\nrepos: ${REPOS}\ncheckout: ${CHECKOUT}\nfile: ${FILE}"
-        git -C "${_MKDKR_TMP_DIR}/includes/${ALIAS}/" pull --depth "${MKDKR_INCLUDE_CLONE_DEPTH:-1}" origin "$CHECKOUT" >&2
-        git -C "${_MKDKR_TMP_DIR}/includes/${ALIAS}/" reset --hard "origin/${CHECKOUT}" >&2
-      else
-        _pretty "light_cyan" "clone: ${ALIAS}\nrepos: ${REPOS}\ncheckout: ${CHECKOUT}\nfile: ${FILE}"
-        git clone "${REPOS}" --branch "${CHECKOUT}" --depth "${MKDKR_INCLUDE_CLONE_DEPTH:-1}" "${_MKDKR_TMP_DIR}/includes/${ALIAS}" >&2
-      fi
+      _MKDKR_INCLUDE_PATH="${_MKDKR_TMP_DIR}/includes/${ALIAS}_$(_uuid)"
 
-      _MKDKR_INCLUDES_LIST+=("${_MKDKR_TMP_DIR}/includes/${ALIAS}/${FILE}")
+      _pretty "light_cyan" "clone: ${ALIAS}\nrepos: ${REPOS}\ncheckout: ${CHECKOUT}\nfile: ${FILE}"
+      git clone "${REPOS}" --branch "${CHECKOUT}" --depth "${MKDKR_INCLUDE_CLONE_DEPTH:-1}" "${_MKDKR_INCLUDE_PATH}" >&2
+      rm -rf "${_MKDKR_INCLUDE_PATH}/.git"
+
+      _MKDKR_INCLUDES_LIST+=("${_MKDKR_INCLUDE_PATH}/${FILE}")
     done < <(grep -v '^ *#' <mkdkr.csv)
 
     echo "${_MKDKR_INCLUDES_LIST[*]}"
@@ -158,6 +155,9 @@ EOF
 _header() {
   if [ -d "${_MKDKR_TMP_DIR}" ]; then
     find "${_MKDKR_TMP_DIR}" -name "mkdkr_header_*.mk" -type f -mmin +60 -delete
+    if [ -d "${_MKDKR_TMP_DIR}/includes" ]; then
+      find "${_MKDKR_TMP_DIR}/includes" -maxdepth 1 -type d -mmin +60 -exec rm -rf {} \;
+    fi
   else
     mkdir -p "${_MKDKR_TMP_DIR}"
   fi
