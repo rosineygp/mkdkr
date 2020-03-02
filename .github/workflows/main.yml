@@ -6,29 +6,80 @@ name: CI
 on: [push]
 
 jobs:
-  pipeline:
-
+  lint_commit:
     runs-on: ubuntu-18.04
-
     steps:
     - uses: actions/checkout@v1
     - name: lint commit
       run: make lint.commit
+  lint_shellcheck:
+    runs-on: ubuntu-18.04
+    steps:
+    - uses: actions/checkout@v1
     - name: lint shellcheck
       run: make lint.shellcheck
+  test_unit:
+    runs-on: ubuntu-18.04
+    needs:
+      - lint_commit
+      - lint_shellcheck
+    steps:
+    - uses: actions/checkout@v1
     - name: test unit
       run: make test.unit
+  examples_simple:
+    runs-on: ubuntu-18.04
+    needs:
+      - test_unit
+    steps:
+    - uses: actions/checkout@v1
     - name: examples simple
       run: make examples.simple
+  examples_service:
+    runs-on: ubuntu-18.04
+    needs:
+      - test_unit
+    steps:
+    - uses: actions/checkout@v1
     - name: examples service
       run: make examples.service
+  examples_dind:
+    runs-on: ubuntu-18.04
+    needs:
+      - test_unit
+    steps:
+    - uses: actions/checkout@v1
     - name: examples dind
       run: make examples.dind
+  examples_escapes:
+    runs-on: ubuntu-18.04
+    needs:
+      - test_unit
+    steps:
+    - uses: actions/checkout@v1
     - name: examples escapes
       run: make examples.escapes
+  examples_stdout:
+    runs-on: ubuntu-18.04
+    needs:
+      - test_unit
+    steps:
+    - uses: actions/checkout@v1
     - name: examples stdout
       run: make examples.stdout
+  examples_shell:
+    runs-on: ubuntu-18.04
+    needs:
+      - test_unit
+    steps:
+    - uses: actions/checkout@v1
     - name: examples shell
       run: make examples.shell
+  examples_pipeline:
+    runs-on: ubuntu-18.04
+    needs:
+      - test_unit
+    steps:
+    - uses: actions/checkout@v1
     - name: examples pipeline
       run: make examples.pipeline
