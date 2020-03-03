@@ -133,14 +133,14 @@ _header_render() {
   cat <<EOF
 .EXPORT_ALL_VARIABLES:
 .ONESHELL:
-SHELL = /bin/bash
+SHELL = bash
 
 MKDKR_BRANCH_NAME=$MKDKR_BRANCH_NAME
 MKDKR_BRANCH_NAME_SLUG=$MKDKR_BRANCH_NAME_SLUG
 
 define dkr =
-  . .mkdkr
-  \$(eval MKDKR_JOB_NAME=\$(shell . .mkdkr; _job_uniq_name \$(@)))
+  source .mkdkr
+  \$(eval MKDKR_JOB_NAME=\$(shell source .mkdkr; _job_uniq_name \$(@)))
   \$(eval MKDKR_JOB_STDOUT="${_MKDKR_TMP_DIR}/\${MKDKR_JOB_NAME}.log")
   trap _job_destroy EXIT
   _pretty "orange" "\nstart: \$(@)\n"
