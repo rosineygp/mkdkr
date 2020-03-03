@@ -27,13 +27,43 @@ test.unit:
 
 DOCKER_BIN=https://download.docker.com/linux/static/stable/x86_64/docker-19.03.5.tgz
 
+define _docker_cli =
+	run: curl -s '$(DOCKER_BIN) > /tmp/docker.tgz'
+	run: tar -zxvf /tmp/docker.tgz --strip=1 -C /usr/local/bin/
+endef
+
+define _bash_reqs =
+	$(dkr)
+	dind: $(1)
+	run: apk add curl git make
+	$(call _docker_cli)
+	run: make test.unit
+endef
+
+bash.v5-0:
+	$(call _bash_reqs, bash:5.0)
+
+bash.v4-4:
+	$(call _bash_reqs, bash:4.4)
+
+bash.v4-3:
+	$(call _bash_reqs, bash:4.3)
+
+bash.v4-2:
+	$(call _bash_reqs, bash:4.2)
+
+bash.v4-1:
+	$(call _bash_reqs, bash:4.1)
+
+bash.v4-0:
+	$(call _bash_reqs, bash:4.0)
+
 _coverage.report:
 	@$(dkr)
 	dind: kcov/kcov:v31 --workdir $(PWD)/test
 	run: rm -rf coverage
 	run: 'apt-get update && apt-get install -y curl jq bc git'
-	run: curl -s '$(DOCKER_BIN) > /tmp/docker.tgz'
-	run: tar -zxvf /tmp/docker.tgz --strip=1 -C /usr/local/bin/
+	$(call _docker_cli)
 	run: kcov --include-path=.mkdkr coverage unit
 	run: './cover > coverage/coverage.json'
 	instance: node:12 \
