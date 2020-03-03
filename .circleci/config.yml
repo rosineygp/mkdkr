@@ -1,63 +1,55 @@
-# pipeline autogen by mkdkr_exporter
-# https://gitlab.com/rosiney.gp/mkdkr_exporter
-
-language: minimal
-
-dist: bionic
-
-services:
-  - docker
-
-before_install:
-  - sudo apt-get install -y make
-
+version: 2.1
 jobs:
-  include:
-    - stage: lint
-      name: lint commit
-      script: make lint.commit
-    - stage: lint
-      name: lint shellcheck
-      script: make lint.shellcheck
-    - stage: test
-      name: test unit
-      script: make test.unit
-    - stage: bash
-      name: bash v5-0
-      script: make bash.v5-0
-    - stage: bash
-      name: bash v4-4
-      script: make bash.v4-4
-    - stage: bash
-      name: bash v4-3
-      script: make bash.v4-3
-    - stage: bash
-      name: bash v4-2
-      script: make bash.v4-2
-    - stage: bash
-      name: bash v4-1
-      script: make bash.v4-1
-    - stage: bash
-      name: bash v4-0
-      script: make bash.v4-0
-    - stage: examples
-      name: examples simple
-      script: make examples.simple
-    - stage: examples
-      name: examples service
-      script: make examples.service
-    - stage: examples
-      name: examples dind
-      script: make examples.dind
-    - stage: examples
-      name: examples escapes
-      script: make examples.escapes
-    - stage: examples
-      name: examples stdout
-      script: make examples.stdout
-    - stage: examples
-      name: examples shell
-      script: make examples.shell
-    - stage: examples
-      name: examples pipeline
-      script: make examples.pipeline
+  build:
+    machine:
+      image: ubuntu-1604:201903-01
+    steps:
+    - checkout
+    - run:
+        name: lint commit
+        command: make lint.commit
+    - run:
+        name: lint shellcheck
+        command: make lint.shellcheck
+    - run:
+        name: test unit
+        command: make test.unit
+    - run:
+        name: bash v5-0
+        command: make bash.v5-0
+    - run:
+        name: bash v4-4
+        command: make bash.v4-4
+    - run:
+        name: bash v4-3
+        command: make bash.v4-3
+    - run:
+        name: bash v4-2
+        command: make bash.v4-2
+    - run:
+        name: bash v4-1
+        command: make bash.v4-1
+    - run:
+        name: bash v4-0
+        command: make bash.v4-0
+    - run:
+        name: examples simple
+        command: make examples.simple
+    - run:
+        name: examples service
+        command: make examples.service
+    - run:
+        name: examples dind
+        command: make examples.dind
+    - run:
+        name: examples escapes
+        command: make examples.escapes
+    - run:
+        name: examples stdout
+        command: make examples.stdout
+    - run:
+        name: examples shell
+        command: make examples.shell
+    - run:
+        name: examples pipeline
+        command: make examples.pipeline
