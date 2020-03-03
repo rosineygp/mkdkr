@@ -4,6 +4,7 @@
 stages:
   - lint
   - test
+  - bash
   - examples
 
 services:
@@ -32,6 +33,36 @@ test unit:
   stage: test
   script:
   - make test.unit
+
+bash v5-0:
+  stage: bash
+  script:
+  - make bash.v5-0
+
+bash v4-4:
+  stage: bash
+  script:
+  - make bash.v4-4
+
+bash v4-3:
+  stage: bash
+  script:
+  - make bash.v4-3
+
+bash v4-2:
+  stage: bash
+  script:
+  - make bash.v4-2
+
+bash v4-1:
+  stage: bash
+  script:
+  - make bash.v4-1
+
+bash v4-0:
+  stage: bash
+  script:
+  - make bash.v4-0
 
 examples simple:
   stage: examples

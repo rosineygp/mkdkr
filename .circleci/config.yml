@@ -15,6 +15,24 @@ jobs:
         name: test unit
         command: make test.unit
     - run:
+        name: bash v5-0
+        command: make bash.v5-0
+    - run:
+        name: bash v4-4
+        command: make bash.v4-4
+    - run:
+        name: bash v4-3
+        command: make bash.v4-3
+    - run:
+        name: bash v4-2
+        command: make bash.v4-2
+    - run:
+        name: bash v4-1
+        command: make bash.v4-1
+    - run:
+        name: bash v4-0
+        command: make bash.v4-0
+    - run:
         name: examples simple
         command: make examples.simple
     - run:

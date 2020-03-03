@@ -22,6 +22,24 @@ jobs:
     - stage: test
       name: test unit
       script: make test.unit
+    - stage: bash
+      name: bash v5-0
+      script: make bash.v5-0
+    - stage: bash
+      name: bash v4-4
+      script: make bash.v4-4
+    - stage: bash
+      name: bash v4-3
+      script: make bash.v4-3
+    - stage: bash
+      name: bash v4-2
+      script: make bash.v4-2
+    - stage: bash
+      name: bash v4-1
+      script: make bash.v4-1
+    - stage: bash
+      name: bash v4-0
+      script: make bash.v4-0
     - stage: examples
       name: examples simple
       script: make examples.simple
