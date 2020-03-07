@@ -34,7 +34,7 @@ _command_exist() {
 }
 
 # https://stackoverflow.com/questions/16989598/comparing-php-version-numbers-using-bash#24067243
-function _version_gt() {
+_version_gt() {
   test "$(printf '%s\n' "$@" | sort -V | head -n 1)" != "$1"
 }
 
