@@ -26,6 +26,41 @@ pipeline {
         sh "make test.unit"
       }
     }
+    stage("bash") {
+      parallel {
+        stage("bash v5-0") {
+          steps {
+            sh "make bash.v5-0"
+          }
+        }
+        stage("bash v4-4") {
+          steps {
+            sh "make bash.v4-4"
+          }
+        }
+        stage("bash v4-3") {
+          steps {
+            sh "make bash.v4-3"
+          }
+        }
+        stage("bash v4-2") {
+          steps {
+            sh "make bash.v4-2"
+          }
+        }
+        stage("bash v4-1") {
+          steps {
+            sh "make bash.v4-1"
+          }
+        }
+        stage("bash v4-0") {
+          steps {
+            sh "make bash.v4-0"
+          }
+        }
+      }
+    }
+  
     stage("examples") {
       parallel {
         stage("examples simple") {
