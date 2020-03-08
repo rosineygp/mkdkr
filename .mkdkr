@@ -26,6 +26,53 @@ _pretty() {
   echo -e "${colors[${key}]}${*:2}\e[0m" >&2
 }
 
+_command_exist() {
+  if ! [ -x "$(command -v ${1})" ]; then
+    _pretty "red" "command: ${1} not found, please install it"
+    exit 1
+  fi
+}
+
+# https://stackoverflow.com/questions/16989598/comparing-php-version-numbers-using-bash#24067243
+_version_gt() {
+  test "$(printf '%s\n' "$@" | sort -V | head -n 1)" != "${1}"
+}
+
+_verify_make_version() {
+  _CURRENT="${1}"
+  if _version_gt "3.82" "$_CURRENT"; then
+    _pretty "red" "\nrequirements: [ERROR] make version needs to be > 3.81"
+    _pretty "yellow" "current: $_CURRENT\n\n"
+    exit 1
+  fi
+}
+
+_verify_git_version() {
+  _CURRENT="${1}"
+  if _version_gt "2" "$_CURRENT"; then
+    _pretty "yellow" "\nrequirements: [WARNING] git work better with version >= 2"
+    _pretty "yellow" "current: $_CURRENT\n\n"
+  fi
+}
+
+_verify_bash_version() {
+  _CURRENT="${1}"
+  if _version_gt  "4" "$_CURRENT"; then
+    _pretty "red" "\nrequirements: [ERROR] use bash release > 3"
+    _pretty "yellow" "current: $_CURRENT\n\n"
+    exit 1
+  fi
+}
+
+_local_requirements() {
+  _command_exist "git"
+  _command_exist "make"
+  _command_exist "bash"
+  _verify_bash_version "$(bash --version | head -n 1 | awk '{ print $4 }')"
+  _verify_make_version "$(make --version | head -n 1 | awk '{ print $3 }')"
+  _verify_git_version "$(git --version | awk '{ print $3 }')"
+}
+
 # https://github.com/dylanaraps/pure-bash-bible#generate-a-uuid-v4
 _uuid() {
   C="89ab"
@@ -282,6 +329,8 @@ run:() {
 }
 
 if [ "$1" == "init" ]; then
+
+  _local_requirements
 
   MKDKR_BRANCH_NAME="$(_branch_or_tag_name)"
   MKDKR_BRANCH_NAME_SLUG="$(_branch_or_tag_name_slug ${MKDKR_BRANCH_NAME})"

@@ -6,3 +6,4 @@
 ./unit_branch_or_tag_name
 ./unit_branch_or_tag_name_slug
 ./unit_remote_include
+./unit_requirements
