@@ -35,29 +35,29 @@ _command_exist() {
 
 # https://stackoverflow.com/questions/16989598/comparing-php-version-numbers-using-bash#24067243
 _version_gt() {
-  test "$(printf '%s\n' "$@" | sort -V | head -n 1)" != "$1"
+  test "$(printf '%s\n' "$@" | sort -V | head -n 1)" != "${1}"
 }
 
-_make_version() {
-  _CURRENT="$(make --version | head -n 1 | awk '{ print $3 }')"
-  if ! _version_gt "$_CURRENT" "3.81"; then
+_verify_make_version() {
+  _CURRENT="${1}"
+  if _version_gt "3.82" "$_CURRENT"; then
     _pretty "red" "\nrequirements: [ERROR] make version needs to be > 3.81"
     _pretty "yellow" "current: $_CURRENT\n\n"
     exit 1
   fi
 }
 
-_git_version() {
-  _CURRENT="$(git --version | awk '{ print $3 }')"
-  if ! _version_gt "$_CURRENT" "2"; then
+_verify_git_version() {
+  _CURRENT="${1}"
+  if _version_gt "2" "$_CURRENT"; then
     _pretty "yellow" "\nrequirements: [WARNING] git work better with version >= 2"
     _pretty "yellow" "current: $_CURRENT\n\n"
   fi
 }
 
-_bash_version() {
-  _CURRENT="$(bash --version | head -n 1 | awk '{ print $4 }')"
-  if ! _version_gt "$_CURRENT" "3"; then
+_verify_bash_version() {
+  _CURRENT="${1}"
+  if _version_gt  "4" "$_CURRENT"; then
     _pretty "red" "\nrequirements: [ERROR] use bash release > 3"
     _pretty "yellow" "current: $_CURRENT\n\n"
     exit 1
@@ -68,9 +68,9 @@ _local_requirements() {
   _command_exist "git"
   _command_exist "make"
   _command_exist "bash"
-  _bash_version
-  _make_version
-  _git_version
+  _verify_bash_version "$(bash --version | head -n 1 | awk '{ print $4 }')"
+  _verify_make_version "$(make --version | head -n 1 | awk '{ print $3 }')"
+  _verify_git_version "$(git --version | awk '{ print $3 }')"
 }
 
 # https://github.com/dylanaraps/pure-bash-bible#generate-a-uuid-v4

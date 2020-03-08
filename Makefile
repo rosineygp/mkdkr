@@ -17,12 +17,13 @@ lint.shellcheck:
 	run: shellcheck -e SC2181 -e SC2086 -e SC1091 test/unit_branch_or_tag_name
 	run: shellcheck -e SC2181 -e SC2086 -e SC1091 test/unit_branch_or_tag_name_slug
 	run: shellcheck -e SC2181 -e SC2086 -e SC1091 test/unit_remote_include
+	run: shellcheck -e SC2181 -e SC2086 -e SC1091 test/unit_requirements
 	run: shellcheck test/cover
 
 test.unit:
 	@$(dkr)
 	dind: docker:19 --workdir $(PWD)/test
-	run: apk add bash jq git
+	run: apk add bash jq git make
 	run: ./unit
 
 DOCKER_BIN=https://download.docker.com/linux/static/stable/x86_64/docker-19.03.5.tgz
@@ -62,7 +63,7 @@ _coverage.report:
 	@$(dkr)
 	dind: kcov/kcov:v31 --workdir $(PWD)/test
 	run: rm -rf coverage
-	run: 'apt-get update && apt-get install -y curl jq bc git'
+	run: 'apt-get update && apt-get install -y curl jq bc git make'
 	$(call _docker_cli)
 	run: kcov --include-path=.mkdkr coverage unit
 	run: './cover > coverage/coverage.json'

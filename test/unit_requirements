@@ -1,0 +1,187 @@
+#!/bin/bash
+
+_compare_true() {
+  _version_gt "${1}" "${2}"
+  GT=$?
+  assertEquals "$GT" "1"
+  [[ "$?" == "0" ]] &&
+    _pretty "light_purple" "assert ${1} ${3} ${2}  [ OK ]"
+}
+
+_compare_false() {
+  _version_gt "${1}" "${2}"
+  GT=$?
+  assertEquals "$GT" "0"
+  [[ "$?" == "0" ]] &&
+    _pretty "light_purple" "assert ${1} ${3} ${2}  [ OK ]"
+}
+
+test_mkdkr_version_gt() {
+  # shellcheck disable=SC1091
+  source .mkdkr
+
+  _compare_true "1.0.0" "1.0.1" "<"
+  _compare_true "1.0.0" "1.0.0" "=="
+  _compare_true "0.0.1" "0.0.2" "<"
+  _compare_true "0" "0" "=="
+  _compare_true "1.0.0" "2.0.0-devel" "<"
+  _compare_true "0.20.1" "0.200.1" "<"
+  _compare_true "2" "20" "<"
+  _compare_true "19.04" "20.04" "<"
+  _compare_true "01" "1" "<"
+
+  _compare_false "1.0.1" "1.0.0" ">"
+  _compare_false "0.0.2" "0.0.1" ">"
+  _compare_false "2.0.0-devel" "1.0.0" ">"
+  _compare_false "0.200.1" "0.20.1" ">"
+  _compare_false "20" "2" ">"
+  _compare_false "20.04" "19.04" ">"
+  _compare_false "1" "01" ">"
+
+  echo -e "\nRan\e[36m 16 \e[0masserts."
+}
+
+test_mkdkr_command_exist() {
+  # shellcheck disable=SC1091
+  source .mkdkr
+
+  _command_exist "bash"
+  assertEquals "$?" "0"
+  [[ "$?" == "0" ]] &&
+    _pretty "light_purple" "assert bash exist [ OK ]"
+
+  _command_exist "make"
+  assertEquals "$?" "0"
+  [[ "$?" == "0" ]] &&
+    _pretty "light_purple" "assert make exist [ OK ]"
+
+  _command_exist "git"
+  assertEquals "$?" "0"
+  [[ "$?" == "0" ]] &&
+    _pretty "light_purple" "assert git exist [ OK ]"
+
+  (_command_exist "foo")
+  [[ "$?" == "1" ]] &&
+    _pretty "light_purple" "assert foo not exist [ OK ]"
+
+  (_command_exist "bar")
+  [[ "$?" == "1" ]] &&
+    _pretty "light_purple" "assert bar not exist [ OK ]"
+
+  echo -e "\nRan\e[36m 5 \e[0masserts."
+}
+
+test_mkdkr_verify_make_version() {
+  # shellcheck disable=SC1091
+  source .mkdkr
+
+  (_verify_make_version "4.3")
+  assertEquals "$?" "0"
+  [[ "$?" == "0" ]] &&
+    _pretty "light_purple" "assert version 4.3 [ OK ]"
+
+  (_verify_make_version "4.2")
+  assertEquals "$?" "0"
+  [[ "$?" == "0" ]] &&
+    _pretty "light_purple" "assert version 4.2 [ OK ]"
+
+  (_verify_make_version "4.1")
+  assertEquals "$?" "0"
+  [[ "$?" == "0" ]] &&
+    _pretty "light_purple" "assert version 4.1 [ OK ]"
+
+  (_verify_make_version "4.0")
+  assertEquals "$?" "0"
+  [[ "$?" == "0" ]] &&
+    _pretty "light_purple" "assert version 4.0 [ OK ]"
+
+  (_verify_make_version "3.82")
+  assertEquals "$?" "0"
+  [[ "$?" == "0" ]] &&
+    _pretty "light_purple" "assert version 3.82 [ OK ]"
+
+  (_verify_make_version "3.81")
+  assertEquals "$?" "1"
+  [[ "$?" == "0" ]] &&
+    _pretty "light_purple" "assert version 3.81 [ OK ]"
+
+  echo -e "\nRan\e[36m 6 \e[0masserts."
+
+}
+
+test_mkdkr_verify_git_version() {
+  # shellcheck disable=SC1091
+  source .mkdkr
+
+  (_verify_git_version "2")
+  assertEquals "$?" "0"
+  [[ "$?" == "0" ]] &&
+    _pretty "light_purple" "assert version 2 [ OK ]"
+
+  (_verify_git_version "1.9")
+  assertEquals "$?" "0"
+  [[ "$?" == "0" ]] &&
+    _pretty "light_purple" "assert version 1.9 [ OK ]"
+
+  (_verify_git_version "1.8")
+  assertEquals "$?" "0"
+  [[ "$?" == "0" ]] &&
+    _pretty "light_purple" "assert version 1.8 [ OK ]"
+
+  echo -e "\nRan\e[36m 3 \e[0masserts."
+}
+
+test_mkdkr_verify_bash_version() {
+  # shellcheck disable=SC1091
+  source .mkdkr
+
+  (_verify_bash_version "5.0")
+  assertEquals "$?" "0"
+  [[ "$?" == "0" ]] &&
+    _pretty "light_purple" "assert version 5.0 [ OK ]"
+
+  (_verify_bash_version "4.4")
+  assertEquals "$?" "0"
+  [[ "$?" == "0" ]] &&
+    _pretty "light_purple" "assert version 4.4 [ OK ]"
+
+  (_verify_bash_version "4.3")
+  assertEquals "$?" "0"
+  [[ "$?" == "0" ]] &&
+    _pretty "light_purple" "assert version 4.3 [ OK ]"
+
+  (_verify_bash_version "4.2")
+  assertEquals "$?" "0"
+  [[ "$?" == "0" ]] &&
+    _pretty "light_purple" "assert version 4.2 [ OK ]"
+
+  (_verify_bash_version "4.1")
+  assertEquals "$?" "0"
+  [[ "$?" == "0" ]] &&
+    _pretty "light_purple" "assert version 4.1 [ OK ]"
+
+  (_verify_bash_version "4.0")
+  assertEquals "$?" "0"
+  [[ "$?" == "0" ]] &&
+    _pretty "light_purple" "assert version 4.0 [ OK ]"
+
+  (_verify_bash_version "3.0")
+  assertEquals "$?" "1"
+  [[ "$?" == "0" ]] &&
+    _pretty "light_purple" "assert version 3.0 [ OK ]"
+
+  echo -e "\nRan\e[36m 7 \e[0masserts."
+}
+
+test_mkdkr_local_requirements() {
+  # shellcheck disable=SC1091
+  source .mkdkr
+
+  # just for code coverage, all tested above
+  (_local_requirements)
+
+  echo -e "\nRan\e[36m 1 \e[0masserts."
+}
+
+# shellcheck disable=SC1091
+. ./shunit2
