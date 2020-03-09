@@ -167,6 +167,7 @@ _remote_include() {
       _pretty "light_cyan" "clone: ${ALIAS}\nrepos: ${REPOS}\ncheckout: ${CHECKOUT}\nfile: ${FILE}"
       git clone "${REPOS}" --branch "${CHECKOUT}" --depth "${MKDKR_INCLUDE_CLONE_DEPTH:-1}" "${_MKDKR_INCLUDE_PATH}" >&2
       rm -rf "${_MKDKR_INCLUDE_PATH}/.git"
+      chmod -R o+w "${_MKDKR_INCLUDE_PATH}"
 
       _MKDKR_INCLUDES_LIST+=("${_MKDKR_INCLUDE_PATH}/${FILE}")
     done < <(grep -v '^ *#' <mkdkr.csv)
@@ -211,6 +212,7 @@ _header() {
 
   _MKDKR_INCLUDE="${_MKDKR_TMP_DIR}/mkdkr_header_$(_uuid).mk"
   _header_render >"${_MKDKR_INCLUDE}"
+  chmod o+w "${_MKDKR_INCLUDE}"
 
   echo "${_MKDKR_INCLUDE}"
 }
