@@ -25,7 +25,7 @@ Super small and powerful framework for build CI pipeline, scripted with Makefile
 - Shipping and switch among CI engines like
 [Circle CI](https://circleci.com/gh/rosineygp/mkdkr),
 [GitHub Actions](https://actions-badge.atrox.dev/rosineygp/mkdkr/goto?ref=master),
-[Gitlab-ci](https://gitlab.com/rosiney.gp/mkdkr/pipelines), Jenkins, [Travis](https://travis-ci.org/rosineygp/mkdkr/builds).. and more [#using exporter](#export)
+[Gitlab-ci](https://gitlab.com/rosiney.gp/mkdkr/pipelines), Jenkins, [Travis](https://travis-ci.org/rosineygp/mkdkr/builds).. and more [using exporter](#export)
 - Clean and elegant code syntax
 
 <p align="center">
@@ -315,9 +315,11 @@ The file contains four values per line in following order
 
 ## Collection
 
-* [docker](https://github.com/rosineygp/mkdkr_docker)
-* [commit lint](https://github.com/rosineygp/mkdkr_commitlint)
-* [exporter](https://github.com/rosineygp/mkdkr_exporter)
+| Name                                                         | Description                                        |
+|--------------------------------------------------------------|----------------------------------------------------|
+| [docker](https://github.com/rosineygp/mkdkr_docker)          | Build and Push Docker images.                      |
+| [commit lint](https://github.com/rosineygp/mkdkr_commitlint) | Validate commit message with semantic commit.      |
+| [exporter](https://github.com/rosineygp/mkdkr_exporter)      | Generate pipeline definitions files from Makefile. |
 
 > Small collection, use it as example
 
@@ -457,7 +459,7 @@ Migration from release-0.26, just execute the following script on your terminal 
 curl https://raw.githubusercontent.com/rosineygp/mkdkr/master/.mkdkr > .mkdkr
 
 mkdkr_migration() {
-  sed -i 's/\.\.\.\ job/instance:\ /g;s/\.\.\.\ service/service:\ /g;s/\.\.\.\ privileged/dind:\ /g;s/\.\.\.\ /instance:\ /g;s/\.\.\ /run:\ /g;s/@\$(\.)/@\$(dkr)/g' ${1}
+  sed -i 's/\.\.\.\ job\ /instance:\ /g;s/\.\.\.\ service\ /service:\ /g;s/\.\.\.\ privileged\ /dind:\ /g;s/\.\.\.\ /instance:\ /g;s/\.\.\ /run:\ /g;s/@\$(\.)/@\$(dkr)/g' ${1}
 }
 
 export -f mkdkr_migration
