@@ -1,6 +1,6 @@
 version: 2.1
 jobs:
-  build:
+  lint_commit:
     machine:
       image: ubuntu-1604:201903-01
     steps:
@@ -8,48 +8,208 @@ jobs:
     - run:
         name: lint commit
         command: make lint.commit
+  lint_shellcheck:
+    machine:
+      image: ubuntu-1604:201903-01
+    steps:
+    - checkout
     - run:
         name: lint shellcheck
         command: make lint.shellcheck
+  test_unit:
+    machine:
+      image: ubuntu-1604:201903-01
+    steps:
+    - checkout
     - run:
         name: test unit
         command: make test.unit
+  bash_v5-0:
+    machine:
+      image: ubuntu-1604:201903-01
+    steps:
+    - checkout
     - run:
         name: bash v5-0
         command: make bash.v5-0
+  bash_v4-4:
+    machine:
+      image: ubuntu-1604:201903-01
+    steps:
+    - checkout
     - run:
         name: bash v4-4
         command: make bash.v4-4
+  bash_v4-3:
+    machine:
+      image: ubuntu-1604:201903-01
+    steps:
+    - checkout
     - run:
         name: bash v4-3
         command: make bash.v4-3
+  bash_v4-2:
+    machine:
+      image: ubuntu-1604:201903-01
+    steps:
+    - checkout
     - run:
         name: bash v4-2
         command: make bash.v4-2
+  bash_v4-1:
+    machine:
+      image: ubuntu-1604:201903-01
+    steps:
+    - checkout
     - run:
         name: bash v4-1
         command: make bash.v4-1
+  bash_v4-0:
+    machine:
+      image: ubuntu-1604:201903-01
+    steps:
+    - checkout
     - run:
         name: bash v4-0
         command: make bash.v4-0
+  examples_simple:
+    machine:
+      image: ubuntu-1604:201903-01
+    steps:
+    - checkout
     - run:
         name: examples simple
         command: make examples.simple
+  examples_service:
+    machine:
+      image: ubuntu-1604:201903-01
+    steps:
+    - checkout
     - run:
         name: examples service
         command: make examples.service
+  examples_dind:
+    machine:
+      image: ubuntu-1604:201903-01
+    steps:
+    - checkout
     - run:
         name: examples dind
         command: make examples.dind
+  examples_escapes:
+    machine:
+      image: ubuntu-1604:201903-01
+    steps:
+    - checkout
     - run:
         name: examples escapes
         command: make examples.escapes
+  examples_stdout:
+    machine:
+      image: ubuntu-1604:201903-01
+    steps:
+    - checkout
     - run:
         name: examples stdout
         command: make examples.stdout
+  examples_shell:
+    machine:
+      image: ubuntu-1604:201903-01
+    steps:
+    - checkout
     - run:
         name: examples shell
         command: make examples.shell
+  examples_pipeline:
+    machine:
+      image: ubuntu-1604:201903-01
+    steps:
+    - checkout
     - run:
         name: examples pipeline
         command: make examples.pipeline
+
+workflows:
+  version: 2.1
+  ci:
+    jobs:
+      - lint_commit
+      - lint_shellcheck
+      - test_unit:
+          requires:
+            - lint_commit
+            - lint_shellcheck
+      - bash_v5-0:
+          requires:
+            - test_unit
+      - bash_v4-4:
+          requires:
+            - test_unit
+      - bash_v4-3:
+          requires:
+            - test_unit
+      - bash_v4-2:
+          requires:
+            - test_unit
+      - bash_v4-1:
+          requires:
+            - test_unit
+      - bash_v4-0:
+          requires:
+            - test_unit
+      - examples_simple:
+          requires:
+            - bash_v5-0
+            - bash_v4-4
+            - bash_v4-3
+            - bash_v4-2
+            - bash_v4-1
+            - bash_v4-0
+      - examples_service:
+          requires:
+            - bash_v5-0
+            - bash_v4-4
+            - bash_v4-3
+            - bash_v4-2
+            - bash_v4-1
+            - bash_v4-0
+      - examples_dind:
+          requires:
+            - bash_v5-0
+            - bash_v4-4
+            - bash_v4-3
+            - bash_v4-2
+            - bash_v4-1
+            - bash_v4-0
+      - examples_escapes:
+          requires:
+            - bash_v5-0
+            - bash_v4-4
+            - bash_v4-3
+            - bash_v4-2
+            - bash_v4-1
+            - bash_v4-0
+      - examples_stdout:
+          requires:
+            - bash_v5-0
+            - bash_v4-4
+            - bash_v4-3
+            - bash_v4-2
+            - bash_v4-1
+            - bash_v4-0
+      - examples_shell:
+          requires:
+            - bash_v5-0
+            - bash_v4-4
+            - bash_v4-3
+            - bash_v4-2
+            - bash_v4-1
+            - bash_v4-0
+      - examples_pipeline:
+          requires:
+            - bash_v5-0
+            - bash_v4-4
+            - bash_v4-3
+            - bash_v4-2
+            - bash_v4-1
+            - bash_v4-0
