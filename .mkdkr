@@ -57,7 +57,7 @@ _verify_git_version() {
 
 _verify_bash_version() {
   _CURRENT="${1}"
-  if _version_gt  "4" "$_CURRENT"; then
+  if _version_gt "4" "$_CURRENT"; then
     _pretty "red" "\nrequirements: [ERROR] use bash release > 3"
     _pretty "yellow" "current: $_CURRENT\n\n"
     exit 1
@@ -142,6 +142,7 @@ _remote_include() {
     while IFS= read -r LINE; do
       PARAMS=($(echo "$LINE" | tr "," " "))
       ALIAS="${PARAMS[0]}"
+      TAG="latest"
 
       if [ -z "${PARAMS[1]}" ]; then
         _pretty "include: needs git path to clone for: ${ALIAS}"
@@ -154,6 +155,7 @@ _remote_include() {
 
       if [ "${PARAMS[2]}" ]; then
         CHECKOUT="${PARAMS[2]}"
+        TAG="$CHECKOUT"
       fi
 
       if [ "${PARAMS[3]}" ]; then
@@ -168,6 +170,14 @@ _remote_include() {
       git clone "${REPOS}" --branch "${CHECKOUT}" --depth "${MKDKR_INCLUDE_CLONE_DEPTH:-1}" "${_MKDKR_INCLUDE_PATH}" >&2
       rm -rf "${_MKDKR_INCLUDE_PATH}/.git"
       chmod -R o+w "${_MKDKR_INCLUDE_PATH}"
+
+      if [ "$TAG" != "latest" ]; then
+        if [ "$(grep -E '^[A-Z][A-Z\_]+\_TAG\=.*' "${_MKDKR_INCLUDE_PATH}/${FILE}")" != "" ]; then
+          _TAG_VAR=($(grep -E '^[A-Z][A-Z\_]+\_TAG\=.*' "${_MKDKR_INCLUDE_PATH}/${FILE}" | tr '=' '\n'))
+          _pretty "purple" "replace ${_TAG_VAR[0]}: ${_TAG_VAR[1]} to ${TAG}"
+          sed -i -E "s/(^[A-Z][A-Z\_]+\_TAG\=)(.*)/\1${TAG}/g" "${_MKDKR_INCLUDE_PATH}/${FILE}"
+        fi
+      fi
 
       _MKDKR_INCLUDES_LIST+=("${_MKDKR_INCLUDE_PATH}/${FILE}")
     done < <(grep -v '^ *#' <mkdkr.csv)
