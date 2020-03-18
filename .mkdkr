@@ -249,6 +249,15 @@ _job_destroy() {
   times
 }
 
+_exit_handler() {
+  _EXIT_CODE="${1}"
+  _EXPECTED="${2}"
+  if [ "${_EXIT_CODE}" != "${_EXPECTED:-0}" ]; then
+    _job_destroy
+    exit "${_EXIT_CODE}"
+  fi
+}
+
 instance:() {
   OLDIFS=$IFS
   IFS='⠀' # Braille Pattern Blank (U+2800)
@@ -273,6 +282,7 @@ instance:() {
     --name "job_${MKDKR_JOB_NAME}" \
     "${IMAGE}" sleep "${MKDKR_TTL:-3600}" >&2
 
+  _exit_handler "$?"
   IFS=$OLDIFS
 }
 
@@ -293,6 +303,7 @@ service:() {
     --name "service_${MKDKR_JOB_NAME}" \
     "${IMAGE}" >&2
 
+  _exit_handler "$?"
   IFS=$OLDIFS
 }
 
@@ -321,6 +332,7 @@ dind:() {
     --name "job_${MKDKR_JOB_NAME}" \
     "${IMAGE}" sleep "${MKDKR_TTL:-3600}" >&2
 
+  _exit_handler "$?"
   IFS=$OLDIFS
 }
 
@@ -334,11 +346,8 @@ run:() {
   fi
 
   docker exec -i ${CONTAINER_NAME} ${MKDKR_SHELL:-sh} -c "$*" | tee "${_MKDKR_TMP_DIR}/${MKDKR_JOB_NAME}.log"
-  EXIT_CODE="${PIPESTATUS[0]}"
-  if [ "${EXIT_CODE}" != "0" ]; then
-    _job_destroy
-    exit "${EXIT_CODE}"
-  fi
+
+  _exit_handler "${PIPESTATUS[0]}"
 }
 
 if [ "$1" == "init" ]; then
