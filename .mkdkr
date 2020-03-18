@@ -210,7 +210,7 @@ endef
 EOF
 }
 
-_header() {
+_tmp_dir() {
   if [ -d "${_MKDKR_TMP_DIR}" ]; then
     find "${_MKDKR_TMP_DIR}" -name "mkdkr_header_*.mk" -type f -mmin +60 -delete
     if [ -d "${_MKDKR_TMP_DIR}/includes" ]; then
@@ -219,11 +219,12 @@ _header() {
   else
     mkdir -p "${_MKDKR_TMP_DIR}"
   fi
+}
 
+_header() {
   _MKDKR_INCLUDE="${_MKDKR_TMP_DIR}/mkdkr_header_$(_uuid).mk"
   _header_render >"${_MKDKR_INCLUDE}"
   chmod o+w "${_MKDKR_INCLUDE}"
-
   echo "${_MKDKR_INCLUDE}"
 }
 
@@ -343,6 +344,7 @@ run:() {
 if [ "$1" == "init" ]; then
 
   _local_requirements
+  _tmp_dir
 
   MKDKR_BRANCH_NAME="$(_branch_or_tag_name)"
   MKDKR_BRANCH_NAME_SLUG="$(_branch_or_tag_name_slug ${MKDKR_BRANCH_NAME})"
