@@ -87,7 +87,7 @@ test_mkdkr_remote_include_missing_reference() {
 
   echo "commitlint,https://github.com/rosineygp/mkdkr_commitlint.git,unknow" > mkdkr.csv
 
-  _remote_include
+  (_remote_include)
 
   CLONE="false"
   if [ "$(find .tmp/includes -maxdepth 1 -type d -name 'commitlint*' | wc -l )" != "0" ]; then
