@@ -134,6 +134,30 @@ _branch_or_tag_name_slug() {
   echo "${1}" | sed -E 's/\/|_/-/g' | tr '[:upper:]' '[:lower:]'
 }
 
+_remote_git_clone() {
+  _ALIAS="${1}"
+  _REPOS="${2}"
+  _CHECKOUT="${3}"
+  _FILE="${4}"
+  _MKDKR_INCLUDE_PATH="${5}"
+
+  _pretty "light_cyan" "clone: ${_ALIAS}\nrepos: ${_REPOS}\ncheckout: ${_CHECKOUT}\nfile: ${_FILE}\n"
+  
+  git clone "${_REPOS}" \
+    --config advice.detachedHead=false \
+    --branch "${_CHECKOUT}" \
+    --depth "${MKDKR_INCLUDE_CLONE_DEPTH:-1}" \
+    "${_MKDKR_INCLUDE_PATH}" >&2
+
+  _EXIT_CODE="$?"
+  if [ "$_EXIT_CODE" != "0" ]; then
+    exit "$_EXIT_CODE"
+  fi
+  
+  rm -rf "${_MKDKR_INCLUDE_PATH}/.git"
+  chmod -R o+w "${_MKDKR_INCLUDE_PATH}"
+}
+
 _remote_include() {
   if [ -f mkdkr.csv ]; then
     declare -a _MKDKR_INCLUDES_LIST=()
@@ -166,10 +190,7 @@ _remote_include() {
 
       _MKDKR_INCLUDE_PATH="${_MKDKR_TMP_DIR}/includes/${ALIAS}_$(_uuid)"
 
-      _pretty "light_cyan" "clone: ${ALIAS}\nrepos: ${REPOS}\ncheckout: ${CHECKOUT}\nfile: ${FILE}"
-      git clone "${REPOS}" --branch "${CHECKOUT}" --depth "${MKDKR_INCLUDE_CLONE_DEPTH:-1}" "${_MKDKR_INCLUDE_PATH}" >&2
-      rm -rf "${_MKDKR_INCLUDE_PATH}/.git"
-      chmod -R o+w "${_MKDKR_INCLUDE_PATH}"
+      _remote_git_clone "${ALIAS}" "${REPOS}" "${CHECKOUT}" "${FILE}" "${_MKDKR_INCLUDE_PATH}"
 
       if [ "$TAG" != "latest" ]; then
         if [ "$(grep -E '^[A-Z][A-Z\_]+\_TAG\=.*' "${_MKDKR_INCLUDE_PATH}/${FILE}")" != "" ]; then
