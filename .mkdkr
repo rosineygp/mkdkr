@@ -142,7 +142,7 @@ _remote_git_clone() {
   _MKDKR_INCLUDE_PATH="${5}"
 
   _pretty "light_cyan" "clone: ${_ALIAS}\nrepos: ${_REPOS}\ncheckout: ${_CHECKOUT}\nfile: ${_FILE}\n"
-  
+
   git clone "${_REPOS}" \
     --config advice.detachedHead=false \
     --branch "${_CHECKOUT}" \
@@ -153,9 +153,20 @@ _remote_git_clone() {
   if [ "$_EXIT_CODE" != "0" ]; then
     exit "$_EXIT_CODE"
   fi
-  
+
   rm -rf "${_MKDKR_INCLUDE_PATH}/.git"
   chmod -R o+w "${_MKDKR_INCLUDE_PATH}"
+}
+
+_remote_force_tag() {
+  _TAG="${1}"
+  _FILE="${2}"
+
+  if [ "$(grep -E '^[A-Z][A-Z\_]+\_TAG\=.*' "${_FILE}")" != "" ]; then
+    _KEY_VALUE=($(grep -E '^[A-Z][A-Z\_]+\_TAG\=.*' "${_FILE}" | tr '=' '\n'))
+    _pretty "purple" "replace ${_KEY_VALUE[0]}: ${_KEY_VALUE[1]} to ${_TAG}"
+    sed -i -E "s/(^[A-Z][A-Z\_]+\_TAG\=)(.*)/\1${_TAG}/g" "${_FILE}"
+  fi
 }
 
 _remote_include() {
@@ -187,18 +198,10 @@ _remote_include() {
       fi
 
       mkdir -p "${_MKDKR_TMP_DIR}/includes"
-
       _MKDKR_INCLUDE_PATH="${_MKDKR_TMP_DIR}/includes/${ALIAS}_$(_uuid)"
 
       _remote_git_clone "${ALIAS}" "${REPOS}" "${CHECKOUT}" "${FILE}" "${_MKDKR_INCLUDE_PATH}"
-
-      if [ "$TAG" != "latest" ]; then
-        if [ "$(grep -E '^[A-Z][A-Z\_]+\_TAG\=.*' "${_MKDKR_INCLUDE_PATH}/${FILE}")" != "" ]; then
-          _TAG_VAR=($(grep -E '^[A-Z][A-Z\_]+\_TAG\=.*' "${_MKDKR_INCLUDE_PATH}/${FILE}" | tr '=' '\n'))
-          _pretty "purple" "replace ${_TAG_VAR[0]}: ${_TAG_VAR[1]} to ${TAG}"
-          sed -i -E "s/(^[A-Z][A-Z\_]+\_TAG\=)(.*)/\1${TAG}/g" "${_MKDKR_INCLUDE_PATH}/${FILE}"
-        fi
-      fi
+      _remote_force_tag "${TAG}" "${_MKDKR_INCLUDE_PATH}/${FILE}"
 
       _MKDKR_INCLUDES_LIST+=("${_MKDKR_INCLUDE_PATH}/${FILE}")
     done < <(grep -v '^ *#' <mkdkr.csv)
