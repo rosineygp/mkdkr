@@ -141,7 +141,10 @@ _remote_git_clone() {
   _FILE="${4}"
   _MKDKR_INCLUDE_PATH="${5}"
 
-  _pretty "light_cyan" "clone: ${_ALIAS}\nrepos: ${_REPOS}\ncheckout: ${_CHECKOUT}\nfile: ${_FILE}\n"
+  _pretty "light_cyan" "alias: ${_ALIAS}"
+  _pretty "light_cyan" "repos: ${_REPOS}"
+  _pretty "light_cyan" "checkout: ${_CHECKOUT}"
+  _pretty "light_cyan" "file: ${_FILE}\n"
 
   git clone "${_REPOS}" \
     --config advice.detachedHead=false \
