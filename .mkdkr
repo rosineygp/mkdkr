@@ -330,7 +330,16 @@ service:() {
 
   _pretty "cyan" "\nservice: ${IMAGE} ${ARGS[*]}"
 
-  NETWORK_ALIAS="$(echo $IMAGE | sed 's/:.*//g;s/\//_/g')"
+  NETWORK_ALIAS="$(echo $IMAGE | sed -E 's/:|\./_/g')"
+  _pretty "cyan" "network alias: ${NETWORK_ALIAS}"
+
+  SERVICE_COUNT="$(docker ps | grep -cE 'service_.*'${MKDKR_JOB_NAME})"
+
+  if [ "$SERVICE_COUNT" != "0" ]; then
+    SERVICE_COUNT="${SERVICE_COUNT}_"
+  else
+    SERVICE_COUNT=""
+  fi
 
   docker run --rm -d \
     -v "${PWD}":"${PWD}" \
@@ -338,7 +347,7 @@ service:() {
     --network "network_${MKDKR_JOB_NAME}" \
     --network-alias "$NETWORK_ALIAS" \
     $ARGS \
-    --name "service_${MKDKR_JOB_NAME}" \
+    --name "service_${SERVICE_COUNT}${MKDKR_JOB_NAME}" \
     "${IMAGE}" >&2
 
   _exit_handler "$?"

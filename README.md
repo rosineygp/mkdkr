@@ -153,7 +153,7 @@ mkdkr-job:
 
 ## instance:
 
-Create a docker container, without special privileges.
+Create docker containers, without special privileges.
 
 ```Makefile
 my-instance:
@@ -181,6 +181,27 @@ my-service:
 	service: nginx    # up a nginx
 	instance: alpine
 ```
+Is possible start more de one service.
+
+```Makefile
+multi-service:
+	@$(dkr)
+	service: mysql
+	service: redis
+	instance: node:12
+	run: npm install
+	run: npm test
+```
+
+> \* Instance and services are connected in same network<br>
+> \*\* The name of service is the same of image name
+
+| Image Name         | Network Name       |
+|--------------------|--------------------|
+| nginx              | nginx              |
+| nginx:1.2          | nginx_1_2          |
+| redis:3            | redis_3            |
+| project/apache_1.2 | project_apache_1_2 |
 
 **Parameters:**
 

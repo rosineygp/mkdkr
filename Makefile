@@ -79,8 +79,9 @@ examples.simple:
 	make --silent -f examples/simple.mk multi-images
 
 examples.service:
-	make --silent -f examples/service.mk service
 	make --silent -f examples/service.mk link
+	make --silent -f examples/service.mk service
+	make --silent -f examples/service.mk multiply
 
 examples.dind:
 	make --silent -f examples/dind.mk dind
