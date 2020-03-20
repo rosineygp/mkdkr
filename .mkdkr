@@ -177,36 +177,36 @@ _remote_include() {
     declare -a _MKDKR_INCLUDES_LIST=()
 
     _pretty "orange" "\ninclude\n"
-    while IFS= read -r LINE; do
-      PARAMS=($(echo "$LINE" | tr "," " "))
-      ALIAS="${PARAMS[0]}"
-      TAG="latest"
+    while IFS= read -r _LINE; do
+      _PARAMS=($(echo "$_LINE" | tr "," " "))
+      _ALIAS="${_PARAMS[0]}"
+      _TAG="latest"
 
-      if [ -z "${PARAMS[1]}" ]; then
-        _pretty "include: needs git path to clone for: ${ALIAS}"
+      if [ -z "${_PARAMS[1]}" ]; then
+        _pretty "include: needs git path to clone for: ${_ALIAS}"
         exit 1
       fi
 
-      REPOS="${PARAMS[1]}"
-      CHECKOUT="master"
-      FILE="main.mk"
+      _REPOS="${_PARAMS[1]}"
+      _CHECKOUT="master"
+      _MK="main.mk"
 
-      if [ "${PARAMS[2]}" ]; then
-        CHECKOUT="${PARAMS[2]}"
-        TAG="$CHECKOUT"
+      if [ "${_PARAMS[2]}" ]; then
+        _CHECKOUT="${_PARAMS[2]}"
+        _TAG="$_CHECKOUT"
       fi
 
-      if [ "${PARAMS[3]}" ]; then
-        FILE="${PARAMS[3]}"
+      if [ "${_PARAMS[3]}" ]; then
+        _MK="${_PARAMS[3]}"
       fi
 
       mkdir -p "${_MKDKR_TMP_DIR}/includes"
-      _MKDKR_INCLUDE_PATH="${_MKDKR_TMP_DIR}/includes/${ALIAS}_$(_uuid)"
+      _MKDKR_INCLUDE_PATH="${_MKDKR_TMP_DIR}/includes/${_ALIAS}_$(_uuid)"
 
-      _remote_git_clone "${ALIAS}" "${REPOS}" "${CHECKOUT}" "${FILE}" "${_MKDKR_INCLUDE_PATH}"
-      _remote_force_tag "${TAG}" "${_MKDKR_INCLUDE_PATH}/${FILE}"
+      _remote_git_clone "${_ALIAS}" "${_REPOS}" "${_CHECKOUT}" "${_MK}" "${_MKDKR_INCLUDE_PATH}"
+      _remote_force_tag "${_TAG}" "${_MKDKR_INCLUDE_PATH}/${_MK}"
 
-      _MKDKR_INCLUDES_LIST+=("${_MKDKR_INCLUDE_PATH}/${FILE}")
+      _MKDKR_INCLUDES_LIST+=("${_MKDKR_INCLUDE_PATH}/${_MK}")
     done < <(grep -v '^ *#' <mkdkr.csv)
 
     echo "${_MKDKR_INCLUDES_LIST[*]}"
