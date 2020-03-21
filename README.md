@@ -55,6 +55,8 @@ Table of contents
 	* [Implicit](#implicit)
 	* [mkdkr.csv](#mkdkr.csv)
 	* [Collection](#collection)
+* [Helpers](#helpers)
+  * [slug](#slug)
 * [Examples](#examples)
   * [Simple](#simple)
   * [Service](#service)
@@ -153,7 +155,7 @@ mkdkr-job:
 
 ## instance:
 
-Create a docker container, without special privileges.
+Create docker containers, without special privileges.
 
 ```Makefile
 my-instance:
@@ -173,7 +175,7 @@ my-instance:
 
 ## service:
 
-Create a docker container in detached mode. Useful to bring up a required service for a job, like a webserver or a database.
+Create a docker container in detached mode. Useful to bring up a required service for a job, like a webserver or database.
 
 ```Makefile
 my-service:
@@ -181,6 +183,30 @@ my-service:
 	service: nginx    # up a nginx
 	instance: alpine
 ```
+Is possible start more than one service.
+
+```Makefile
+multi-service:
+	@$(dkr)
+	service: mysql
+	service: redis
+	instance: node:12
+	run: npm install
+	run: npm test
+```
+
+> \* Instance and services are connected in same network<br>
+> \*\* The name of service is the same of image name with safe values
+
+| Image Name                 | Network Name               |
+|----------------------------|----------------------------|
+| nginx                      | nginx                      |
+| nginx:1.2                  | nginx_1_2                  |
+| redis:3                    | redis_3                    |
+| project/apache_1.2         | project_apache_1_2         |
+| registry/my/service:latest | registry_my_service_latest |
+
+> replace role `'s/:|\.|\/|-/_/g'`
 
 **Parameters:**
 
@@ -322,6 +348,26 @@ The file contains four values per line in following order
 | [exporter](https://github.com/rosineygp/mkdkr_exporter)      | Generate pipeline definitions files from Makefile. |
 
 > Small collection, use it as example
+
+# Helpers
+
+A set of small functions to common pipelines process.
+
+## slug
+
+Replace unsafe values from a string.
+
+- safe for docker
+- safe for network domain
+
+```shell
+slug "my/unsafe/v1.0.0:string"
+# "my_unsafe_v1_0_0_0_string"
+```
+
+Usage example:
+
+[service: multiply](examples/service.mk)
 
 # Examples
 

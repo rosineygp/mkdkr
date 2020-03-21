@@ -7,7 +7,7 @@ _helper_instance() {
 
   assertEquals "$(docker inspect ${1}_${MKDKR_JOB_NAME} | jq .[0].Config.Cmd[0])" "${3}"
   [[ "$?" == "0" ]] &&
-    _pretty "light_purple" "cmd is ${2} [ OK ]"
+    _pretty "light_purple" "cmd is ${3} [ OK ]"
 
   assertEquals "$(docker inspect ${1}_${MKDKR_JOB_NAME} | jq .[0].Config.Image)" "${2}"
   [[ "$?" == "0" ]] &&
@@ -128,17 +128,80 @@ test_test_mkdkr_create_service_and_job() {
 
   _helper_instance "job" '"alpine"' '"sleep"'
 
-  assertNotEquals "$(docker inspect job_${MKDKR_JOB_NAME} | jq .[0].HostConfig.Links[0])" 'null'
-  [[ "$?" == "0" ]] &&
-    _pretty "light_purple" "linked with service [ OK ]"
+  _JOB_NETWORK="$(docker inspect service_${MKDKR_JOB_NAME} | jq '.[0].NetworkSettings.Networks' | jq -r 'keys[0]')"
+  _SERVICE_NETWORK="$(docker inspect service_${MKDKR_JOB_NAME} | jq '.[0].NetworkSettings.Networks' | jq -r 'keys[0]')"
+  _SERVICE_NETWORK_ALIAS=$(docker inspect service_${MKDKR_JOB_NAME} | jq -r '.[0].NetworkSettings.Networks["'$_SERVICE_NETWORK'"].Aliases[0]')
 
-  assertContains "$(docker inspect job_${MKDKR_JOB_NAME} | jq .[0].HostConfig.Links[0])" "nginx"
+  assertEquals "$_JOB_NETWORK" "$_SERVICE_NETWORK"
   [[ "$?" == "0" ]] &&
-    _pretty "light_purple" "alias linked name [ OK ]"
+    _pretty "light_purple" "job and service connected at same network [ OK ]"
+
+  assertEquals "$_SERVICE_NETWORK_ALIAS" "nginx"
+  [[ "$?" == "0" ]] &&
+    _pretty "light_purple" "service alias name [ OK ]"
 
   _job_destroy
 
   _pretty "light_green" "\nRan 12 assert(s)\n"
+
+}
+
+test_test_mkdkr_create_multi_service_and_job() {
+  # shellcheck disable=SC1091
+  source .mkdkr
+  unset MKDKR_JOB_NAME
+
+  NAME="my_service"
+  _job_uniq_name "${NAME}"
+
+  service: nginx
+  _helper_instance "service" '"nginx"' '"nginx"'
+
+  service: httpd
+  _helper_instance "service_1" '"httpd"' '"httpd-foreground"'
+
+  service: httpd:2.4
+  _helper_instance "service_2" '"httpd:2.4"' '"httpd-foreground"'
+
+  instance: alpine
+
+  _helper_instance "job" '"alpine"' '"sleep"'
+
+  _JOB_NETWORK="$(docker inspect service_${MKDKR_JOB_NAME} | jq '.[0].NetworkSettings.Networks' | jq -r 'keys[0]')"
+  _SERVICE_NETWORK="$(docker inspect service_${MKDKR_JOB_NAME} | jq '.[0].NetworkSettings.Networks' | jq -r 'keys[0]')"
+  _SERVICE_NETWORK_ALIAS=$(docker inspect service_${MKDKR_JOB_NAME} | jq -r '.[0].NetworkSettings.Networks["'$_SERVICE_NETWORK'"].Aliases[0]')
+  _SERVICE_NETWORK_1="$(docker inspect service_1_${MKDKR_JOB_NAME} | jq '.[0].NetworkSettings.Networks' | jq -r 'keys[0]')"
+  _SERVICE_NETWORK_ALIAS_1=$(docker inspect service_1_${MKDKR_JOB_NAME} | jq -r '.[0].NetworkSettings.Networks["'$_SERVICE_NETWORK'"].Aliases[0]')
+  _SERVICE_NETWORK_2="$(docker inspect service_2_${MKDKR_JOB_NAME} | jq '.[0].NetworkSettings.Networks' | jq -r 'keys[0]')"
+  _SERVICE_NETWORK_ALIAS_2=$(docker inspect service_2_${MKDKR_JOB_NAME} | jq -r '.[0].NetworkSettings.Networks["'$_SERVICE_NETWORK'"].Aliases[0]')
+
+  assertEquals "$_JOB_NETWORK" "$_SERVICE_NETWORK"
+  [[ "$?" == "0" ]] &&
+    _pretty "light_purple" "job and service (nginx) connected at same network [ OK ]"
+
+  assertEquals "$_SERVICE_NETWORK_ALIAS" "nginx"
+  [[ "$?" == "0" ]] &&
+    _pretty "light_purple" "service (nginx) alias name [ OK ]"
+
+  assertEquals "$_JOB_NETWORK" "$_SERVICE_NETWORK_1"
+  [[ "$?" == "0" ]] &&
+    _pretty "light_purple" "job and service (httpd) connected at same network [ OK ]"
+
+  assertEquals "$_SERVICE_NETWORK_ALIAS_1" "httpd"
+  [[ "$?" == "0" ]] &&
+    _pretty "light_purple" "service (httpd) alias name [ OK ]"
+
+  assertEquals "$_JOB_NETWORK" "$_SERVICE_NETWORK_2"
+  [[ "$?" == "0" ]] &&
+    _pretty "light_purple" "job and service (httpd 2.4) connected at same network [ OK ]"
+
+  assertEquals "$_SERVICE_NETWORK_ALIAS_2" "httpd_2_4"
+  [[ "$?" == "0" ]] &&
+    _pretty "light_purple" "service (httpd 2.4) alias name [ OK ]"
+
+  _job_destroy
+
+  _pretty "light_green" "\nRan 26 assert(s)\n"
 
 }
 

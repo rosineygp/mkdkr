@@ -272,6 +272,8 @@ _job_destroy() {
       rm "${_MKDKR_TMP_DIR}/${MKDKR_JOB_NAME}.log"
     fi
   fi
+
+  docker network rm "network_${MKDKR_JOB_NAME}"
   _pretty "orange" "\ncompleted:"
   times
 }
@@ -285,6 +287,18 @@ _exit_handler() {
   fi
 }
 
+_network_create() {
+  _NETWORK_EXIST="$(docker network ls | awk '{ print $2 }' | grep network_${MKDKR_JOB_NAME})"
+  if [ ! "${_NETWORK_EXIST}" ]; then
+    _pretty "orange" "network: network_${MKDKR_JOB_NAME}"
+    docker network create "network_${MKDKR_JOB_NAME}"
+  fi
+}
+
+slug() {
+  echo "${1}" | sed -E 's/:|\.|\/|-/_/g'
+}
+
 instance:() {
   OLDIFS=$IFS
   IFS='⠀' # Braille Pattern Blank (U+2800)
@@ -292,20 +306,16 @@ instance:() {
   ARGS="${*:2}"
 
   _remove_running_job
+  _network_create
 
   _pretty "cyan" "\ninstance: ${IMAGE} ${ARGS[*]}"
-
-  SERVICE=$(_image "service_${MKDKR_JOB_NAME}" | sed 's/:.*//g;s/\//_/g')
-  if [ "${SERVICE}" != "" ]; then
-    SERVICES=(--link "service_${MKDKR_JOB_NAME}:${SERVICE}")
-  fi
 
   docker run --rm -d \
     -v "${PWD}":"${PWD}" \
     --workdir "${PWD}" \
     --entrypoint "" \
+    --network "network_${MKDKR_JOB_NAME}" \
     $ARGS \
-    ${SERVICES[@]} \
     --name "job_${MKDKR_JOB_NAME}" \
     "${IMAGE}" sleep "${MKDKR_TTL:-3600}" >&2
 
@@ -320,14 +330,28 @@ service:() {
   ARGS="${*:2}"
 
   _remove_running_job
+  _network_create
 
   _pretty "cyan" "\nservice: ${IMAGE} ${ARGS[*]}"
+
+  NETWORK_ALIAS="$(slug $IMAGE)"
+  _pretty "cyan" "network alias: ${NETWORK_ALIAS}"
+
+  SERVICE_COUNT="$(docker ps | grep -cE 'service_.*'${MKDKR_JOB_NAME})"
+
+  if [ "$SERVICE_COUNT" != "0" ]; then
+    SERVICE_COUNT="${SERVICE_COUNT}_"
+  else
+    SERVICE_COUNT=""
+  fi
 
   docker run --rm -d \
     -v "${PWD}":"${PWD}" \
     --workdir "${PWD}" \
+    --network "network_${MKDKR_JOB_NAME}" \
+    --network-alias "$NETWORK_ALIAS" \
     $ARGS \
-    --name "service_${MKDKR_JOB_NAME}" \
+    --name "service_${SERVICE_COUNT}${MKDKR_JOB_NAME}" \
     "${IMAGE}" >&2
 
   _exit_handler "$?"
@@ -341,21 +365,17 @@ dind:() {
   ARGS="${*:2}"
 
   _remove_running_job
+  _network_create
 
   _pretty "cyan" "\ndind: ${IMAGE} ${ARGS[*]}"
-
-  SERVICE=$(_image "service_${MKDKR_JOB_NAME}" | sed 's/:.*//g;s/\//_/g')
-  if [ "${SERVICE}" != "" ]; then
-    SERVICES=(--link "service_${MKDKR_JOB_NAME}:${SERVICE}")
-  fi
 
   docker run --rm -d \
     -v "${PWD}":"${PWD}" \
     --workdir "${PWD}" \
     --entrypoint "" \
+    --network "network_${MKDKR_JOB_NAME}" \
     $ARGS \
     --privileged -v /var/run/docker.sock:/var/run/docker.sock \
-    ${SERVICES[@]} \
     --name "job_${MKDKR_JOB_NAME}" \
     "${IMAGE}" sleep "${MKDKR_TTL:-3600}" >&2
 
