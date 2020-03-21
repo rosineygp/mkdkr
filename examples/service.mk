@@ -23,8 +23,10 @@ multiply:
 	service: nginx
 	service: httpd
 	service: httpd:2.4
+	service: docker.io/bitnami/nginx:latest
 	instance: alpine
 	run: apk add curl
 	run: curl -s nginx
 	run: curl -s httpd
 	run: curl -s httpd_2_4
+	run: curl -s $$(slug docker.io/bitnami/nginx:latest):8080

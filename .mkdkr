@@ -295,6 +295,10 @@ _network_create() {
   fi
 }
 
+slug() {
+  echo "${1}" | sed -E 's/:|\.|\/|-/_/g'
+}
+
 instance:() {
   OLDIFS=$IFS
   IFS='⠀' # Braille Pattern Blank (U+2800)
@@ -330,7 +334,7 @@ service:() {
 
   _pretty "cyan" "\nservice: ${IMAGE} ${ARGS[*]}"
 
-  NETWORK_ALIAS="$(echo $IMAGE | sed -E 's/:|\./_/g')"
+  NETWORK_ALIAS="$(slug $IMAGE)"
   _pretty "cyan" "network alias: ${NETWORK_ALIAS}"
 
   SERVICE_COUNT="$(docker ps | grep -cE 'service_.*'${MKDKR_JOB_NAME})"
