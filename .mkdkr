@@ -275,7 +275,7 @@ _job_destroy() {
 
   docker network rm "network_${MKDKR_JOB_NAME}"
   _pretty "orange" "\ncompleted:"
-  times
+  times >&2
 }
 
 _exit_handler() {
