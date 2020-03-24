@@ -1,0 +1,27 @@
+#!/bin/bash
+
+test_mkdkr_version_gt() {
+  # shellcheck disable=SC1091
+  source .mkdkr
+
+  _pretty "black" "black"
+  _pretty "red" "red"
+  _pretty "green" "green"
+  _pretty "orange" "orange"
+  _pretty "blue" "blue"
+  _pretty "purple" "purple"
+  _pretty "cyan" "cyan"
+  _pretty "light_gray" "light_gray"
+  _pretty "dark_gray" "dark_gray"
+  _pretty "light_red" "light_red"
+  _pretty "light_green" "light_green"
+  _pretty "yellow" "yellow"
+  _pretty "light_blue" "light_blue"
+  _pretty "light_purple" "light_purple"
+  _pretty "light_cyan" "light_cyan"
+  _pretty "white" "white"
+
+}
+
+# shellcheck disable=SC1091
+. ./shunit2
