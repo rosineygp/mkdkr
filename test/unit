@@ -1,5 +1,6 @@
 #!/bin/bash
 
+./unit_colors
 ./unit_job_name
 ./unit_create_instance
 ./unit_run_command
