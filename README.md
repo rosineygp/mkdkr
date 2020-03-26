@@ -494,6 +494,7 @@ pipeline:
 |MKDKR_INCLUDE_CLONE_DEPTH|1|In the most of case you no need change history for includes|
 |MKDKR_BRANCH_NAME||Return current git branch, if it exist|
 |MKDKR_BRANCH_NAME_SLUG||Return current git branch, if it exist, with safe values|
+|MKDKR_NETWORK_ARGS||Arguments of docker create networks|
 
 > - to overwrite the values use: `export <var>=<value>`
 > - \* auto generated

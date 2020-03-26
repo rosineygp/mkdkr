@@ -291,7 +291,11 @@ _network_create() {
   _NETWORK_EXIST="$(docker network ls | awk '{ print $2 }' | grep network_${MKDKR_JOB_NAME})"
   if [ ! "${_NETWORK_EXIST}" ]; then
     _pretty "orange" "network: network_${MKDKR_JOB_NAME}"
-    docker network create "network_${MKDKR_JOB_NAME}"
+    docker network create "network_${MKDKR_JOB_NAME}" ${MKDKR_NETWORK_ARGS} >&2
+    _EXIT_CODE="$?"
+    if [ "$_EXIT_CODE" != "0" ]; then
+      exit "$_EXIT_CODE"
+    fi
   fi
 }
 
