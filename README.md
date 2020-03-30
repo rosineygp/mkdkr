@@ -64,7 +64,7 @@ Table of contents
   * [DIND](#dind)
   * [Escapes](#escapes)
   * [Shell](#shell)
-  * [Sdtout](#stdout)
+  * [Stdout](#stdout)
   * [Pipelines](#pipelines)
 * [Environment Variables](#environment-variables)
 * [Migration](#migration)
@@ -469,7 +469,7 @@ stdout:
 
 [Makefile](examples/stdout.mk)
 
-## Pipeline
+## Pipelines
 
 Group of jobs for parallel and organization execution
 
