@@ -31,12 +31,13 @@
   "devDependencies": {
     "@commitlint/cli": "^8.3.4",
     "@commitlint/config-conventional": "^8.3.4",
-    "husky": "^3.1.0"
+    "husky": "^3.1.0",
+    "standard-version": "^7.1.0"
   },
   "husky": {
     "hooks": {
       "pre-commit": "make lint.shellcheck",
       "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
-    }  
+    }
   }
 }
