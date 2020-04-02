@@ -1,6 +1,6 @@
 {
   "name": "mkdkr",
-  "version": "0.9.1",
+  "version": "1.12.0",
   "description": "Super small and powerful framework for build CI pipeline, scripted with Makefile and isolated with docker.",
   "main": "index.js",
   "directories": {
@@ -8,7 +8,8 @@
     "test": "test"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "release": "standard-version -n"
   },
   "repository": {
     "type": "git",
@@ -31,12 +32,13 @@
   "devDependencies": {
     "@commitlint/cli": "^8.3.4",
     "@commitlint/config-conventional": "^8.3.4",
-    "husky": "^3.1.0"
+    "husky": "^3.1.0",
+    "standard-version": "^7.1.0"
   },
   "husky": {
     "hooks": {
       "pre-commit": "make lint.shellcheck",
       "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
-    }  
+    }
   }
 }
