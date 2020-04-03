@@ -1,6 +1,6 @@
 {
   "name": "mkdkr",
-  "version": "1.12.0",
+  "version": "1.13.0",
   "description": "Super small and powerful framework for build CI pipeline, scripted with Makefile and isolated with docker.",
   "main": "index.js",
   "directories": {
@@ -9,7 +9,7 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "release": "standard-version -n"
+    "release": "standard-version -n --skip.commit --skip.tag && git add CHANGELOG.md package.json && git commit --amend --no-edit && standard-version -n --skip.commit --skip.changelog --skip.bump"
   },
   "repository": {
     "type": "git",
@@ -38,7 +38,8 @@
   "husky": {
     "hooks": {
       "pre-commit": "make lint.shellcheck",
-      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
+      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS",
+      "pre-push": "npm run release"
     }
   }
 }
