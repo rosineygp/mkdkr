@@ -2,9 +2,10 @@
 
 set -e
 
-make -j2 --output-sync=line \
+make -j3 --output-sync=line \
   lint.commit \
-  lint.shellcheck
+  lint.shellcheck \
+  lint.hadolint
 
 make test.unit
     

@@ -19,6 +19,9 @@ jobs:
     - stage: lint
       name: lint shellcheck
       script: make lint.shellcheck
+    - stage: lint
+      name: lint hadolint
+      script: make lint.hadolint
     - stage: test
       name: test unit
       script: make test.unit

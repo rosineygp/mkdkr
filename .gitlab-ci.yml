@@ -26,6 +26,11 @@ lint shellcheck:
   script:
   - make lint.shellcheck
 
+lint hadolint:
+  stage: lint
+  script:
+  - make lint.hadolint
+
 test unit:
   stage: test
   script:
