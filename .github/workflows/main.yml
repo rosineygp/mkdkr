@@ -18,11 +18,18 @@ jobs:
     - uses: actions/checkout@v1
     - name: lint shellcheck
       run: make lint.shellcheck
+  lint_hadolint:
+    runs-on: ubuntu-18.04
+    steps:
+    - uses: actions/checkout@v1
+    - name: lint hadolint
+      run: make lint.hadolint
   test_unit:
     runs-on: ubuntu-18.04
     needs:
       - lint_commit
       - lint_shellcheck
+      - lint_hadolint
     steps:
     - uses: actions/checkout@v1
     - name: test unit

@@ -20,6 +20,11 @@ lint.shellcheck:
 	run: shellcheck -e SC2181 -e SC2086 -e SC1091 test/unit_requirements
 	run: shellcheck test/cover
 
+lint.hadolint:
+	@$(dkr)
+	instance: hadolint/hadolint:latest-alpine
+	run: hadolint Dockerfile
+
 test.unit:
 	@$(dkr)
 	dind: docker:19 --workdir $(PWD)/test

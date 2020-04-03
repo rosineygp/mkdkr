@@ -16,6 +16,14 @@ jobs:
     - run:
         name: lint shellcheck
         command: make lint.shellcheck
+  lint_hadolint:
+    machine:
+      image: ubuntu-1604:201903-01
+    steps:
+    - checkout
+    - run:
+        name: lint hadolint
+        command: make lint.hadolint
   test_unit:
     machine:
       image: ubuntu-1604:201903-01
@@ -135,10 +143,12 @@ workflows:
     jobs:
       - lint_commit
       - lint_shellcheck
+      - lint_hadolint
       - test_unit:
           requires:
             - lint_commit
             - lint_shellcheck
+            - lint_hadolint
       - bash_v5-0:
           requires:
             - test_unit

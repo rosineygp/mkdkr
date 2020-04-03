@@ -18,6 +18,11 @@ pipeline {
             sh "make lint.shellcheck"
           }
         }
+        stage("lint hadolint") {
+          steps {
+            sh "make lint.hadolint"
+          }
+        }
       }
     }
   
