@@ -325,8 +325,6 @@ instance:() {
   _pretty "cyan" "\ninstance: ${IMAGE} ${ARGS[*]}"
 
   docker run --rm -d \
-    -e MKDKR_JOB_NAME \
-    -e MKDKR_TARGET_NAME \
     -v "${PWD}":"${PWD}" \
     --workdir "${PWD}" \
     --entrypoint "" \
@@ -362,8 +360,6 @@ service:() {
   fi
 
   docker run --rm -d \
-    -e MKDKR_JOB_NAME \
-    -e MKDKR_TARGET_NAME \
     -v "${PWD}":"${PWD}" \
     --workdir "${PWD}" \
     --network "network_${MKDKR_JOB_NAME}" \
@@ -388,8 +384,6 @@ dind:() {
   _pretty "cyan" "\ndind: ${IMAGE} ${ARGS[*]}"
 
   docker run --rm -d \
-    -e MKDKR_JOB_NAME \
-    -e MKDKR_TARGET_NAME \
     -v "${PWD}":"${PWD}" \
     --workdir "${PWD}" \
     --entrypoint "" \

@@ -232,7 +232,7 @@ test_mkdkr_create_instance_with_parameters() {
   [[ "$?" == "0" ]] &&
     _pretty "light_purple" "memory restriction [ OK ]"
 
-  assertEquals "$(docker inspect job_${MKDKR_JOB_NAME} | jq '.[0].Config.Env | length')" 7
+  assertEquals "$(docker inspect job_${MKDKR_JOB_NAME} | jq '.[0].Config.Env | length')" 5
   [[ "$?" == "0" ]] &&
     _pretty "light_purple" "count env vars == 5 [ OK ]"
 
