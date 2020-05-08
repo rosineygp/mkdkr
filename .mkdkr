@@ -243,7 +243,7 @@ _tmp_dir() {
 }
 
 _header() {
-  _MKDKR_INCLUDE="${_MKDKR_TMP_DIR}/mkdkr.mk"
+  _MKDKR_INCLUDE="${_MKDKR_TMP_DIR}/mkdkr_header_$(_uuid).mk"
   _header_render >"${_MKDKR_INCLUDE}"
   echo "${_MKDKR_INCLUDE}"
 }
