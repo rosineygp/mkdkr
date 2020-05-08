@@ -141,12 +141,10 @@ _remote_git_clone() {
   _FILE="${4}"
   _MKDKR_INCLUDE_PATH="${5}"
 
-  _pretty "light_cyan" "alias: ${_ALIAS}"
-  _pretty "light_cyan" "repos: ${_REPOS}"
-  _pretty "light_cyan" "checkout: ${_CHECKOUT}"
-  _pretty "light_cyan" "file: ${_FILE}\n"
+  _pretty "light_cyan" "alias: ${_ALIAS}, repos: ${_REPOS}, checkout: ${_CHECKOUT}, file: ${_FILE}\n"
 
   git clone "${_REPOS}" \
+    --quiet \
     --config advice.detachedHead=false \
     --branch "${_CHECKOUT}" \
     --depth "${MKDKR_INCLUDE_CLONE_DEPTH:-1}" \
@@ -167,7 +165,7 @@ _remote_force_tag() {
 
   if [ "$(grep -E '^[A-Z][A-Z\_]+\_TAG\=.*' "${_FILE}")" != "" ]; then
     _KEY_VALUE=($(grep -E '^[A-Z][A-Z\_]+\_TAG\=.*' "${_FILE}" | tr '=' '\n'))
-    _pretty "purple" "replace ${_KEY_VALUE[0]}: ${_KEY_VALUE[1]} to ${_TAG}"
+    _pretty "purple" "replace: ${_KEY_VALUE[0]}=${_KEY_VALUE[1]} to ${_TAG}"
     sed -i -E "s/(^[A-Z][A-Z\_]+\_TAG\=)(.*)/\1${_TAG}/g" "${_FILE}"
   fi
 }
@@ -226,13 +224,9 @@ MKDKR_BRANCH_NAME_SLUG=$MKDKR_BRANCH_NAME_SLUG
 define dkr =
   source .mkdkr
   \$(eval MKDKR_JOB_NAME=\$(shell source .mkdkr; _job_uniq_name \$(@)))
-  \$(eval MKDKR_JOB_STDOUT="${_MKDKR_TMP_DIR}/\${MKDKR_JOB_NAME}.log")
+  \$(eval MKDKR_TARGET_NAME=\$(@))
   trap _job_destroy EXIT
   _pretty "orange" "\nstart: \$(@)\n"
-endef
-
-define stdout =
-  if [ -f \$(MKDKR_JOB_STDOUT) ]; then cat \$(MKDKR_JOB_STDOUT); fi
 endef
 EOF
 }
@@ -249,9 +243,8 @@ _tmp_dir() {
 }
 
 _header() {
-  _MKDKR_INCLUDE="${_MKDKR_TMP_DIR}/mkdkr_header_$(_uuid).mk"
+  _MKDKR_INCLUDE="${_MKDKR_TMP_DIR}/mkdkr.mk"
   _header_render >"${_MKDKR_INCLUDE}"
-  chmod o+w "${_MKDKR_INCLUDE}"
   echo "${_MKDKR_INCLUDE}"
 }
 
@@ -268,8 +261,8 @@ _job_destroy() {
   if [ "${ALIVE[0]}" != "" ]; then
     _pretty "cyan" "\ncleanup:"
     docker ps | grep "${MKDKR_JOB_NAME}" | awk '{print $1}' | xargs -i{} docker rm -f {} >&2
-    if [ -f "${_MKDKR_TMP_DIR}/${MKDKR_JOB_NAME}.log" ]; then
-      rm "${_MKDKR_TMP_DIR}/${MKDKR_JOB_NAME}.log"
+    if [ -f "${_MKDKR_TMP_DIR}/${MKDKR_TARGET_NAME}.log" ]; then
+      rm -v "${_MKDKR_TMP_DIR}/${MKDKR_TARGET_NAME}.log"  >&2
     fi
   fi
 
@@ -303,6 +296,23 @@ slug() {
   echo "${1}" | sed -E 's/:|\.|\/|-/_/g'
 }
 
+_step_id() {
+  _STEP_ID=0
+  if [ -f "${_MKDKR_TMP_DIR}/${MKDKR_TARGET_NAME}.log" ]; then
+    _STEP_ID="$(grep -c '^MKDKR_HEREDOC_.*$' ${_MKDKR_TMP_DIR}/${MKDKR_TARGET_NAME}.log)"
+  fi
+
+  echo "$_STEP_ID"
+}
+
+_step_header() {
+  echo -e "STEP_${1} << MKDKR_HEREDOC_${1}" >> "${_MKDKR_TMP_DIR}/${MKDKR_TARGET_NAME}.log"
+}
+
+_step_footer() {
+  echo -e "MKDKR_HEREDOC_${1}\n" >> "${_MKDKR_TMP_DIR}/${MKDKR_TARGET_NAME}.log"
+}
+
 instance:() {
   OLDIFS=$IFS
   IFS='⠀' # Braille Pattern Blank (U+2800)
@@ -315,6 +325,8 @@ instance:() {
   _pretty "cyan" "\ninstance: ${IMAGE} ${ARGS[*]}"
 
   docker run --rm -d \
+    -e MKDKR_JOB_NAME \
+    -e MKDKR_TARGET_NAME \
     -v "${PWD}":"${PWD}" \
     --workdir "${PWD}" \
     --entrypoint "" \
@@ -350,6 +362,8 @@ service:() {
   fi
 
   docker run --rm -d \
+    -e MKDKR_JOB_NAME \
+    -e MKDKR_TARGET_NAME \
     -v "${PWD}":"${PWD}" \
     --workdir "${PWD}" \
     --network "network_${MKDKR_JOB_NAME}" \
@@ -374,6 +388,8 @@ dind:() {
   _pretty "cyan" "\ndind: ${IMAGE} ${ARGS[*]}"
 
   docker run --rm -d \
+    -e MKDKR_JOB_NAME \
+    -e MKDKR_TARGET_NAME \
     -v "${PWD}":"${PWD}" \
     --workdir "${PWD}" \
     --entrypoint "" \
@@ -396,9 +412,30 @@ run:() {
     mkdir -p "${_MKDKR_TMP_DIR}"
   fi
 
-  docker exec -i ${CONTAINER_NAME} ${MKDKR_SHELL:-sh} -c "$*" | tee "${_MKDKR_TMP_DIR}/${MKDKR_JOB_NAME}.log"
+  _STEP_ID=$(_step_id)
+  _step_header "$_STEP_ID"
 
-  _exit_handler "${PIPESTATUS[0]}"
+  docker exec -i ${CONTAINER_NAME} ${MKDKR_SHELL:-sh} -c "$*" | tee -a "${_MKDKR_TMP_DIR}/${MKDKR_TARGET_NAME}.log"
+  _EXIT_CODE="${PIPESTATUS[0]}"
+
+  _step_footer "$_STEP_ID"
+  _exit_handler "${_EXIT_CODE}"
+}
+
+log: () {
+  _ID="${1}"
+
+  _pretty "purple" "\nlog: ${_ID}"
+  awk '/^STEP_'"${_ID}"' << MKDKR_HEREDOC_'"${_ID}"'$/  {on=1} on==1 {print}  /^MKDKR_HEREDOC_'"${_ID}"'$/ {on=0; print ""}' \
+    "${_MKDKR_TMP_DIR}/${MKDKR_TARGET_NAME}.log" | \
+    grep -v 'MKDKR_HEREDOC_'
+
+  _EXIT_CODE="${PIPESTATUS[1]}"
+  if [ "$_EXIT_CODE" != "0" ]; then
+    _pretty "red" "error: null pointer execption, log id not found."
+  fi
+
+  _exit_handler "${_EXIT_CODE}"
 }
 
 if [ "$1" == "init" ]; then

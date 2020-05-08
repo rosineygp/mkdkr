@@ -98,11 +98,9 @@ examples.escapes:
 	make --silent -f examples/escapes.mk redirect_to_outside
 
 examples.stdout:
-	make --silent -f examples/stdout.mk from-filename
-	make --silent -f examples/stdout.mk from-function
-	make --silent -f examples/stdout.mk show-path
 	make --silent -f examples/stdout.mk parse-output
 	make --silent -f examples/stdout.mk from
+	make --silent -f examples/stdout.mk back-to-container
 
 examples.shell:
 	make --silent -f examples/shell.mk shell
