@@ -168,13 +168,14 @@ _remote_git_clone() {
 }
 
 _remote_force_tag() {
-  _TAG="${1}"
-  _FILE="${2}"
+  local -r tag="${1}"; shift
+  local -r file="${1}"; shift
 
-  if [ "$(grep -E '^[A-Z][A-Z\_]+\_TAG\=.*' "${_FILE}")" != "" ]; then
-    _KEY_VALUE=($(grep -E '^[A-Z][A-Z\_]+\_TAG\=.*' "${_FILE}" | tr '=' '\n'))
-    _pretty "purple" "replace: ${_KEY_VALUE[0]}=${_KEY_VALUE[1]} to ${_TAG}"
-    sed -i -E "s/(^[A-Z][A-Z\_]+\_TAG\=)(.*)/\1${_TAG}/g" "${_FILE}"
+  local -r tag_in_file=$(grep -E '^[A-Z][A-Z\_]+\_TAG\=.*' "${file}")
+  if [ "${tag_in_file}" != "" ]; then
+    mapfile -t key_value < <(grep -E '^[A-Z][A-Z\_]+\_TAG\=.*' "${file}" | tr '=' '\n')
+    _pretty "purple" "replace: ${key_value[0]}=${key_value[1]} to ${tag}"
+    sed -i -E "s/(^[A-Z][A-Z\_]+\_TAG\=)(.*)/\1${tag}/g" "${file}"
   fi
 }
 
