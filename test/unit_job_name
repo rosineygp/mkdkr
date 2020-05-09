@@ -13,7 +13,7 @@ test_mkdkr_job_name() {
         [[ "$?" == "0" ]] && \
             _pretty "light_purple" "assert ${MKDKR_JOB_NAME} is not null [ OK ]"
 
-        assertContains "$MKDKR_JOB_NAME" "$(echo "$NAME" | sed 's/\//_/g')"
+        assertContains "${MKDKR_JOB_NAME}" "$(echo "$NAME" | sed 's/\//_/g')"
         [[ "$?" == "0" ]] && \
             _pretty "light_purple" "assert ${MKDKR_JOB_NAME} contains current name [ OK ]"
 

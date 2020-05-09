@@ -15,11 +15,6 @@ multi-images:
 	run: 'curl -s https://i.kym-cdn.com/entries/icons/mobile/000/018/012/this_is_fine.jpg > img.jpg'
 	instance: ubuntu
 	run: apt update -qq
-	run: apt install imagemagick -y
-	run: convert img.jpg img.png
-	instance: node:10
-	run: npm install -g picture-tube
-	run: picture-tube img.png
-	run: rm img.jpg img.png
+	run: ls -la
 	dind: docker:19
 	run: docker build -t my/image .

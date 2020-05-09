@@ -51,6 +51,7 @@ Table of contents
   * [service:](#service)
   * [dind:](#dind)
   * [run:](#run)
+  * [log:](#log)
 * [Includes](#includes)
 	* [Explicit](#explicit)
 	* [Implicit](#implicit)
@@ -270,6 +271,27 @@ my-run:
 	run: 'ls -la > myfile'
 ```
 
+## log:
+
+All output steps executed in a job (except log:) is stored and can be reused during future steps.
+
+**Parameters:**
+- Number: The number represent the step in a job and start with 0.
+
+**Return:**
+- Text, Multiline text.
+
+**Usage**
+
+```Makefile
+my-log:
+	@$(dkr)
+	instance: alpine
+	run: apk add curl jq
+	run: curl http://example.com
+	log: 1 \| jq '.'
+```
+
 # Includes
 
 Is possible create jobs or fragments of jobs and reuse it in another projects, like a code package library.
@@ -442,19 +464,20 @@ shell:
 
 ## Stdout
 
-Get last command output
+Get output by id
 
-Use to filter or apply some logic in last command executed (also outside container)
+Use to filter or apply some logic in last command executed
 
 ```Makefile
 stdout:
 	@$(dkr)
 	instance: alpine
 	run: echo "hello mkdkr!"
-	cat "$(MKDKR_JOB_STDOUT)"
+	run: ps -ef
+	log: 1
 ```
 
-> `$(MKDKR_JOB_STDOUT)` return path of file
+> `log: 1` return stout form second command `ps -ef`
 
 ```Makefile
 stdout:
@@ -463,9 +486,9 @@ stdout:
 	run: apt-get update
 	run: apt-get install curl -y
 	run: dpkg -l
-	$(stdout) | grep -i curl && echo "INSTALLED"
+	log: 2 | grep -i curl && echo "INSTALLED"
 ```
-> `$(stdout)` return output file using cat
+> `log: 2` return stdout from third command  `dpkg -l` and apply filter
 
 [Makefile](examples/stdout.mk)
 
