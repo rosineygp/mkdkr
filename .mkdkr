@@ -105,32 +105,36 @@ _image() {
 }
 
 _remove_running_job() {
-  if [ "$(docker ps | grep job_${MKDKR_JOB_NAME})" != "" ]; then
-    _pretty "purple" "image changed, from: $(_image job_${MKDKR_JOB_NAME}) to: ${IMAGE}"
+  if [[ $(docker ps | grep "job_${MKDKR_JOB_NAME}") != "" ]]; then
+    local -r image=$(_image "job_${MKDKR_JOB_NAME}")
+    _pretty "purple" "image changed, from: ${image} to: ${IMAGE}"
     docker rm -f "job_${MKDKR_JOB_NAME}" >&2
   fi
 }
 
 _branch_or_tag_name() {
-  _BRANCH=""
-  if [ "$GITHUB_ACTIONS" == "true" ]; then
-    _BRANCH="$(echo $GITHUB_REF | cut -d'/' -f3-)"
-  elif [ "$GITLAB_CI" == "true" ]; then
-    _BRANCH="$CI_COMMIT_REF_NAME"
-  elif [ "$JENKINS_URL" != "" ]; then
-    _BRANCH="$GIT_BRANCH"
-  elif [ "$TRAVIS" == "true" ]; then
-    _BRANCH="$TRAVIS_BRANCH"
-  elif [ "$CIRCLECI" == "true" ]; then
-    if [ "$CIRCLE_TAG" != "" ]; then
-      _BRANCH="$CIRCLE_TAG"
+  local branch=""
+  if [[ "$GITHUB_ACTIONS" == "true" ]]; then
+    branch=$(echo "${GITHUB_REF}" | cut -d'/' -f3-)
+    echo -ne "${branch}"
+  elif [[ "${GITLAB_CI}" == "true" ]]; then
+    echo -ne "${CI_COMMIT_REF_NAME}"
+  elif [[ "${JENKINS_URL}" != "" ]]; then
+    echo -ne "${GIT_BRANCH}"
+  elif [[ "${TRAVIS}" == "true" ]]; then
+    echo -ne "${TRAVIS_BRANCH}"
+  elif [[ "${CIRCLECI}" == "true" ]]; then
+    if [[ "${CIRCLE_TAG}" != "" ]]; then
+      echo -ne "${CIRCLE_TAG}"
     else
-      _BRANCH="$CIRCLE_BRANCH"
+      echo -ne "${CIRCLE_BRANCH}"
     fi
-  elif [ "$(git rev-parse --is-inside-work-tree)" == true ]; then
-    _BRANCH="$(git rev-parse --abbrev-ref HEAD)"
+  elif [[ $(git rev-parse --is-inside-work-tree) == true ]]; then
+    branch=$(git rev-parse --abbrev-ref HEAD)
+    echo -ne "${branch}"
+  else
+    echo -ne "${branch}"
   fi
-  echo "$_BRANCH"
 }
 
 _branch_or_tag_name_slug() {
