@@ -175,7 +175,7 @@ _remote_force_tag() {
   if [ "${tag_in_file}" != "" ]; then
     mapfile -t key_value < <(grep -E '^[A-Z][A-Z\_]+\_TAG\=.*' "${file}" | tr '=' '\n')
 
-    if [[ "${key_value[0]}" != "${key_value[1]}" ]]; then
+    if [[ "${key_value[1]}" != "${tag}" ]]; then
       _pretty "purple" "replace: ${key_value[0]}=${key_value[1]} to ${tag}"
       sed -i -E "s/(^[A-Z][A-Z\_]+\_TAG\=)(.*)/\1${tag}/g" "${file}"
     fi
@@ -239,7 +239,7 @@ EOF
 }
 
 _tmp_dir() {
-  if [ -d "${_MKDKR_TMP_DIR}" ]; then
+  if [[ -d "${_MKDKR_TMP_DIR}" ]]; then
     find "${_MKDKR_TMP_DIR}" -name "mkdkr_header_*.mk" -type f -mmin +60 -delete
     if [ -d "${_MKDKR_TMP_DIR}/includes" ]; then
       find "${_MKDKR_TMP_DIR}/includes" -maxdepth 1 -type d -mmin +60 -exec rm -rf {} \;
@@ -256,68 +256,76 @@ _header() {
 }
 
 _job_uniq_name() {
-  if [ -z "${MKDKR_JOB_NAME}" ]; then
-    _MKDKR_JOB_NAME=$(echo "${1}_$(_uuid)" | sed 's/\//_/g')
+  local -r target="${1}"
+  if [[ -z "${MKDKR_JOB_NAME}" ]]; then
+    _MKDKR_JOB_NAME=$(sed 's/\//_/g' <<< "${target}_$(_uuid)")
     export MKDKR_JOB_NAME="${_MKDKR_JOB_NAME}"
   fi
   echo "${MKDKR_JOB_NAME}"
 }
 
 _job_destroy() {
-  ALIVE=$(docker ps | grep "${MKDKR_JOB_NAME}" | awk '{print $1}')
-  if [ "${ALIVE[0]}" != "" ]; then
+  alives=$(docker ps | grep "${MKDKR_JOB_NAME}" | awk '{print $1}')
+  if [[ "${alives[0]}" != "" ]]; then
     _pretty "cyan" "\ncleanup:"
     docker ps | grep "${MKDKR_JOB_NAME}" | awk '{print $1}' | xargs -i{} docker rm -f {} >&2
-    if [ -f "${_MKDKR_TMP_DIR}/${MKDKR_TARGET_NAME}.log" ]; then
+    if [[ -f "${_MKDKR_TMP_DIR}/${MKDKR_TARGET_NAME}.log" ]]; then
       rm -v "${_MKDKR_TMP_DIR}/${MKDKR_TARGET_NAME}.log" >&2
     fi
   fi
 
-  docker network rm "network_${MKDKR_JOB_NAME}"
+  local -r network=$(docker network ls | grep "network_${MKDKR_JOB_NAME}")
+  if [[ "$network" != "" ]]; then
+    docker network rm "network_${MKDKR_JOB_NAME}"
+  fi
+
   _pretty "orange" "\ncompleted:"
   times >&2
 }
 
 _exit_handler() {
-  _EXIT_CODE="${1}"
-  _EXPECTED="${2}"
-  if [ "${_EXIT_CODE}" != "${_EXPECTED:-0}" ]; then
+  exit_code="${1}"; shift
+  expected="${1}"; shift
+  if [ "${exit_code}" != "${expected:-0}" ]; then
     _job_destroy
-    exit "${_EXIT_CODE}"
+    exit "${exit_code}"
   fi
 }
 
 _network_create() {
-  _NETWORK_EXIST="$(docker network ls | awk '{ print $2 }' | grep network_${MKDKR_JOB_NAME})"
-  if [ ! "${_NETWORK_EXIST}" ]; then
+  local -r network=$(docker network ls | grep "network_${MKDKR_JOB_NAME}" | awk '{ print $2 }')
+  if [ ! "${network}" ]; then
     _pretty "orange" "network: network_${MKDKR_JOB_NAME}"
     docker network create "network_${MKDKR_JOB_NAME}" ${MKDKR_NETWORK_ARGS} >&2
-    _EXIT_CODE="$?"
-    if [ "$_EXIT_CODE" != "0" ]; then
-      exit "$_EXIT_CODE"
+    local -r exit_code="$?"
+    if [ "$exit_code" != "0" ]; then
+      exit "$exit_code"
     fi
   fi
 }
 
 slug() {
-  echo "${1}" | sed -E 's/:|\.|\/|-/_/g'
+  local -r str="${1}"
+  sed -E 's/:|\.|\/|-/_/g' <<< "${str}"
 }
 
 _step_id() {
-  _STEP_ID=0
+  local step="0"
   if [ -f "${_MKDKR_TMP_DIR}/${MKDKR_TARGET_NAME}.log" ]; then
-    _STEP_ID="$(grep -c '^MKDKR_HEREDOC_.*$' ${_MKDKR_TMP_DIR}/${MKDKR_TARGET_NAME}.log)"
+    step=$(grep -c '^MKDKR_HEREDOC_.*$' "${_MKDKR_TMP_DIR}/${MKDKR_TARGET_NAME}.log")
   fi
 
-  echo "$_STEP_ID"
+  echo "$step"
 }
 
 _step_header() {
-  echo -e "STEP_${1} << MKDKR_HEREDOC_${1}" >>"${_MKDKR_TMP_DIR}/${MKDKR_TARGET_NAME}.log"
+  local -r step="${1}"
+  echo -e "STEP_${step} << MKDKR_HEREDOC_${step}" >>"${_MKDKR_TMP_DIR}/${MKDKR_TARGET_NAME}.log"
 }
 
 _step_footer() {
-  echo -e "MKDKR_HEREDOC_${1}\n" >>"${_MKDKR_TMP_DIR}/${MKDKR_TARGET_NAME}.log"
+  local -r step="${1}"
+  echo -e "MKDKR_HEREDOC_${step}\n" >>"${_MKDKR_TMP_DIR}/${MKDKR_TARGET_NAME}.log"
 }
 
 instance:() {
