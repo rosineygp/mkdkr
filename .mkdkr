@@ -100,7 +100,8 @@ _uuid() {
 }
 
 _image() {
-  docker ps | grep "${1}" | awk '{print $2}'
+  local -r image="${1}"
+  docker ps | grep "${image}" | awk '{print $2}'
 }
 
 _remove_running_job() {
