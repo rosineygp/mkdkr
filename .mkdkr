@@ -27,39 +27,41 @@ _pretty() {
 }
 
 _command_exist() {
-  if ! [ -x "$(command -v ${1})" ]; then
-    _pretty "red" "command: ${1} not found, please install it"
+  local -r cmd="${1}"
+  if ! [[ -x $(command -v "${cmd}") ]]; then
+    _pretty "red" "command: $cmd not found, please install it"
     exit 1
   fi
 }
 
-# https://stackoverflow.com/questions/16989598/comparing-php-version-numbers-using-bash#24067243
 _version_gt() {
-  test "$(printf '%s\n' "$@" | sort -V | head -n 1)" != "${1}"
+  local -r versions=("${@}")
+  local -r current="${1}"
+  test "$(printf '%s\n' "${versions[@]}" | sort -V | head -n 1)" != "${current}"
 }
 
 _verify_make_version() {
-  _CURRENT="${1}"
-  if _version_gt "3.82" "$_CURRENT"; then
+  local -r current="${1}"
+  if _version_gt "3.82" "${current}"; then
     _pretty "red" "\nrequirements: [ERROR] make version needs to be > 3.81"
-    _pretty "yellow" "current: $_CURRENT\n\n"
+    _pretty "yellow" "current: ${current}\n\n"
     exit 1
   fi
 }
 
 _verify_git_version() {
-  _CURRENT="${1}"
-  if _version_gt "2" "$_CURRENT"; then
+  local -r current="${1}"
+  if _version_gt "2" "${current}"; then
     _pretty "yellow" "\nrequirements: [WARNING] git work better with version >= 2"
-    _pretty "yellow" "current: $_CURRENT\n\n"
+    _pretty "yellow" "current: ${current}\n\n"
   fi
 }
 
 _verify_bash_version() {
-  _CURRENT="${1}"
-  if _version_gt "4" "$_CURRENT"; then
+  local -r current="${1}"
+  if _version_gt "4" "${current}"; then
     _pretty "red" "\nrequirements: [ERROR] use bash release > 3"
-    _pretty "yellow" "current: $_CURRENT\n\n"
+    _pretty "yellow" "current: ${current}\n\n"
     exit 1
   fi
 }
@@ -262,7 +264,7 @@ _job_destroy() {
     _pretty "cyan" "\ncleanup:"
     docker ps | grep "${MKDKR_JOB_NAME}" | awk '{print $1}' | xargs -i{} docker rm -f {} >&2
     if [ -f "${_MKDKR_TMP_DIR}/${MKDKR_TARGET_NAME}.log" ]; then
-      rm -v "${_MKDKR_TMP_DIR}/${MKDKR_TARGET_NAME}.log"  >&2
+      rm -v "${_MKDKR_TMP_DIR}/${MKDKR_TARGET_NAME}.log" >&2
     fi
   fi
 
@@ -306,11 +308,11 @@ _step_id() {
 }
 
 _step_header() {
-  echo -e "STEP_${1} << MKDKR_HEREDOC_${1}" >> "${_MKDKR_TMP_DIR}/${MKDKR_TARGET_NAME}.log"
+  echo -e "STEP_${1} << MKDKR_HEREDOC_${1}" >>"${_MKDKR_TMP_DIR}/${MKDKR_TARGET_NAME}.log"
 }
 
 _step_footer() {
-  echo -e "MKDKR_HEREDOC_${1}\n" >> "${_MKDKR_TMP_DIR}/${MKDKR_TARGET_NAME}.log"
+  echo -e "MKDKR_HEREDOC_${1}\n" >>"${_MKDKR_TMP_DIR}/${MKDKR_TARGET_NAME}.log"
 }
 
 instance:() {
@@ -416,12 +418,12 @@ run:() {
   _exit_handler "${_EXIT_CODE}"
 }
 
-log: () {
+log:() {
   _ID="${1}"
 
   _pretty "purple" "\nlog: ${_ID}"
   awk '/^STEP_'"${_ID}"' << MKDKR_HEREDOC_'"${_ID}"'$/  {on=1} on==1 {print}  /^MKDKR_HEREDOC_'"${_ID}"'$/ {on=0; print ""}' \
-    "${_MKDKR_TMP_DIR}/${MKDKR_TARGET_NAME}.log" | \
+    "${_MKDKR_TMP_DIR}/${MKDKR_TARGET_NAME}.log" |
     grep -v 'MKDKR_HEREDOC_'
 
   _EXIT_CODE="${PIPESTATUS[1]}"
