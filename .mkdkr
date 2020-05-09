@@ -138,7 +138,8 @@ _branch_or_tag_name() {
 }
 
 _branch_or_tag_name_slug() {
-  echo "${1}" | sed -E 's/\/|_/-/g' | tr '[:upper:]' '[:lower:]'
+  local -r branch="${1}"
+  sed -E 's/\/|_/-/g' <<< "${branch}" | tr '[:upper:]' '[:lower:]'  
 }
 
 _remote_git_clone() {
