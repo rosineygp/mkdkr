@@ -10,8 +10,9 @@ lint.commit:
 
 lint.shellcheck:
 	@$(dkr)
+	instance: koalaman/shellcheck-alpine:v0.7.1
+	run: shellcheck .mkdkr
 	instance: koalaman/shellcheck-alpine:v0.4.6
-	run: shellcheck -e SC2068 -e SC2086 .mkdkr
 	run: shellcheck -e SC2181 test/unit_job_name
 	run: shellcheck -e SC2181 -e SC2086 test/unit_create_instance
 	run: shellcheck -e SC2181 -e SC2086 -e SC1091 test/unit_branch_or_tag_name

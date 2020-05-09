@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 
-declare -A colors
 _MKDKR_TMP_DIR="${PWD}/.tmp"
 
+#output fn
+declare -A colors
 _pretty() {
   colors+=(
     ["black"]='\e[0;30m'
@@ -26,40 +27,43 @@ _pretty() {
   echo -e "${colors[${key}]}${*:2}\e[0m" >&2
 }
 
+#requirements fn
 _command_exist() {
-  if ! [ -x "$(command -v ${1})" ]; then
-    _pretty "red" "command: ${1} not found, please install it"
+  local -r cmd="${1}"
+  if ! [[ -x $(command -v "${cmd}") ]]; then
+    _pretty "red" "command: $cmd not found, please install it"
     exit 1
   fi
 }
 
-# https://stackoverflow.com/questions/16989598/comparing-php-version-numbers-using-bash#24067243
 _version_gt() {
-  test "$(printf '%s\n' "$@" | sort -V | head -n 1)" != "${1}"
+  local -r versions=("${@}")
+  local -r current="${1}"
+  test "$(printf '%s\n' "${versions[@]}" | sort -V | head -n 1)" != "${current}"
 }
 
 _verify_make_version() {
-  _CURRENT="${1}"
-  if _version_gt "3.82" "$_CURRENT"; then
+  local -r current="${1}"
+  if _version_gt "3.82" "${current}"; then
     _pretty "red" "\nrequirements: [ERROR] make version needs to be > 3.81"
-    _pretty "yellow" "current: $_CURRENT\n\n"
+    _pretty "yellow" "current: ${current}\n\n"
     exit 1
   fi
 }
 
 _verify_git_version() {
-  _CURRENT="${1}"
-  if _version_gt "2" "$_CURRENT"; then
+  local -r current="${1}"
+  if _version_gt "2" "${current}"; then
     _pretty "yellow" "\nrequirements: [WARNING] git work better with version >= 2"
-    _pretty "yellow" "current: $_CURRENT\n\n"
+    _pretty "yellow" "current: ${current}\n\n"
   fi
 }
 
 _verify_bash_version() {
-  _CURRENT="${1}"
-  if _version_gt "4" "$_CURRENT"; then
+  local -r current="${1}"
+  if _version_gt "4" "${current}"; then
     _pretty "red" "\nrequirements: [ERROR] use bash release > 3"
-    _pretty "yellow" "current: $_CURRENT\n\n"
+    _pretty "yellow" "current: ${current}\n\n"
     exit 1
   fi
 }
@@ -71,6 +75,243 @@ _local_requirements() {
   _verify_bash_version "$(bash --version | head -n 1 | awk '{ print $4 }')"
   _verify_make_version "$(make --version | head -n 1 | awk '{ print $3 }')"
   _verify_git_version "$(git --version | awk '{ print $3 }')"
+}
+
+#git fn
+_remote_git_clone() {
+  local -r alias="${1}"; shift
+  local -r repos="${1}"; shift
+  local -r checkout="${1}"; shift
+  local -r file="${1}"; shift
+  local -r include_path="${1}"; shift
+
+  _pretty "light_cyan" "alias: ${alias}, repos: ${repos}, checkout: ${checkout}, file: ${file}\n"
+
+  git clone "${repos}" \
+    --quiet \
+    --config advice.detachedHead=false \
+    --branch "${checkout}" \
+    --depth "${MKDKR_INCLUDE_CLONE_DEPTH:-1}" \
+    "${include_path}" >&2
+
+  local -r exit_code="$?"
+  if [ "$exit_code" != "0" ]; then
+    exit "$exit_code"
+  fi
+
+  rm -rf "${include_path}/.git"
+  chmod -R o+w "${include_path}"
+}
+
+_remote_include() {
+  if [ -f mkdkr.csv ]; then
+    declare -a include_list=()
+
+    _pretty "orange" "\ninclude\n"
+    while IFS= read -r line; do
+      mapfile -t params < <(tr "," "\n" <<< "${line}")
+
+      local -r alias="${params[0]}"
+
+      if [[ -z "${params[1]}" ]]; then
+        _pretty "red" "include: needs git path to clone for: ${alias}"
+        exit 1
+      fi
+      
+      local -r repos="${params[1]}"
+      local -r checkout="${params[2]:-master}"
+      local -r mk="${params[3]:-main.mk}"
+      local tag="latest"
+
+      if [[ "$checkout" != "master" ]]; then
+        tag="$checkout"
+      fi
+
+      mkdir -p "${_MKDKR_TMP_DIR}/includes"
+      include_path="${_MKDKR_TMP_DIR}/includes/${alias}_$(_uuid)"
+      
+      _remote_git_clone "${alias}" "${repos}" "${checkout}" "${mk}" "${include_path}"
+      _remote_force_tag "${tag}" "${include_path}/${mk}"
+
+      include_list+=("${include_path}/${mk}")
+    done < <(grep -v '^ *#' <mkdkr.csv)
+
+    echo "${include_list[*]}"
+  fi
+}
+
+_branch_or_tag_name() {
+  local branch=""
+  if [[ "$GITHUB_ACTIONS" == "true" ]]; then
+    branch=$(echo "${GITHUB_REF}" | cut -d'/' -f3-)
+    echo -ne "${branch}"
+  elif [[ "${GITLAB_CI}" == "true" ]]; then
+    echo -ne "${CI_COMMIT_REF_NAME}"
+  elif [[ "${JENKINS_URL}" != "" ]]; then
+    echo -ne "${GIT_BRANCH}"
+  elif [[ "${TRAVIS}" == "true" ]]; then
+    echo -ne "${TRAVIS_BRANCH}"
+  elif [[ "${CIRCLECI}" == "true" ]]; then
+    if [[ "${CIRCLE_TAG}" != "" ]]; then
+      echo -ne "${CIRCLE_TAG}"
+    else
+      echo -ne "${CIRCLE_BRANCH}"
+    fi
+  elif [[ $(git rev-parse --is-inside-work-tree) == true ]]; then
+    branch=$(git rev-parse --abbrev-ref HEAD)
+    echo -ne "${branch}"
+  else
+    echo -ne "${branch}"
+  fi
+}
+
+# handler fn
+_image() {
+  local -r image="${1}"
+  docker ps | grep "${image}" | awk '{print $2}'
+}
+
+_branch_or_tag_name_slug() {
+  local -r branch="${1}"
+  sed -E 's/\/|_/-/g' <<< "${branch}" | tr '[:upper:]' '[:lower:]'  
+}
+
+_remote_force_tag() {
+  local -r tag="${1}"; shift
+  local -r file="${1}"; shift
+
+  local -r tag_in_file=$(grep -E '^[A-Z][A-Z\_]+\_TAG\=.*' "${file}")
+  if [ "${tag_in_file}" != "" ]; then
+    mapfile -t key_value < <(grep -E '^[A-Z][A-Z\_]+\_TAG\=.*' "${file}" | tr '=' '\n')
+
+    if [[ "${key_value[1]}" != "${tag}" ]]; then
+      _pretty "purple" "replace: ${key_value[0]}=${key_value[1]} to ${tag}"
+      sed -i -E "s/(^[A-Z][A-Z\_]+\_TAG\=)(.*)/\1${tag}/g" "${file}"
+    fi
+  fi
+}
+
+_network_create() {
+  local -r network=$(docker network ls | grep "network_${MKDKR_JOB_NAME}" | awk '{ print $2 }')
+  if [ ! "${network}" ]; then
+    _pretty "orange" "network: network_${MKDKR_JOB_NAME}"
+    
+    # shellcheck disable=SC2086
+    docker network create "network_${MKDKR_JOB_NAME}" ${MKDKR_NETWORK_ARGS} >&2
+    local -r exit_code="$?"
+    if [ "$exit_code" != "0" ]; then
+      exit "$exit_code"
+    fi
+  fi
+}
+
+# header fn
+_header_render() {
+  cat <<EOF
+.EXPORT_ALL_VARIABLES:
+.ONESHELL:
+SHELL = bash
+
+MKDKR_BRANCH_NAME=$MKDKR_BRANCH_NAME
+MKDKR_BRANCH_NAME_SLUG=$MKDKR_BRANCH_NAME_SLUG
+
+define dkr =
+  source .mkdkr
+  \$(eval MKDKR_JOB_NAME=\$(shell source .mkdkr; _job_uniq_name \$(@)))
+  \$(eval MKDKR_TARGET_NAME=\$(@))
+  trap _job_destroy EXIT
+  _pretty "orange" "\nstart: \$(@)\n"
+endef
+EOF
+}
+
+_header() {
+  _MKDKR_INCLUDE="${_MKDKR_TMP_DIR}/mkdkr_header_$(_uuid).mk"
+  _header_render >"${_MKDKR_INCLUDE}"
+  echo "${_MKDKR_INCLUDE}"
+}
+
+_job_uniq_name() {
+  local -r target="${1}"
+  if [[ -z "${MKDKR_JOB_NAME}" ]]; then
+    _MKDKR_JOB_NAME=$(sed 's/\//_/g' <<< "${target}_$(_uuid)")
+    export MKDKR_JOB_NAME="${_MKDKR_JOB_NAME}"
+  fi
+  echo "${MKDKR_JOB_NAME}"
+}
+
+# destroy and clean fn
+_job_destroy() {
+  alives=$(docker ps | grep "${MKDKR_JOB_NAME}" | awk '{print $1}')
+  if [[ "${alives[0]}" != "" ]]; then
+    _pretty "cyan" "\ncleanup:"
+    docker ps | grep "${MKDKR_JOB_NAME}" | awk '{print $1}' | xargs -i{} docker rm -f {} >&2
+    if [[ -f "${_MKDKR_TMP_DIR}/${MKDKR_TARGET_NAME}.log" ]]; then
+      rm -v "${_MKDKR_TMP_DIR}/${MKDKR_TARGET_NAME}.log" >&2
+    fi
+  fi
+
+  local -r network=$(docker network ls | grep "network_${MKDKR_JOB_NAME}")
+  if [[ "$network" != "" ]]; then
+    docker network rm "network_${MKDKR_JOB_NAME}"
+  fi
+
+  _pretty "orange" "\ncompleted:"
+  times >&2
+}
+
+_remove_running_job() {
+  if [[ $(docker ps | grep "job_${MKDKR_JOB_NAME}") != "" ]]; then
+    local -r image=$(_image "job_${MKDKR_JOB_NAME}")
+    _pretty "purple" "image changed, from: ${image} to: ${image}"
+    docker rm -f "job_${MKDKR_JOB_NAME}" >&2
+  fi
+}
+
+_exit_handler() {
+  local -r exit_code="${1}"; shift
+  local -r expected="${1}"; shift
+  if [ "${exit_code}" != "${expected:-0}" ]; then
+    _job_destroy
+    exit "${exit_code}"
+  fi
+}
+
+_tmp_dir() {
+  if [[ -d "${_MKDKR_TMP_DIR}" ]]; then
+    find "${_MKDKR_TMP_DIR}" -name "mkdkr_header_*.mk" -type f -mmin +60 -delete
+    if [ -d "${_MKDKR_TMP_DIR}/includes" ]; then
+      find "${_MKDKR_TMP_DIR}/includes" -maxdepth 1 -type d -mmin +60 -exec rm -rf {} \;
+    fi
+  else
+    mkdir -p "${_MKDKR_TMP_DIR}"
+  fi
+}
+
+# log fn
+_step_id() {
+  local step="0"
+  if [ -f "${_MKDKR_TMP_DIR}/${MKDKR_TARGET_NAME}.log" ]; then
+    step=$(grep -c '^MKDKR_HEREDOC_.*$' "${_MKDKR_TMP_DIR}/${MKDKR_TARGET_NAME}.log")
+  fi
+
+  echo "$step"
+}
+
+_step_header() {
+  local -r step="${1}"
+  echo -e "STEP_${step} << MKDKR_HEREDOC_${step}" >>"${_MKDKR_TMP_DIR}/${MKDKR_TARGET_NAME}.log"
+}
+
+_step_footer() {
+  local -r step="${1}"
+  echo -e "MKDKR_HEREDOC_${step}\n" >>"${_MKDKR_TMP_DIR}/${MKDKR_TARGET_NAME}.log"
+}
+
+# helper fn
+slug() {
+  local -r str="${1}"
+  sed -E 's/:|\.|\/|-/_/g' <<< "${str}"
 }
 
 # https://github.com/dylanaraps/pure-bash-bible#generate-a-uuid-v4
@@ -97,348 +338,136 @@ _uuid() {
   printf '\n'
 }
 
-_image() {
-  docker ps | grep "${1}" | awk '{print $2}'
-}
-
-_remove_running_job() {
-  if [ "$(docker ps | grep job_${MKDKR_JOB_NAME})" != "" ]; then
-    _pretty "purple" "image changed, from: $(_image job_${MKDKR_JOB_NAME}) to: ${IMAGE}"
-    docker rm -f "job_${MKDKR_JOB_NAME}" >&2
-  fi
-}
-
-_branch_or_tag_name() {
-  _BRANCH=""
-  if [ "$GITHUB_ACTIONS" == "true" ]; then
-    _BRANCH="$(echo $GITHUB_REF | cut -d'/' -f3-)"
-  elif [ "$GITLAB_CI" == "true" ]; then
-    _BRANCH="$CI_COMMIT_REF_NAME"
-  elif [ "$JENKINS_URL" != "" ]; then
-    _BRANCH="$GIT_BRANCH"
-  elif [ "$TRAVIS" == "true" ]; then
-    _BRANCH="$TRAVIS_BRANCH"
-  elif [ "$CIRCLECI" == "true" ]; then
-    if [ "$CIRCLE_TAG" != "" ]; then
-      _BRANCH="$CIRCLE_TAG"
-    else
-      _BRANCH="$CIRCLE_BRANCH"
-    fi
-  elif [ "$(git rev-parse --is-inside-work-tree)" == true ]; then
-    _BRANCH="$(git rev-parse --abbrev-ref HEAD)"
-  fi
-  echo "$_BRANCH"
-}
-
-_branch_or_tag_name_slug() {
-  echo "${1}" | sed -E 's/\/|_/-/g' | tr '[:upper:]' '[:lower:]'
-}
-
-_remote_git_clone() {
-  _ALIAS="${1}"
-  _REPOS="${2}"
-  _CHECKOUT="${3}"
-  _FILE="${4}"
-  _MKDKR_INCLUDE_PATH="${5}"
-
-  _pretty "light_cyan" "alias: ${_ALIAS}, repos: ${_REPOS}, checkout: ${_CHECKOUT}, file: ${_FILE}\n"
-
-  git clone "${_REPOS}" \
-    --quiet \
-    --config advice.detachedHead=false \
-    --branch "${_CHECKOUT}" \
-    --depth "${MKDKR_INCLUDE_CLONE_DEPTH:-1}" \
-    "${_MKDKR_INCLUDE_PATH}" >&2
-
-  _EXIT_CODE="$?"
-  if [ "$_EXIT_CODE" != "0" ]; then
-    exit "$_EXIT_CODE"
-  fi
-
-  rm -rf "${_MKDKR_INCLUDE_PATH}/.git"
-  chmod -R o+w "${_MKDKR_INCLUDE_PATH}"
-}
-
-_remote_force_tag() {
-  _TAG="${1}"
-  _FILE="${2}"
-
-  if [ "$(grep -E '^[A-Z][A-Z\_]+\_TAG\=.*' "${_FILE}")" != "" ]; then
-    _KEY_VALUE=($(grep -E '^[A-Z][A-Z\_]+\_TAG\=.*' "${_FILE}" | tr '=' '\n'))
-    _pretty "purple" "replace: ${_KEY_VALUE[0]}=${_KEY_VALUE[1]} to ${_TAG}"
-    sed -i -E "s/(^[A-Z][A-Z\_]+\_TAG\=)(.*)/\1${_TAG}/g" "${_FILE}"
-  fi
-}
-
-_remote_include() {
-  if [ -f mkdkr.csv ]; then
-    declare -a _MKDKR_INCLUDES_LIST=()
-
-    _pretty "orange" "\ninclude\n"
-    while IFS= read -r _LINE; do
-      _PARAMS=($(echo "$_LINE" | tr "," " "))
-      _ALIAS="${_PARAMS[0]}"
-      _TAG="latest"
-
-      if [ -z "${_PARAMS[1]}" ]; then
-        _pretty "include: needs git path to clone for: ${_ALIAS}"
-        exit 1
-      fi
-
-      _REPOS="${_PARAMS[1]}"
-      _CHECKOUT="master"
-      _MK="main.mk"
-
-      if [ "${_PARAMS[2]}" ]; then
-        _CHECKOUT="${_PARAMS[2]}"
-        _TAG="$_CHECKOUT"
-      fi
-
-      if [ "${_PARAMS[3]}" ]; then
-        _MK="${_PARAMS[3]}"
-      fi
-
-      mkdir -p "${_MKDKR_TMP_DIR}/includes"
-      _MKDKR_INCLUDE_PATH="${_MKDKR_TMP_DIR}/includes/${_ALIAS}_$(_uuid)"
-
-      _remote_git_clone "${_ALIAS}" "${_REPOS}" "${_CHECKOUT}" "${_MK}" "${_MKDKR_INCLUDE_PATH}"
-      _remote_force_tag "${_TAG}" "${_MKDKR_INCLUDE_PATH}/${_MK}"
-
-      _MKDKR_INCLUDES_LIST+=("${_MKDKR_INCLUDE_PATH}/${_MK}")
-    done < <(grep -v '^ *#' <mkdkr.csv)
-
-    echo "${_MKDKR_INCLUDES_LIST[*]}"
-  fi
-
-}
-
-_header_render() {
-  cat <<EOF
-.EXPORT_ALL_VARIABLES:
-.ONESHELL:
-SHELL = bash
-
-MKDKR_BRANCH_NAME=$MKDKR_BRANCH_NAME
-MKDKR_BRANCH_NAME_SLUG=$MKDKR_BRANCH_NAME_SLUG
-
-define dkr =
-  source .mkdkr
-  \$(eval MKDKR_JOB_NAME=\$(shell source .mkdkr; _job_uniq_name \$(@)))
-  \$(eval MKDKR_TARGET_NAME=\$(@))
-  trap _job_destroy EXIT
-  _pretty "orange" "\nstart: \$(@)\n"
-endef
-EOF
-}
-
-_tmp_dir() {
-  if [ -d "${_MKDKR_TMP_DIR}" ]; then
-    find "${_MKDKR_TMP_DIR}" -name "mkdkr_header_*.mk" -type f -mmin +60 -delete
-    if [ -d "${_MKDKR_TMP_DIR}/includes" ]; then
-      find "${_MKDKR_TMP_DIR}/includes" -maxdepth 1 -type d -mmin +60 -exec rm -rf {} \;
-    fi
-  else
-    mkdir -p "${_MKDKR_TMP_DIR}"
-  fi
-}
-
-_header() {
-  _MKDKR_INCLUDE="${_MKDKR_TMP_DIR}/mkdkr_header_$(_uuid).mk"
-  _header_render >"${_MKDKR_INCLUDE}"
-  echo "${_MKDKR_INCLUDE}"
-}
-
-_job_uniq_name() {
-  if [ -z "${MKDKR_JOB_NAME}" ]; then
-    _MKDKR_JOB_NAME=$(echo "${1}_$(_uuid)" | sed 's/\//_/g')
-    export MKDKR_JOB_NAME="${_MKDKR_JOB_NAME}"
-  fi
-  echo "${MKDKR_JOB_NAME}"
-}
-
-_job_destroy() {
-  ALIVE=$(docker ps | grep "${MKDKR_JOB_NAME}" | awk '{print $1}')
-  if [ "${ALIVE[0]}" != "" ]; then
-    _pretty "cyan" "\ncleanup:"
-    docker ps | grep "${MKDKR_JOB_NAME}" | awk '{print $1}' | xargs -i{} docker rm -f {} >&2
-    if [ -f "${_MKDKR_TMP_DIR}/${MKDKR_TARGET_NAME}.log" ]; then
-      rm -v "${_MKDKR_TMP_DIR}/${MKDKR_TARGET_NAME}.log"  >&2
-    fi
-  fi
-
-  docker network rm "network_${MKDKR_JOB_NAME}"
-  _pretty "orange" "\ncompleted:"
-  times >&2
-}
-
-_exit_handler() {
-  _EXIT_CODE="${1}"
-  _EXPECTED="${2}"
-  if [ "${_EXIT_CODE}" != "${_EXPECTED:-0}" ]; then
-    _job_destroy
-    exit "${_EXIT_CODE}"
-  fi
-}
-
-_network_create() {
-  _NETWORK_EXIST="$(docker network ls | awk '{ print $2 }' | grep network_${MKDKR_JOB_NAME})"
-  if [ ! "${_NETWORK_EXIST}" ]; then
-    _pretty "orange" "network: network_${MKDKR_JOB_NAME}"
-    docker network create "network_${MKDKR_JOB_NAME}" ${MKDKR_NETWORK_ARGS} >&2
-    _EXIT_CODE="$?"
-    if [ "$_EXIT_CODE" != "0" ]; then
-      exit "$_EXIT_CODE"
-    fi
-  fi
-}
-
-slug() {
-  echo "${1}" | sed -E 's/:|\.|\/|-/_/g'
-}
-
-_step_id() {
-  _STEP_ID=0
-  if [ -f "${_MKDKR_TMP_DIR}/${MKDKR_TARGET_NAME}.log" ]; then
-    _STEP_ID="$(grep -c '^MKDKR_HEREDOC_.*$' ${_MKDKR_TMP_DIR}/${MKDKR_TARGET_NAME}.log)"
-  fi
-
-  echo "$_STEP_ID"
-}
-
-_step_header() {
-  echo -e "STEP_${1} << MKDKR_HEREDOC_${1}" >> "${_MKDKR_TMP_DIR}/${MKDKR_TARGET_NAME}.log"
-}
-
-_step_footer() {
-  echo -e "MKDKR_HEREDOC_${1}\n" >> "${_MKDKR_TMP_DIR}/${MKDKR_TARGET_NAME}.log"
-}
-
+# main fn
 instance:() {
-  OLDIFS=$IFS
+  local -r oldIFS=$IFS
   IFS='⠀' # Braille Pattern Blank (U+2800)
-  IMAGE="${1}"
-  ARGS="${*:2}"
+  local -r image="${1}"
+  local -r args="${*:2}"
 
   _remove_running_job
   _network_create
 
-  _pretty "cyan" "\ninstance: ${IMAGE} ${ARGS[*]}"
+  _pretty "cyan" "\ninstance: ${image} ${args[*]}"
 
+  # shellcheck disable=SC2086
   docker run --rm -d \
     -v "${PWD}":"${PWD}" \
     --workdir "${PWD}" \
     --entrypoint "" \
     --network "network_${MKDKR_JOB_NAME}" \
-    $ARGS \
+    $args \
     --name "job_${MKDKR_JOB_NAME}" \
-    "${IMAGE}" sleep "${MKDKR_TTL:-3600}" >&2
+    "${image}" sleep "${MKDKR_TTL:-3600}" >&2
 
   _exit_handler "$?"
-  IFS=$OLDIFS
+  IFS=$oldIFS
 }
 
 service:() {
-  OLDIFS=$IFS
+  local -r oldIFS=$IFS
   IFS='⠀' # Braille Pattern Blank (U+2800)
-  IMAGE="${1}"
-  ARGS="${*:2}"
+  local -r image="${1}"
+  local -r args="${*:2}"
 
   _remove_running_job
   _network_create
 
-  _pretty "cyan" "\nservice: ${IMAGE} ${ARGS[*]}"
+  _pretty "cyan" "\nservice: ${image} ${args[*]}"
 
-  NETWORK_ALIAS="$(slug $IMAGE)"
-  _pretty "cyan" "network alias: ${NETWORK_ALIAS}"
+  local -r network_alias=$(slug "${image}")
+  _pretty "cyan" "network alias: ${network_alias}"
 
-  SERVICE_COUNT="$(docker ps | grep -cE 'service_.*'${MKDKR_JOB_NAME})"
+  local service_count
+  service_count=$(docker ps | grep -cE "service_.*${MKDKR_JOB_NAME}")
 
-  if [ "$SERVICE_COUNT" != "0" ]; then
-    SERVICE_COUNT="${SERVICE_COUNT}_"
+  if [[ "$service_count" != "0" ]]; then
+    service_count="${service_count}_"
   else
-    SERVICE_COUNT=""
+    service_count=""
   fi
 
+  # shellcheck disable=SC2086
   docker run --rm -d \
     -v "${PWD}":"${PWD}" \
     --workdir "${PWD}" \
     --network "network_${MKDKR_JOB_NAME}" \
-    --network-alias "$NETWORK_ALIAS" \
-    $ARGS \
-    --name "service_${SERVICE_COUNT}${MKDKR_JOB_NAME}" \
-    "${IMAGE}" >&2
+    --network-alias "$network_alias" \
+    $args \
+    --name "service_${service_count}${MKDKR_JOB_NAME}" \
+    "${image}" >&2
 
   _exit_handler "$?"
-  IFS=$OLDIFS
+  IFS=$oldIFS
 }
 
 dind:() {
-  OLDIFS=$IFS
+  local -r oldIFS=$IFS
   IFS='⠀' # Braille Pattern Blank (U+2800)
-  IMAGE="${1}"
-  ARGS="${*:2}"
+  local -r image="${1}"
+  local -r args="${*:2}"
 
   _remove_running_job
   _network_create
 
-  _pretty "cyan" "\ndind: ${IMAGE} ${ARGS[*]}"
+  _pretty "cyan" "\ndind: ${image} ${args[*]}"
 
+  # shellcheck disable=SC2086
   docker run --rm -d \
     -v "${PWD}":"${PWD}" \
     --workdir "${PWD}" \
     --entrypoint "" \
     --network "network_${MKDKR_JOB_NAME}" \
-    $ARGS \
+    $args \
     --privileged -v /var/run/docker.sock:/var/run/docker.sock \
     --name "job_${MKDKR_JOB_NAME}" \
-    "${IMAGE}" sleep "${MKDKR_TTL:-3600}" >&2
+    "${image}" sleep "${MKDKR_TTL:-3600}" >&2
 
   _exit_handler "$?"
-  IFS=$OLDIFS
+  IFS=$oldIFS
 }
 
 run:() {
-  CONTAINER_NAME="job_${MKDKR_JOB_NAME}"
-
+  local -r container_name="job_${MKDKR_JOB_NAME}"
   _pretty "green" "\nrun: ${*}"
 
-  if [ ! -d "${_MKDKR_TMP_DIR}" ]; then
+  if [[ ! -d "${_MKDKR_TMP_DIR}" ]]; then
     mkdir -p "${_MKDKR_TMP_DIR}"
   fi
 
-  _STEP_ID=$(_step_id)
-  _step_header "$_STEP_ID"
+  local -r step=$(_step_id)
+  _step_header "$step"
 
-  docker exec -i ${CONTAINER_NAME} ${MKDKR_SHELL:-sh} -c "$*" | tee -a "${_MKDKR_TMP_DIR}/${MKDKR_TARGET_NAME}.log"
-  _EXIT_CODE="${PIPESTATUS[0]}"
+  docker exec -i "${container_name}" "${MKDKR_SHELL:-sh}" -c "$*" | tee -a "${_MKDKR_TMP_DIR}/${MKDKR_TARGET_NAME}.log"
+  local -r exit_code="${PIPESTATUS[0]}"
 
-  _step_footer "$_STEP_ID"
-  _exit_handler "${_EXIT_CODE}"
+  _step_footer "$step"
+  _exit_handler "${exit_code}"
 }
 
-log: () {
-  _ID="${1}"
+log:() {
+  local -r step="${1}"
 
-  _pretty "purple" "\nlog: ${_ID}"
-  awk '/^STEP_'"${_ID}"' << MKDKR_HEREDOC_'"${_ID}"'$/  {on=1} on==1 {print}  /^MKDKR_HEREDOC_'"${_ID}"'$/ {on=0; print ""}' \
-    "${_MKDKR_TMP_DIR}/${MKDKR_TARGET_NAME}.log" | \
+  _pretty "purple" "\nlog: ${step}"
+  awk '/^STEP_'"${step}"' << MKDKR_HEREDOC_'"${step}"'$/  {on=1} on==1 {print}  /^MKDKR_HEREDOC_'"${step}"'$/ {on=0; print ""}' \
+    "${_MKDKR_TMP_DIR}/${MKDKR_TARGET_NAME}.log" |
     grep -v 'MKDKR_HEREDOC_'
 
-  _EXIT_CODE="${PIPESTATUS[1]}"
-  if [ "$_EXIT_CODE" != "0" ]; then
+  local -r exit_code="${PIPESTATUS[1]}"
+  if [[ "$exit_code" != "0" ]]; then
     _pretty "red" "error: null pointer execption, log id not found."
   fi
 
-  _exit_handler "${_EXIT_CODE}"
+  _exit_handler "${exit_code}"
 }
 
-if [ "$1" == "init" ]; then
+if [[ "$1" == "init" ]]; then
 
   _local_requirements
   _tmp_dir
 
   MKDKR_BRANCH_NAME="$(_branch_or_tag_name)"
-  MKDKR_BRANCH_NAME_SLUG="$(_branch_or_tag_name_slug ${MKDKR_BRANCH_NAME})"
+  MKDKR_BRANCH_NAME_SLUG=$(_branch_or_tag_name_slug "${MKDKR_BRANCH_NAME}")
 
   echo "$(_header) $(_remote_include)"
 fi
