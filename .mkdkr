@@ -174,49 +174,47 @@ _remote_force_tag() {
   local -r tag_in_file=$(grep -E '^[A-Z][A-Z\_]+\_TAG\=.*' "${file}")
   if [ "${tag_in_file}" != "" ]; then
     mapfile -t key_value < <(grep -E '^[A-Z][A-Z\_]+\_TAG\=.*' "${file}" | tr '=' '\n')
-    _pretty "purple" "replace: ${key_value[0]}=${key_value[1]} to ${tag}"
-    sed -i -E "s/(^[A-Z][A-Z\_]+\_TAG\=)(.*)/\1${tag}/g" "${file}"
+
+    if [[ "${key_value[0]}" != "${key_value[1]}" ]]; then
+      _pretty "purple" "replace: ${key_value[0]}=${key_value[1]} to ${tag}"
+      sed -i -E "s/(^[A-Z][A-Z\_]+\_TAG\=)(.*)/\1${tag}/g" "${file}"
+    fi
   fi
 }
 
 _remote_include() {
   if [ -f mkdkr.csv ]; then
-    declare -a _MKDKR_INCLUDES_LIST=()
+    declare -a include_list=()
 
     _pretty "orange" "\ninclude\n"
-    while IFS= read -r _LINE; do
-      _PARAMS=($(echo "$_LINE" | tr "," " "))
-      _ALIAS="${_PARAMS[0]}"
-      _TAG="latest"
+    while IFS= read -r line; do
+      mapfile -t params < <(tr "," "\n" <<< "${line}")
 
-      if [ -z "${_PARAMS[1]}" ]; then
-        _pretty "include: needs git path to clone for: ${_ALIAS}"
+      if [[ -z "${params[1]}" ]]; then
+        _pretty "red" "include: needs git path to clone for: ${alias}"
         exit 1
       fi
 
-      _REPOS="${_PARAMS[1]}"
-      _CHECKOUT="master"
-      _MK="main.mk"
+      local -r alias="${params[0]}"
+      local -r repos="${params[1]}"
+      local -r checkout="${params[2]:-master}"
+      local -r mk="${params[3]:-main.mk}"
+      local tag="latest"
 
-      if [ "${_PARAMS[2]}" ]; then
-        _CHECKOUT="${_PARAMS[2]}"
-        _TAG="$_CHECKOUT"
-      fi
-
-      if [ "${_PARAMS[3]}" ]; then
-        _MK="${_PARAMS[3]}"
+      if [[ "$checkout" != "master" ]]; then
+        tag="$checkout"
       fi
 
       mkdir -p "${_MKDKR_TMP_DIR}/includes"
-      _MKDKR_INCLUDE_PATH="${_MKDKR_TMP_DIR}/includes/${_ALIAS}_$(_uuid)"
+      include_path="${_MKDKR_TMP_DIR}/includes/${alias}_$(_uuid)"
+      
+      _remote_git_clone "${alias}" "${repos}" "${checkout}" "${mk}" "${include_path}"
+      _remote_force_tag "${tag}" "${include_path}/${mk}"
 
-      _remote_git_clone "${_ALIAS}" "${_REPOS}" "${_CHECKOUT}" "${_MK}" "${_MKDKR_INCLUDE_PATH}"
-      _remote_force_tag "${_TAG}" "${_MKDKR_INCLUDE_PATH}/${_MK}"
-
-      _MKDKR_INCLUDES_LIST+=("${_MKDKR_INCLUDE_PATH}/${_MK}")
+      include_list+=("${include_path}/${mk}")
     done < <(grep -v '^ *#' <mkdkr.csv)
 
-    echo "${_MKDKR_INCLUDES_LIST[*]}"
+    echo "${include_list[*]}"
   fi
 
 }
