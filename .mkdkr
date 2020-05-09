@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 
-declare -A colors
 _MKDKR_TMP_DIR="${PWD}/.tmp"
 
+#output fn
+declare -A colors
 _pretty() {
   colors+=(
     ["black"]='\e[0;30m'
@@ -26,6 +27,7 @@ _pretty() {
   echo -e "${colors[${key}]}${*:2}\e[0m" >&2
 }
 
+#requirements fn
 _command_exist() {
   local -r cmd="${1}"
   if ! [[ -x $(command -v "${cmd}") ]]; then
@@ -75,73 +77,7 @@ _local_requirements() {
   _verify_git_version "$(git --version | awk '{ print $3 }')"
 }
 
-# https://github.com/dylanaraps/pure-bash-bible#generate-a-uuid-v4
-_uuid() {
-  C="89ab"
-
-  for ((N = 0; N < 16; ++N)); do
-    B="$((RANDOM % 256))"
-
-    case "$N" in
-    6) printf '4%x' "$((B % 16))" ;;
-    8) printf '%c%x' "${C:$RANDOM%${#C}:1}" "$((B % 16))" ;;
-
-    3 | 5 | 7 | 9)
-      printf '%02x-' "$B"
-      ;;
-
-    *)
-      printf '%02x' "$B"
-      ;;
-    esac
-  done
-
-  printf '\n'
-}
-
-_image() {
-  local -r image="${1}"
-  docker ps | grep "${image}" | awk '{print $2}'
-}
-
-_remove_running_job() {
-  if [[ $(docker ps | grep "job_${MKDKR_JOB_NAME}") != "" ]]; then
-    local -r image=$(_image "job_${MKDKR_JOB_NAME}")
-    _pretty "purple" "image changed, from: ${image} to: ${image}"
-    docker rm -f "job_${MKDKR_JOB_NAME}" >&2
-  fi
-}
-
-_branch_or_tag_name() {
-  local branch=""
-  if [[ "$GITHUB_ACTIONS" == "true" ]]; then
-    branch=$(echo "${GITHUB_REF}" | cut -d'/' -f3-)
-    echo -ne "${branch}"
-  elif [[ "${GITLAB_CI}" == "true" ]]; then
-    echo -ne "${CI_COMMIT_REF_NAME}"
-  elif [[ "${JENKINS_URL}" != "" ]]; then
-    echo -ne "${GIT_BRANCH}"
-  elif [[ "${TRAVIS}" == "true" ]]; then
-    echo -ne "${TRAVIS_BRANCH}"
-  elif [[ "${CIRCLECI}" == "true" ]]; then
-    if [[ "${CIRCLE_TAG}" != "" ]]; then
-      echo -ne "${CIRCLE_TAG}"
-    else
-      echo -ne "${CIRCLE_BRANCH}"
-    fi
-  elif [[ $(git rev-parse --is-inside-work-tree) == true ]]; then
-    branch=$(git rev-parse --abbrev-ref HEAD)
-    echo -ne "${branch}"
-  else
-    echo -ne "${branch}"
-  fi
-}
-
-_branch_or_tag_name_slug() {
-  local -r branch="${1}"
-  sed -E 's/\/|_/-/g' <<< "${branch}" | tr '[:upper:]' '[:lower:]'  
-}
-
+#git fn
 _remote_git_clone() {
   local -r alias="${1}"; shift
   local -r repos="${1}"; shift
@@ -165,21 +101,6 @@ _remote_git_clone() {
 
   rm -rf "${include_path}/.git"
   chmod -R o+w "${include_path}"
-}
-
-_remote_force_tag() {
-  local -r tag="${1}"; shift
-  local -r file="${1}"; shift
-
-  local -r tag_in_file=$(grep -E '^[A-Z][A-Z\_]+\_TAG\=.*' "${file}")
-  if [ "${tag_in_file}" != "" ]; then
-    mapfile -t key_value < <(grep -E '^[A-Z][A-Z\_]+\_TAG\=.*' "${file}" | tr '=' '\n')
-
-    if [[ "${key_value[1]}" != "${tag}" ]]; then
-      _pretty "purple" "replace: ${key_value[0]}=${key_value[1]} to ${tag}"
-      sed -i -E "s/(^[A-Z][A-Z\_]+\_TAG\=)(.*)/\1${tag}/g" "${file}"
-    fi
-  fi
 }
 
 _remote_include() {
@@ -217,9 +138,74 @@ _remote_include() {
 
     echo "${include_list[*]}"
   fi
-
 }
 
+_branch_or_tag_name() {
+  local branch=""
+  if [[ "$GITHUB_ACTIONS" == "true" ]]; then
+    branch=$(echo "${GITHUB_REF}" | cut -d'/' -f3-)
+    echo -ne "${branch}"
+  elif [[ "${GITLAB_CI}" == "true" ]]; then
+    echo -ne "${CI_COMMIT_REF_NAME}"
+  elif [[ "${JENKINS_URL}" != "" ]]; then
+    echo -ne "${GIT_BRANCH}"
+  elif [[ "${TRAVIS}" == "true" ]]; then
+    echo -ne "${TRAVIS_BRANCH}"
+  elif [[ "${CIRCLECI}" == "true" ]]; then
+    if [[ "${CIRCLE_TAG}" != "" ]]; then
+      echo -ne "${CIRCLE_TAG}"
+    else
+      echo -ne "${CIRCLE_BRANCH}"
+    fi
+  elif [[ $(git rev-parse --is-inside-work-tree) == true ]]; then
+    branch=$(git rev-parse --abbrev-ref HEAD)
+    echo -ne "${branch}"
+  else
+    echo -ne "${branch}"
+  fi
+}
+
+# handler fn
+_image() {
+  local -r image="${1}"
+  docker ps | grep "${image}" | awk '{print $2}'
+}
+
+_branch_or_tag_name_slug() {
+  local -r branch="${1}"
+  sed -E 's/\/|_/-/g' <<< "${branch}" | tr '[:upper:]' '[:lower:]'  
+}
+
+_remote_force_tag() {
+  local -r tag="${1}"; shift
+  local -r file="${1}"; shift
+
+  local -r tag_in_file=$(grep -E '^[A-Z][A-Z\_]+\_TAG\=.*' "${file}")
+  if [ "${tag_in_file}" != "" ]; then
+    mapfile -t key_value < <(grep -E '^[A-Z][A-Z\_]+\_TAG\=.*' "${file}" | tr '=' '\n')
+
+    if [[ "${key_value[1]}" != "${tag}" ]]; then
+      _pretty "purple" "replace: ${key_value[0]}=${key_value[1]} to ${tag}"
+      sed -i -E "s/(^[A-Z][A-Z\_]+\_TAG\=)(.*)/\1${tag}/g" "${file}"
+    fi
+  fi
+}
+
+_network_create() {
+  local -r network=$(docker network ls | grep "network_${MKDKR_JOB_NAME}" | awk '{ print $2 }')
+  if [ ! "${network}" ]; then
+    _pretty "orange" "network: network_${MKDKR_JOB_NAME}"
+    
+    # shellcheck disable=SC2086
+    docker network create "network_${MKDKR_JOB_NAME}" ${MKDKR_NETWORK_ARGS} >&2
+    local -r exit_code="$?"
+    if [ "$exit_code" != "0" ]; then
+      exit "$exit_code"
+    fi
+  fi
+}
+
+# header fn
 _header_render() {
   cat <<EOF
 .EXPORT_ALL_VARIABLES:
@@ -239,17 +225,6 @@ endef
 EOF
 }
 
-_tmp_dir() {
-  if [[ -d "${_MKDKR_TMP_DIR}" ]]; then
-    find "${_MKDKR_TMP_DIR}" -name "mkdkr_header_*.mk" -type f -mmin +60 -delete
-    if [ -d "${_MKDKR_TMP_DIR}/includes" ]; then
-      find "${_MKDKR_TMP_DIR}/includes" -maxdepth 1 -type d -mmin +60 -exec rm -rf {} \;
-    fi
-  else
-    mkdir -p "${_MKDKR_TMP_DIR}"
-  fi
-}
-
 _header() {
   _MKDKR_INCLUDE="${_MKDKR_TMP_DIR}/mkdkr_header_$(_uuid).mk"
   _header_render >"${_MKDKR_INCLUDE}"
@@ -265,6 +240,7 @@ _job_uniq_name() {
   echo "${MKDKR_JOB_NAME}"
 }
 
+# destroy and clean fn
 _job_destroy() {
   alives=$(docker ps | grep "${MKDKR_JOB_NAME}" | awk '{print $1}')
   if [[ "${alives[0]}" != "" ]]; then
@@ -284,6 +260,14 @@ _job_destroy() {
   times >&2
 }
 
+_remove_running_job() {
+  if [[ $(docker ps | grep "job_${MKDKR_JOB_NAME}") != "" ]]; then
+    local -r image=$(_image "job_${MKDKR_JOB_NAME}")
+    _pretty "purple" "image changed, from: ${image} to: ${image}"
+    docker rm -f "job_${MKDKR_JOB_NAME}" >&2
+  fi
+}
+
 _exit_handler() {
   local -r exit_code="${1}"; shift
   local -r expected="${1}"; shift
@@ -293,24 +277,18 @@ _exit_handler() {
   fi
 }
 
-_network_create() {
-  local -r network=$(docker network ls | grep "network_${MKDKR_JOB_NAME}" | awk '{ print $2 }')
-  if [ ! "${network}" ]; then
-    _pretty "orange" "network: network_${MKDKR_JOB_NAME}"
-    # shellcheck disable=SC2086
-    docker network create "network_${MKDKR_JOB_NAME}" ${MKDKR_NETWORK_ARGS} >&2
-    local -r exit_code="$?"
-    if [ "$exit_code" != "0" ]; then
-      exit "$exit_code"
+_tmp_dir() {
+  if [[ -d "${_MKDKR_TMP_DIR}" ]]; then
+    find "${_MKDKR_TMP_DIR}" -name "mkdkr_header_*.mk" -type f -mmin +60 -delete
+    if [ -d "${_MKDKR_TMP_DIR}/includes" ]; then
+      find "${_MKDKR_TMP_DIR}/includes" -maxdepth 1 -type d -mmin +60 -exec rm -rf {} \;
     fi
+  else
+    mkdir -p "${_MKDKR_TMP_DIR}"
   fi
 }
 
-slug() {
-  local -r str="${1}"
-  sed -E 's/:|\.|\/|-/_/g' <<< "${str}"
-}
-
+# log fn
 _step_id() {
   local step="0"
   if [ -f "${_MKDKR_TMP_DIR}/${MKDKR_TARGET_NAME}.log" ]; then
@@ -330,6 +308,37 @@ _step_footer() {
   echo -e "MKDKR_HEREDOC_${step}\n" >>"${_MKDKR_TMP_DIR}/${MKDKR_TARGET_NAME}.log"
 }
 
+# helper fn
+slug() {
+  local -r str="${1}"
+  sed -E 's/:|\.|\/|-/_/g' <<< "${str}"
+}
+
+# https://github.com/dylanaraps/pure-bash-bible#generate-a-uuid-v4
+_uuid() {
+  C="89ab"
+
+  for ((N = 0; N < 16; ++N)); do
+    B="$((RANDOM % 256))"
+
+    case "$N" in
+    6) printf '4%x' "$((B % 16))" ;;
+    8) printf '%c%x' "${C:$RANDOM%${#C}:1}" "$((B % 16))" ;;
+
+    3 | 5 | 7 | 9)
+      printf '%02x-' "$B"
+      ;;
+
+    *)
+      printf '%02x' "$B"
+      ;;
+    esac
+  done
+
+  printf '\n'
+}
+
+# main fn
 instance:() {
   local -r oldIFS=$IFS
   IFS='⠀' # Braille Pattern Blank (U+2800)
