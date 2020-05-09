@@ -143,28 +143,28 @@ _branch_or_tag_name_slug() {
 }
 
 _remote_git_clone() {
-  _ALIAS="${1}"
-  _REPOS="${2}"
-  _CHECKOUT="${3}"
-  _FILE="${4}"
-  _MKDKR_INCLUDE_PATH="${5}"
+  local -r alias="${1}"; shift
+  local -r repos="${1}"; shift
+  local -r checkout="${1}"; shift
+  local -r file="${1}"; shift
+  local -r include_path="${1}"; shift
 
-  _pretty "light_cyan" "alias: ${_ALIAS}, repos: ${_REPOS}, checkout: ${_CHECKOUT}, file: ${_FILE}\n"
+  _pretty "light_cyan" "alias: ${alias}, repos: ${repos}, checkout: ${checkout}, file: ${file}\n"
 
-  git clone "${_REPOS}" \
+  git clone "${repos}" \
     --quiet \
     --config advice.detachedHead=false \
-    --branch "${_CHECKOUT}" \
+    --branch "${checkout}" \
     --depth "${MKDKR_INCLUDE_CLONE_DEPTH:-1}" \
-    "${_MKDKR_INCLUDE_PATH}" >&2
+    "${include_path}" >&2
 
-  _EXIT_CODE="$?"
-  if [ "$_EXIT_CODE" != "0" ]; then
-    exit "$_EXIT_CODE"
+  local -r exit_code="$?"
+  if [ "$exit_code" != "0" ]; then
+    exit "$exit_code"
   fi
 
-  rm -rf "${_MKDKR_INCLUDE_PATH}/.git"
-  chmod -R o+w "${_MKDKR_INCLUDE_PATH}"
+  rm -rf "${include_path}/.git"
+  chmod -R o+w "${include_path}"
 }
 
 _remote_force_tag() {
