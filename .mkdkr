@@ -107,7 +107,7 @@ _image() {
 _remove_running_job() {
   if [[ $(docker ps | grep "job_${MKDKR_JOB_NAME}") != "" ]]; then
     local -r image=$(_image "job_${MKDKR_JOB_NAME}")
-    _pretty "purple" "image changed, from: ${image} to: ${IMAGE}"
+    _pretty "purple" "image changed, from: ${image} to: ${image}"
     docker rm -f "job_${MKDKR_JOB_NAME}" >&2
   fi
 }
@@ -190,12 +190,13 @@ _remote_include() {
     while IFS= read -r line; do
       mapfile -t params < <(tr "," "\n" <<< "${line}")
 
+      local -r alias="${params[0]}"
+
       if [[ -z "${params[1]}" ]]; then
         _pretty "red" "include: needs git path to clone for: ${alias}"
         exit 1
       fi
-
-      local -r alias="${params[0]}"
+      
       local -r repos="${params[1]}"
       local -r checkout="${params[2]:-master}"
       local -r mk="${params[3]:-main.mk}"
@@ -284,8 +285,8 @@ _job_destroy() {
 }
 
 _exit_handler() {
-  exit_code="${1}"; shift
-  expected="${1}"; shift
+  local -r exit_code="${1}"; shift
+  local -r expected="${1}"; shift
   if [ "${exit_code}" != "${expected:-0}" ]; then
     _job_destroy
     exit "${exit_code}"
@@ -296,6 +297,7 @@ _network_create() {
   local -r network=$(docker network ls | grep "network_${MKDKR_JOB_NAME}" | awk '{ print $2 }')
   if [ ! "${network}" ]; then
     _pretty "orange" "network: network_${MKDKR_JOB_NAME}"
+    # shellcheck disable=SC2086
     docker network create "network_${MKDKR_JOB_NAME}" ${MKDKR_NETWORK_ARGS} >&2
     local -r exit_code="$?"
     if [ "$exit_code" != "0" ]; then
@@ -329,131 +331,134 @@ _step_footer() {
 }
 
 instance:() {
-  OLDIFS=$IFS
+  local -r oldIFS=$IFS
   IFS='⠀' # Braille Pattern Blank (U+2800)
-  IMAGE="${1}"
-  ARGS="${*:2}"
+  local -r image="${1}"
+  local -r args="${*:2}"
 
   _remove_running_job
   _network_create
 
-  _pretty "cyan" "\ninstance: ${IMAGE} ${ARGS[*]}"
+  _pretty "cyan" "\ninstance: ${image} ${args[*]}"
 
+  # shellcheck disable=SC2086
   docker run --rm -d \
     -v "${PWD}":"${PWD}" \
     --workdir "${PWD}" \
     --entrypoint "" \
     --network "network_${MKDKR_JOB_NAME}" \
-    $ARGS \
+    $args \
     --name "job_${MKDKR_JOB_NAME}" \
-    "${IMAGE}" sleep "${MKDKR_TTL:-3600}" >&2
+    "${image}" sleep "${MKDKR_TTL:-3600}" >&2
 
   _exit_handler "$?"
-  IFS=$OLDIFS
+  IFS=$oldIFS
 }
 
 service:() {
-  OLDIFS=$IFS
+  local -r oldIFS=$IFS
   IFS='⠀' # Braille Pattern Blank (U+2800)
-  IMAGE="${1}"
-  ARGS="${*:2}"
+  local -r image="${1}"
+  local -r args="${*:2}"
 
   _remove_running_job
   _network_create
 
-  _pretty "cyan" "\nservice: ${IMAGE} ${ARGS[*]}"
+  _pretty "cyan" "\nservice: ${image} ${args[*]}"
 
-  NETWORK_ALIAS="$(slug $IMAGE)"
-  _pretty "cyan" "network alias: ${NETWORK_ALIAS}"
+  local -r network_alias=$(slug "${image}")
+  _pretty "cyan" "network alias: ${network_alias}"
 
-  SERVICE_COUNT="$(docker ps | grep -cE 'service_.*'${MKDKR_JOB_NAME})"
+  local service_count
+  service_count=$(docker ps | grep -cE "service_.*${MKDKR_JOB_NAME}")
 
-  if [ "$SERVICE_COUNT" != "0" ]; then
-    SERVICE_COUNT="${SERVICE_COUNT}_"
+  if [[ "$service_count" != "0" ]]; then
+    service_count="${service_count}_"
   else
-    SERVICE_COUNT=""
+    service_count=""
   fi
 
+  # shellcheck disable=SC2086
   docker run --rm -d \
     -v "${PWD}":"${PWD}" \
     --workdir "${PWD}" \
     --network "network_${MKDKR_JOB_NAME}" \
-    --network-alias "$NETWORK_ALIAS" \
-    $ARGS \
-    --name "service_${SERVICE_COUNT}${MKDKR_JOB_NAME}" \
-    "${IMAGE}" >&2
+    --network-alias "$network_alias" \
+    $args \
+    --name "service_${service_count}${MKDKR_JOB_NAME}" \
+    "${image}" >&2
 
   _exit_handler "$?"
-  IFS=$OLDIFS
+  IFS=$oldIFS
 }
 
 dind:() {
-  OLDIFS=$IFS
+  local -r oldIFS=$IFS
   IFS='⠀' # Braille Pattern Blank (U+2800)
-  IMAGE="${1}"
-  ARGS="${*:2}"
+  local -r image="${1}"
+  local -r args="${*:2}"
 
   _remove_running_job
   _network_create
 
-  _pretty "cyan" "\ndind: ${IMAGE} ${ARGS[*]}"
+  _pretty "cyan" "\ndind: ${image} ${args[*]}"
 
+  # shellcheck disable=SC2086
   docker run --rm -d \
     -v "${PWD}":"${PWD}" \
     --workdir "${PWD}" \
     --entrypoint "" \
     --network "network_${MKDKR_JOB_NAME}" \
-    $ARGS \
+    $args \
     --privileged -v /var/run/docker.sock:/var/run/docker.sock \
     --name "job_${MKDKR_JOB_NAME}" \
-    "${IMAGE}" sleep "${MKDKR_TTL:-3600}" >&2
+    "${image}" sleep "${MKDKR_TTL:-3600}" >&2
 
   _exit_handler "$?"
-  IFS=$OLDIFS
+  IFS=$oldIFS
 }
 
 run:() {
-  CONTAINER_NAME="job_${MKDKR_JOB_NAME}"
-
+  local -r container_name="job_${MKDKR_JOB_NAME}"
   _pretty "green" "\nrun: ${*}"
 
-  if [ ! -d "${_MKDKR_TMP_DIR}" ]; then
+  if [[ ! -d "${_MKDKR_TMP_DIR}" ]]; then
     mkdir -p "${_MKDKR_TMP_DIR}"
   fi
 
-  _STEP_ID=$(_step_id)
-  _step_header "$_STEP_ID"
+  local -r step=$(_step_id)
+  _step_header "$step"
 
-  docker exec -i ${CONTAINER_NAME} ${MKDKR_SHELL:-sh} -c "$*" | tee -a "${_MKDKR_TMP_DIR}/${MKDKR_TARGET_NAME}.log"
-  _EXIT_CODE="${PIPESTATUS[0]}"
+  docker exec -i "${container_name}" "${MKDKR_SHELL:-sh}" -c "$*" | tee -a "${_MKDKR_TMP_DIR}/${MKDKR_TARGET_NAME}.log"
+  local -r exit_code="${PIPESTATUS[0]}"
 
-  _step_footer "$_STEP_ID"
-  _exit_handler "${_EXIT_CODE}"
+  _step_footer "$step"
+  _exit_handler "${exit_code}"
 }
 
 log:() {
-  _ID="${1}"
+  local -r step="${1}"
 
-  _pretty "purple" "\nlog: ${_ID}"
-  awk '/^STEP_'"${_ID}"' << MKDKR_HEREDOC_'"${_ID}"'$/  {on=1} on==1 {print}  /^MKDKR_HEREDOC_'"${_ID}"'$/ {on=0; print ""}' \
+  _pretty "purple" "\nlog: ${step}"
+  awk '/^STEP_'"${step}"' << MKDKR_HEREDOC_'"${step}"'$/  {on=1} on==1 {print}  /^MKDKR_HEREDOC_'"${step}"'$/ {on=0; print ""}' \
     "${_MKDKR_TMP_DIR}/${MKDKR_TARGET_NAME}.log" |
     grep -v 'MKDKR_HEREDOC_'
 
-  _EXIT_CODE="${PIPESTATUS[1]}"
-  if [ "$_EXIT_CODE" != "0" ]; then
+  local -r exit_code="${PIPESTATUS[1]}"
+  if [[ "$exit_code" != "0" ]]; then
     _pretty "red" "error: null pointer execption, log id not found."
   fi
 
-  _exit_handler "${_EXIT_CODE}"
+  _exit_handler "${exit_code}"
 }
 
-if [ "$1" == "init" ]; then
+if [[ "$1" == "init" ]]; then
 
   _local_requirements
   _tmp_dir
 
   MKDKR_BRANCH_NAME="$(_branch_or_tag_name)"
-  MKDKR_BRANCH_NAME_SLUG="$(_branch_or_tag_name_slug ${MKDKR_BRANCH_NAME})"
+  MKDKR_BRANCH_NAME_SLUG=$(_branch_or_tag_name_slug "${MKDKR_BRANCH_NAME}")
 
   echo "$(_header) $(_remote_include)"
 fi
