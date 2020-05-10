@@ -98,6 +98,11 @@ pipeline {
             sh "make examples.shell"
           }
         }
+        stage("examples retry") {
+          steps {
+            sh "make examples.retry"
+          }
+        }
         stage("examples pipeline") {
           steps {
             sh "make examples.pipeline"

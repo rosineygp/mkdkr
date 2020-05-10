@@ -160,6 +160,19 @@ jobs:
     - uses: actions/checkout@v1
     - name: examples shell
       run: make examples.shell
+  examples_retry:
+    runs-on: ubuntu-18.04
+    needs:
+      - bash_v5-0
+      - bash_v4-4
+      - bash_v4-3
+      - bash_v4-2
+      - bash_v4-1
+      - bash_v4-0
+    steps:
+    - uses: actions/checkout@v1
+    - name: examples retry
+      run: make examples.retry
   examples_pipeline:
     runs-on: ubuntu-18.04
     needs:

@@ -96,6 +96,11 @@ examples shell:
   script:
   - make examples.shell
 
+examples retry:
+  stage: examples
+  script:
+  - make examples.retry
+
 examples pipeline:
   stage: examples
   script:

@@ -62,5 +62,8 @@ jobs:
       name: examples shell
       script: make examples.shell
     - stage: examples
+      name: examples retry
+      script: make examples.retry
+    - stage: examples
       name: examples pipeline
       script: make examples.pipeline

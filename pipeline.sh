@@ -17,12 +17,13 @@ make -j6 --output-sync=line \
   bash.v4-1 \
   bash.v4-0
 
-make -j7 --output-sync=line \
+make -j8 --output-sync=line \
   examples.simple \
   examples.service \
   examples.dind \
   examples.escapes \
   examples.stdout \
   examples.shell \
+  examples.retry \
   examples.pipeline
 
