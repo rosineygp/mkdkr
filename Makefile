@@ -106,6 +106,9 @@ examples.stdout:
 examples.shell:
 	make --silent -f examples/shell.mk shell
 
+examples.retry:
+	make --silent -f examples/retry.mk slow-service
+
 examples.pipeline:
 	make -f examples/pipeline.mk test -j 3 --output-sync
 	make -f examples/pipeline.mk build
