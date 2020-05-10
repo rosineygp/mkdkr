@@ -370,7 +370,6 @@ service:() {
   local -r image="${1}"
   local -r args="${*:2}"
 
-  _remove_running_job
   _network_create
 
   _pretty "cyan" "\nservice: ${image} ${args[*]}"
