@@ -444,6 +444,42 @@ run:() {
   _exit_handler "${exit_code}"
 }
 
+retry:() {
+  local -r container_name="job_${MKDKR_JOB_NAME}"
+  local -r attempts="${1}";shift
+  local -r sleep="${1}";shift
+  local -r cmd="${*:1}"
+
+  _pretty "green" "\nretry: ${attempts}, command: ${cmd}"
+
+  if [[ ! -d "${_MKDKR_TMP_DIR}" ]]; then
+    mkdir -p "${_MKDKR_TMP_DIR}"
+  fi
+
+  local exit_code
+
+  for i in $(seq "1" "${attempts}"); do
+    _pretty "purple" "\nattempts: ${i}"
+    
+    local step
+    step=$(_step_id)
+    _step_header "$step"
+    docker exec -i "${container_name}" "${MKDKR_SHELL:-sh}" -c "$cmd" | tee -a "${_MKDKR_TMP_DIR}/${MKDKR_TARGET_NAME}.log"
+    exit_code="${PIPESTATUS[0]}"
+    _step_footer "$step"
+
+    if [[ "$exit_code" == "0" ]]; then
+      _exit_handler "${exit_code}"
+      return 0
+    fi
+
+    _pretty "purple" "sleep: ${sleep}"
+    sleep "${sleep}"
+  done
+
+  _exit_handler "${exit_code}"
+}
+
 log:() {
   local -r step="${1}"
 

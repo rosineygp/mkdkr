@@ -128,6 +128,14 @@ jobs:
     - run:
         name: examples shell
         command: make examples.shell
+  examples_retry:
+    machine:
+      image: ubuntu-1604:201903-01
+    steps:
+    - checkout
+    - run:
+        name: examples retry
+        command: make examples.retry
   examples_pipeline:
     machine:
       image: ubuntu-1604:201903-01
@@ -208,6 +216,14 @@ workflows:
             - bash_v4-1
             - bash_v4-0
       - examples_shell:
+          requires:
+            - bash_v5-0
+            - bash_v4-4
+            - bash_v4-3
+            - bash_v4-2
+            - bash_v4-1
+            - bash_v4-0
+      - examples_retry:
           requires:
             - bash_v5-0
             - bash_v4-4

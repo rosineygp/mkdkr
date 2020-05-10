@@ -51,6 +51,7 @@ Table of contents
   * [service:](#service)
   * [dind:](#dind)
   * [run:](#run)
+  * [retry:](#retry)
   * [log:](#log)
 * [Includes](#includes)
 	* [Explicit](#explicit)
@@ -269,6 +270,36 @@ my-run:
 
 	# run a command inside container and redirect output to container
 	run: 'ls -la > myfile'
+```
+
+## retry:
+
+Execute a command inside docker container [**instance:** or **dind:**] (the last one), with retry options.
+
+> Is not possible to execute commands in a **service**.
+
+**Parameters:**
+- Number|Int, attempts: number of attempts before crash.
+- Number|Int, sleep: time sleeping before retry.
+- String|Array, command: any sh command eg. 'curl https://tomcat:8080'
+
+**Return:**
+- String, Command(s) output
+
+**Usage**
+
+```Makefile
+deploy:
+	@$(dkr)
+	instance: oc
+	retry: 3 10 oc apply -f build.yml
+	#the job can run 3 times with a delay of ten seconds
+
+npm:
+	instance: alpine
+	run: apk add curl
+	service: my-slow-service
+	retry: 60 1 curl http://my-slow-service:8080
 ```
 
 ## log:
