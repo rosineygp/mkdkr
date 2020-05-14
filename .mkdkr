@@ -111,16 +111,16 @@ _remote_include() {
     while IFS= read -r line; do
       mapfile -t params < <(tr "," "\n" <<< "${line}")
 
-      local -r alias="${params[0]}"
+      local alias="${params[0]}"
 
       if [[ -z "${params[1]}" ]]; then
         _pretty "red" "include: needs git path to clone for: ${alias}"
         exit 1
       fi
       
-      local -r repos="${params[1]}"
-      local -r checkout="${params[2]:-master}"
-      local -r mk="${params[3]:-main.mk}"
+      local repos="${params[1]}"
+      local checkout="${params[2]:-master}"
+      local mk="${params[3]:-main.mk}"
       local tag="latest"
 
       if [[ "$checkout" != "master" ]]; then
