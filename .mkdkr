@@ -128,7 +128,7 @@ _remote_include() {
       fi
 
       mkdir -p "${_MKDKR_TMP_DIR}/includes"
-      include_path="${_MKDKR_TMP_DIR}/includes/${alias}_$(_uuid)"
+      include_path="${_MKDKR_TMP_DIR}/includes/${alias}_$(uuid)"
       
       _remote_git_clone "${alias}" "${repos}" "${checkout}" "${mk}" "${include_path}"
       _remote_force_tag "${tag}" "${include_path}/${mk}"
@@ -226,7 +226,7 @@ EOF
 }
 
 _header() {
-  _MKDKR_INCLUDE="${_MKDKR_TMP_DIR}/mkdkr_header_$(_uuid).mk"
+  _MKDKR_INCLUDE="${_MKDKR_TMP_DIR}/mkdkr_header_$(uuid).mk"
   _header_render >"${_MKDKR_INCLUDE}"
   echo "${_MKDKR_INCLUDE}"
 }
@@ -234,7 +234,7 @@ _header() {
 _job_uniq_name() {
   local -r target="${1}"
   if [[ -z "${MKDKR_JOB_NAME}" ]]; then
-    _MKDKR_JOB_NAME=$(sed 's/\//_/g' <<< "${target}_$(_uuid)")
+    _MKDKR_JOB_NAME=$(sed 's/\//_/g' <<< "${target}_$(uuid)")
     export MKDKR_JOB_NAME="${_MKDKR_JOB_NAME}"
   fi
   echo "${MKDKR_JOB_NAME}"
@@ -339,7 +339,7 @@ urldecode() {
 }
 
 # https://github.com/dylanaraps/pure-bash-bible#generate-a-uuid-v4
-_uuid() {
+uuid() {
   C="89ab"
 
   for ((N = 0; N < 16; ++N)); do

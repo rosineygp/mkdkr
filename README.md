@@ -384,12 +384,12 @@ docker,https://github.com/rosineygp/mkdkr_docker.git
 
 The file contains four values per line in following order
 
-|#|Name|Definition|
-|-|----|----------|
-|1|alias *|unique identifier of include and clone folder destiny|
-|2|reference *|any git clone reference|
-|3|checkout|branch, tag or hash that git can checkout (default master)|
-|4|file|the fragment of Makefile that will be included (default main.mk)|
+| # | Name        | Definition                                                       |
+|---|-------------|------------------------------------------------------------------|
+| 1 | alias *     | unique identifier of include and clone folder destiny            |
+| 2 | reference * | any git clone reference                                          |
+| 3 | checkout    | branch, tag or hash that git can checkout (default master)       |
+| 4 | file        | the fragment of Makefile that will be included (default main.mk) |
 
 > \* required
 
@@ -407,21 +407,12 @@ The file contains four values per line in following order
 
 A set of small functions to common pipelines process.
 
-## slug
-
-Replace unsafe values from a string.
-
-- safe for docker
-- safe for network domain
-
-```shell
-slug "my/unsafe/v1.0.0:string"
-# "my_unsafe_v1_0_0_0_string"
-```
-
-Usage example:
-
-[service: multiply](examples/service.mk)
+| Name      | Description                         | Usage                | Output |
+|-----------|-------------------------------------|----------------------|--------|
+| slug      | Replace unsafe values from a string | `slug <string>`      | string |
+| urlencode | Encode a string to URL format       | `urlencode <string>` | string |
+| urldecode | Decode a string from URL format     | `urldecode <string>` | string |
+| uuid      | Generate UUID                       | `uuid`               | string |
 
 # Examples
 
@@ -539,16 +530,16 @@ pipeline:
 
 # Environment Variables
 
-|Name|Default|Description|
-|----|-------|-----------|
-|MKDKR_TTL|3600|The time limit to a job or service run|
-|MKDKR_SHELL|sh|Change to another shell eg. bash, csh|
-|MKDKR_JOB_STDOUT|last stdout|Path of file, generated with last stdout output|
-|MKDKR_JOB_NAME*|(job\|service)\_target-name\_(uuid)|Unique job name, used as container name suffix|
-|MKDKR_INCLUDE_CLONE_DEPTH|1|In the most of case you no need change history for includes|
-|MKDKR_BRANCH_NAME||Return current git branch, if it exist|
-|MKDKR_BRANCH_NAME_SLUG||Return current git branch, if it exist, with safe values|
-|MKDKR_NETWORK_ARGS||Arguments of docker create networks|
+| Name                      | Default                             | Description                                                 |
+|---------------------------|-------------------------------------|-------------------------------------------------------------|
+| MKDKR_TTL                 | 3600                                | The time limit to a job or service run                      |
+| MKDKR_SHELL               | sh                                  | Change to another shell eg. bash, csh                       |
+| MKDKR_JOB_STDOUT          | last stdout                         | Path of file, generated with last stdout output             |
+| MKDKR_JOB_NAME*           | (job\|service)\_target-name\_(uuid) | Unique job name, used as container name suffix              |
+| MKDKR_INCLUDE_CLONE_DEPTH | 1                                   | In the most of case you no need change history for includes |
+| MKDKR_BRANCH_NAME         |                                     | Return current git branch, if it exist                      |
+| MKDKR_BRANCH_NAME_SLUG    |                                     | Return current git branch, if it exist, with safe values    |
+| MKDKR_NETWORK_ARGS        |                                     | Arguments of docker create networks                         |
 
 > - to overwrite the values use: `export <var>=<value>`
 > - \* auto generated
