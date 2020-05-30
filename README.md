@@ -59,7 +59,6 @@ Table of contents
 	* [mkdkr.csv](#mkdkr.csv)
 	* [Collection](#collection)
 * [Helpers](#helpers)
-  * [slug](#slug)
 * [Examples](#examples)
   * [Simple](#simple)
   * [Service](#service)
