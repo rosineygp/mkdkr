@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 
 _MKDKR_TMP_DIR="${PWD}/.tmp"
+_MKDKR_WORKDIR="${PWD}"
 
-#output fn
+# output fn
 declare -A colors
 _pretty() {
   colors+=(
@@ -27,7 +28,7 @@ _pretty() {
   echo -e "${colors[${key}]}${*:2}\e[0m" >&2
 }
 
-#requirements fn
+# requirements fn
 _command_exist() {
   local -r cmd="${1}"
   if ! [[ -x $(command -v "${cmd}") ]]; then
@@ -77,7 +78,7 @@ _local_requirements() {
   _verify_git_version "$(git --version | awk '{ print $3 }')"
 }
 
-#git fn
+# git fn
 _remote_git_clone() {
   local -r alias="${1}"; shift
   local -r repos="${1}"; shift
@@ -203,6 +204,11 @@ _network_create() {
       exit "$exit_code"
     fi
   fi
+}
+
+_update_workdir() {
+  local -r container_name="${1}"
+  _MKDKR_WORKDIR=$(docker inspect --format='{{.Config.WorkingDir}}' "${container_name}")
 }
 
 # header fn
@@ -430,6 +436,8 @@ instance:() {
     "${image}" sleep "${MKDKR_TTL:-3600}" >&2
 
   _exit_handler "$?"
+
+  _update_workdir "job_${MKDKR_JOB_NAME}"
   IFS=$oldIFS
 }
 
@@ -492,6 +500,8 @@ dind:() {
     "${image}" sleep "${MKDKR_TTL:-3600}" >&2
 
   _exit_handler "$?"
+
+  _update_workdir "job_${MKDKR_JOB_NAME}"
   IFS=$oldIFS
 }
 
@@ -506,7 +516,7 @@ run:() {
   local -r step=$(_step_id)
   _step_header "$step"
 
-  docker exec -i "${container_name}" "${MKDKR_SHELL:-sh}" -c "$*" | tee -a "${_MKDKR_TMP_DIR}/${MKDKR_TARGET_NAME}.log"
+  docker exec -i -w "${_MKDKR_WORKDIR}" "${container_name}" "${MKDKR_SHELL:-sh}" -c "$*" | tee -a "${_MKDKR_TMP_DIR}/${MKDKR_TARGET_NAME}.log"
   local -r exit_code="${PIPESTATUS[0]}"
 
   _step_footer "$step"
@@ -533,7 +543,7 @@ retry:() {
     local step
     step=$(_step_id)
     _step_header "$step"
-    docker exec -i "${container_name}" "${MKDKR_SHELL:-sh}" -c "$cmd" | tee -a "${_MKDKR_TMP_DIR}/${MKDKR_TARGET_NAME}.log"
+    docker exec -i -w "${_MKDKR_WORKDIR}" "${container_name}" "${MKDKR_SHELL:-sh}" -c "$cmd" | tee -a "${_MKDKR_TMP_DIR}/${MKDKR_TARGET_NAME}.log"
     exit_code="${PIPESTATUS[0]}"
     _step_footer "$step"
 
@@ -587,6 +597,12 @@ pull:() {
 
   local -r exit_code="$?"
   _exit_handler "${exit_code}"
+}
+
+cd:() {
+  local -r workdir="${1}"
+  _pretty "green" "\ncd: ${workdir}"
+  _MKDKR_WORKDIR="${workdir}"
 }
 
 if [[ "$1" == "init" ]]; then

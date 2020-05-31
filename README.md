@@ -55,6 +55,7 @@ Table of contents
   * [log:](#log)
   * [push:](#push)
   * [pull:](#pull)
+  * [cd:](#cd)
 * [Includes](#includes)
 	* [Explicit](#explicit)
 	* [Implicit](#implicit)
@@ -369,6 +370,25 @@ pull:
 ```
 
 [Example](examples/pull.mk)
+
+## cd:
+
+Move folder context.
+
+**Parameters:**
+- String, workdir: Set workdir.
+
+**Return**
+- None.
+
+```Makefile
+change-folder:
+	@$(dkr)
+	instance: debian
+	cd: /tmp
+	run: pwd 
+	# /tmp
+```
 
 # Includes
 
