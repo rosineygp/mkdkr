@@ -53,6 +53,8 @@ Table of contents
   * [run:](#run)
   * [retry:](#retry)
   * [log:](#log)
+  * [push:](#push)
+  * [pull:](#pull)
 * [Includes](#includes)
 	* [Explicit](#explicit)
 	* [Implicit](#implicit)
@@ -321,6 +323,52 @@ my-log:
 	run: curl http://example.com
 	log: 1 \| jq '.'
 ```
+
+## push:
+
+Push files/folders to a container job from local filesystem.
+
+**Parameters:**
+- String, from: Target files/folders in local filesystem.
+- String, to: Destiny of files/folders inside container.
+
+**Return**
+- None.
+
+**Usage**
+
+```Makefile
+push:
+	@$(dkr)
+	instance: ansible
+	push: /etc/ansible/inventory/hosts.yml
+	run: ansible-playbook main.yml
+```
+
+[Example](examples/push.mk)
+
+## pull:
+
+Pull files/folders from a container job to local filesystem.
+
+**Parameters:**
+- String, from: Target files/folders inside container.
+- String, to: Destiny of files/folders in local filesystem.
+
+**Return**
+- None.
+
+**Usage**
+
+```Makefile
+pull:
+	@$(dkr)
+	instance: debian
+	run: curl https://example.com -o /tmp/out.html
+	pull: /tmp/out.html .
+```
+
+[Example](examples/pull.mk)
 
 # Includes
 
