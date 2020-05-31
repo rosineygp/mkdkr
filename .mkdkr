@@ -520,6 +520,30 @@ log:() {
   _exit_handler "${exit_code}"
 }
 
+push:() {
+  local -r from="${1}"; shift
+  local -r to="${1}"
+  local -r container_name="job_${MKDKR_JOB_NAME}"
+
+  _pretty "green" "\npush: ${from} to ${to}"
+  docker cp "$from" "${container_name}:${to}"
+
+  local -r exit_code="$?"
+  _exit_handler "${exit_code}"
+}
+
+pull:() {
+  local -r from="${1}"; shift
+  local -r to="${1}"
+  local -r container_name="job_${MKDKR_JOB_NAME}"
+
+  _pretty "green" "\npull: ${from} to ${to}"
+  docker cp "${container_name}:${from}" "${to}"
+
+  local -r exit_code="$?"
+  _exit_handler "${exit_code}"
+}
+
 if [[ "$1" == "init" ]]; then
 
   _local_requirements
