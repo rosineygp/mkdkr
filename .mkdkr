@@ -362,6 +362,51 @@ uuid() {
   printf '\n'
 }
 
+ssh-cp-key:(){
+  local -r private_key="${1}"; shift
+
+  local -r container_user=$(run: whoami)
+  echo "${container_user}"
+
+  local ssh_dest
+  if [ "${container_user}" == "root" ]; then
+    ssh_dest="/${container_user}/.ssh"
+  else
+    ssh_dest="/home/${container_user}/.ssh"
+  fi
+
+  run: mkdir -p "${ssh_dest}"
+  push: "${private_key}" "${ssh_dest}/id_rsa"
+  run: chown "${container_user}:${container_user}" "${ssh_dest}/id_rsa"
+  run: chmod 600 "${ssh_dest}/id_rsa"
+}
+
+ssh-host-check:(){
+  local -r host_port="${1}"; shift
+  local -r _host=$(cut -d":" -f1 <<< "${host_port}")
+  local -r _port=$(cut -d":" -f2 <<< "${host_port}")
+
+  run: ssh -o StrictHostKeyChecking=no "${_host}" -p "${_port}" \|\| true
+}
+
+git-user:(){
+  local -r git_email="${1}"
+  local -r git_user=$(cut -d"@" -f1 <<< "${git_email}")
+
+  run: git config --global user.name "${git_user}"
+  run: git config --global user.email "${git_email}"
+}
+
+git-ssh:(){
+  local -r private_key="${1}"; shift
+  local -r host_port="${1}"; shift
+  local -r git_email="${1}"
+
+  ssh-cp-key: "${private_key}"
+  ssh-host-check: "${host_port}"
+  git-user: "${git_email}"
+}
+
 # main fn
 instance:() {
   local -r oldIFS=$IFS

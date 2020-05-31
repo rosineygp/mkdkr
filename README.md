@@ -454,12 +454,28 @@ The file contains four values per line in following order
 
 A set of small functions to common pipelines process.
 
-| Name      | Description                         | Usage                | Output |
-|-----------|-------------------------------------|----------------------|--------|
-| slug      | Replace unsafe values from a string | `slug <string>`      | string |
-| urlencode | Encode a string to URL format       | `urlencode <string>` | string |
-| urldecode | Decode a string from URL format     | `urldecode <string>` | string |
-| uuid      | Generate UUID                       | `uuid`               | string |
+| Name           | Description                                                  | Usage                                        | Output |
+|----------------|--------------------------------------------------------------|----------------------------------------------|--------|
+| slug           | Replace unsafe values from a string                          | `slug <string>`                              | string |
+| urlencode      | Encode a string to URL format                                | `urlencode <string>`                         | string |
+| urldecode      | Decode a string from URL format                              | `urldecode <string>`                         | string |
+| uuid           | Generate UUID                                                | `uuid`                                       | string |
+| ssh-cp-key     | Copy ssh private key for current user                        | `ssh-cp-key <key-path>`                      | none   |
+| ssh-host-check | Set StrictHostKeyChecking=no                                 | `ssh-host-check <hostname:port>`             | none   |
+| git-user       | Configure git.user and git.email                             | `git-user <email>`                           | none   |
+| git-ssh        | Configure ssh and git [ssh-cp-key, ssh-host-check, git-user] | `git-ssh <key-path> <hostname:port> <email>` | none   |
+
+```Makefile
+autocommit:
+	@$(dkr)
+	instance: alpine/git
+	git-ssh: ~/.ssh/id_rsa github.com auto@mkdkr.com
+	run: git clone git@github.com:rosineygp/mkdkr.git /auto
+	run: echo "my new file" \> /auto/my-new-file.txt
+	run: git -C /auto add my-new-file.txt
+	run: git -C /auto commit -m "my automatic change"
+	run: git -C /auto push origin master:feat/auto-push
+```
 
 # Examples
 
