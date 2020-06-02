@@ -142,7 +142,7 @@ _remote_include() {
 }
 
 _branch_or_tag_name() {
-  local branch=""
+  local branch="none"
   if [[ "$GITHUB_ACTIONS" == "true" ]]; then
     branch=$(echo "${GITHUB_REF}" | cut -d'/' -f3-)
     echo -ne "${branch}"
@@ -232,9 +232,22 @@ EOF
 }
 
 _header() {
-  _MKDKR_INCLUDE="${_MKDKR_TMP_DIR}/mkdkr_header_$(uuid).mk"
-  _header_render >"${_MKDKR_INCLUDE}"
-  echo "${_MKDKR_INCLUDE}"
+  local -r include="${_MKDKR_TMP_DIR}/mkdkr_header_${MKDKR_BRANCH_NAME_SLUG}.mk"
+
+  if [[ -f "$include" ]]; then
+    fuser "${include}" >&2
+    local -r exit_code="$?"
+
+    if [[ "$exit_code" == "1" ]]; then
+      _header_render >"${include}"
+    else
+      _pretty "orange" "makefile header not update file in use"
+    fi
+  else 
+    _header_render >"${include}"
+  fi
+  
+  echo -ne "${include}"
 }
 
 _job_uniq_name() {
