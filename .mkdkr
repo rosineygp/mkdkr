@@ -259,7 +259,7 @@ _job_destroy() {
 
   local -r network=$(docker network ls | grep "network_${MKDKR_JOB_NAME}")
   if [[ "$network" != "" ]]; then
-    docker network rm "network_${MKDKR_JOB_NAME}"
+    docker network rm "network_${MKDKR_JOB_NAME}" >&2
   fi
 
   _pretty "orange" "\ncompleted:"
@@ -581,7 +581,7 @@ push:() {
   local -r container_name="job_${MKDKR_JOB_NAME}"
 
   _pretty "green" "\npush: ${from} to ${to}"
-  docker cp "$from" "${container_name}:${to}"
+  docker cp "$from" "${container_name}:${to}" >&2
 
   local -r exit_code="$?"
   _exit_handler "${exit_code}"
@@ -593,7 +593,7 @@ pull:() {
   local -r container_name="job_${MKDKR_JOB_NAME}"
 
   _pretty "green" "\npull: ${from} to ${to}"
-  docker cp "${container_name}:${from}" "${to}"
+  docker cp "${container_name}:${from}" "${to}" >&2
 
   local -r exit_code="$?"
   _exit_handler "${exit_code}"
