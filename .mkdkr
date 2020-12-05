@@ -264,7 +264,7 @@ _job_destroy() {
   alives=$(docker ps | grep "${MKDKR_JOB_NAME}" | awk '{print $1}')
   if [[ "${alives[0]}" != "" ]]; then
     _pretty "cyan" "\ncleanup:"
-    docker ps | grep "${MKDKR_JOB_NAME}" | awk '{print $1}' | xargs -i{} docker rm -f {} >&2
+    docker ps | grep "${MKDKR_JOB_NAME}" | awk '{print $1}' | xargs docker rm -f >&2
     if [[ -f "${_MKDKR_TMP_DIR}/${MKDKR_TARGET_NAME}.log" ]]; then
       rm -v "${_MKDKR_TMP_DIR}/${MKDKR_TARGET_NAME}.log" >&2
     fi
