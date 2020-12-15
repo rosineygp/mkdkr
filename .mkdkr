@@ -536,6 +536,26 @@ run:() {
   _exit_handler "${exit_code}"
 }
 
+login:() {
+  local -r repos="${1}"; shift
+  local -r user="${1}"; shift
+  local -r password="${1}"; shift
+  local -r container=$(docker ps | grep -c "job_${MKDKR_JOB_NAME}")
+
+  if [ "$container" != "0" ]; then
+    _pretty "green" "\ndocker login (container): ${user} ${repos}"
+    run: docker login --username "$user" --password-stdin "$repos" <<< "${password}" >&2
+  else
+    _pretty "green" "\ndocker login (host): ${user} ${repos}"
+    docker login --username "$user" --password-stdin "$repos" <<< "${password}" >&2
+  fi
+
+  local -r exit_code="$?"
+  if [ "$exit_code" != "0" ]; then
+    exit "$exit_code"
+  fi
+}
+
 retry:() {
   local -r container_name="job_${MKDKR_JOB_NAME}"
   local -r attempts="${1}";shift
