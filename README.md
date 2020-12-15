@@ -51,6 +51,7 @@ Table of contents
   * [service:](#service)
   * [dind:](#dind)
   * [run:](#run)
+  * [login:](#login)
   * [retry:](#retry)
   * [log:](#log)
   * [push:](#push)
@@ -273,6 +274,40 @@ my-run:
 	# run a command inside container and redirect output to container
 	run: 'ls -la > myfile'
 ```
+
+## login:
+
+Execute docker login in a private registry.
+If docker instance exist, execute login inside container otherwise at host.
+
+**Parameters:**
+- String, domain: private registry domain.
+- String| user: registry username.
+- String| password: registry password.
+
+**Return:**
+- None.
+
+**Usage**
+
+```Makefile
+private-registry:
+	@$(dkr)
+	login: my.private.registry foo $(MKDKR_PASSWORD)
+	instance: my.private.registry/alpine
+```
+
+> Execute login at host and download image from private registry (login before instance creation)
+
+```Makefile
+private-registry:
+	@$(dkr)
+	dind: docker:19
+	login: my.private.registry foo $(MKDKR_PASSWORD)
+	instance:  my.private.registry/alpine
+```
+
+> Execute login inside instance and download image from private registry (login after instance creation)
 
 ## retry:
 
