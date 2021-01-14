@@ -211,6 +211,18 @@ _update_workdir() {
   _MKDKR_WORKDIR=$(docker inspect --format='{{.Config.WorkingDir}}' "${container_name}")
 }
 
+_docker_image_pull() {
+  local -r image="${1}"
+  if [ "${MKDKR_DOCKER_IMAGE_PULL:-missing}" == "always" ]; then
+    _pretty "orange" "\ndocker pull image: ${image}"
+    docker pull "${image}" >&2
+    local -r exit_code="$?"
+    if [ "$exit_code" != "0" ]; then
+      exit "$exit_code"
+    fi
+  fi
+}
+
 # header fn
 _header_render() {
   cat <<EOF
@@ -435,6 +447,7 @@ instance:() {
 
   _remove_running_job
   _network_create
+  _docker_image_pull "${image}"
 
   _pretty "cyan" "\ninstance: ${image} ${args[*]}"
 
@@ -476,6 +489,8 @@ service:() {
     service_count=""
   fi
 
+  _docker_image_pull "${image}"
+
   # shellcheck disable=SC2086
   docker run --rm -d \
     -v "${PWD}":"${PWD}" \
@@ -498,6 +513,8 @@ dind:() {
 
   _remove_running_job
   _network_create
+
+  _docker_image_pull "${image}"
 
   _pretty "cyan" "\ndind: ${image} ${args[*]}"
 
