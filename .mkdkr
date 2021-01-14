@@ -5,6 +5,8 @@ _MKDKR_WORKDIR="${PWD}"
 
 # output fn
 declare -A colors
+declare var_run_env
+
 _pretty() {
   colors+=(
     ["black"]='\e[0;30m'
@@ -546,8 +548,37 @@ run:() {
   local -r step=$(_step_id)
   _step_header "$step"
 
-  docker exec -i -w "${_MKDKR_WORKDIR}" "${container_name}" "${MKDKR_SHELL:-sh}" -c "$*" | tee -a "${_MKDKR_TMP_DIR}/${MKDKR_TARGET_NAME}.log"
+  # shellcheck disable=SC2086
+  docker exec ${var_run_env[*]} -i -w "${_MKDKR_WORKDIR}" "${container_name}" "${MKDKR_SHELL:-sh}" -c "$*" | tee -a "${_MKDKR_TMP_DIR}/${MKDKR_TARGET_NAME}.log"
   local -r exit_code="${PIPESTATUS[0]}"
+
+  _step_footer "$step"
+  _exit_handler "${exit_code}"
+}
+
+var-run:() {
+  local -r container_name="job_${MKDKR_JOB_NAME}"
+  local -r var_name="${1}" ;shift
+  _pretty "green" "\nvar-run \$$var_name: ${*}"
+
+  if [[ ! -d "${_MKDKR_TMP_DIR}" ]]; then
+    mkdir -p "${_MKDKR_TMP_DIR}"
+  fi
+
+  local -r step=$(_step_id)
+  _step_header "$step"
+
+  local -r temp_file="$(mktemp)"
+
+  # shellcheck disable=SC2086
+  docker exec ${var_run_env[*]} -i -w "${_MKDKR_WORKDIR}" "${container_name}" "${MKDKR_SHELL:-sh}" -c "$*" | tee "$temp_file"
+
+  local -r exit_code="${PIPESTATUS[0]}"
+
+  mapfile -t < "$temp_file"
+  export "$var_name=${MAPFILE[*]}"
+  var_run_env+=("--env $var_name")
+  mv "$temp_file" "${_MKDKR_TMP_DIR}/${MKDKR_TARGET_NAME}.log"
 
   _step_footer "$step"
   _exit_handler "${exit_code}"
