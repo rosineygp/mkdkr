@@ -102,6 +102,7 @@ examples.stdout:
 	make --silent -f examples/stdout.mk parse-output
 	make --silent -f examples/stdout.mk from
 	make --silent -f examples/stdout.mk back-to-container
+	make --silent -f examples/dynamic.mk vars
 
 examples.shell:
 	make --silent -f examples/shell.mk shell

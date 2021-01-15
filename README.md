@@ -51,6 +51,7 @@ Table of contents
   * [service:](#service)
   * [dind:](#dind)
   * [run:](#run)
+  * [var-run:](#var-run)
   * [login:](#login)
   * [retry:](#retry)
   * [log:](#log)
@@ -273,6 +274,32 @@ my-run:
 
 	# run a command inside container and redirect output to container
 	run: 'ls -la > myfile'
+```
+
+## var-run:
+
+Execute a command inside docker container [**instance:** or **dind:**] and return stdout at named var.
+
+> After created var it is passed to next `run:` or `var-run:` execution.
+
+**Parameters:**
+- String, var: any bash valid variable name
+- String|Array, command: any sh command eg. 'apk add nodejs'
+
+**Return:**
+- String, Command(s) output
+
+**Usage**
+
+```Makefile
+my-var-run:
+	@$(dkr)
+	instance: alpine
+	# run a command inside container
+	var-run: myvar hostname
+	run: echo '$$myvar'
+	var-run: mynewvar echo '$$myvar'
+	run: echo "$$myvar $$mynewvar"
 ```
 
 ## login:

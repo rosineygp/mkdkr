@@ -143,6 +143,27 @@ test_mkdkr_get_output() {
   _pretty "light_green" "\nRan 1 assert(s)\n"
 }
 
+test_mkdkr_var_run() {
+  # shellcheck disable=SC1091
+  source .mkdkr
+  unset MKDKR_JOB_NAME
+
+  NAME="simple_instance"
+  _job_uniq_name "${NAME}"
+
+  instance: alpine
+
+  var-run: "test1" echo 'test'
+  run: echo "$$test1"
+  var-run: 'iam' whoami
+  run: echo '$$iam'
+  var-run: w hostname
+  run: echo $$w
+
+  _job_destroy
+
+  _pretty "light_green" "\nRan 1 assert(s)\n"
+}
 
 test_mkdkr_print_env_var() {
   # shellcheck disable=SC1091
