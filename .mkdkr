@@ -249,8 +249,14 @@ _header() {
   local -r include="${_MKDKR_TMP_DIR}/mkdkr_header_${MKDKR_BRANCH_NAME_SLUG}.mk"
 
   if [[ -f "$include" ]]; then
-    fuser "${include}" >&2
-    local -r exit_code="$?"
+
+    local exit_code="1"
+    if [[ -x "$(command -v fuser)" ]]; then
+      fuser "${include}" >&2
+      exit_code="$?"
+    else
+      _pretty "orange" "fuser not found, try update header"
+    fi
 
     if [[ "$exit_code" == "1" ]]; then
       _header_render >"${include}"
