@@ -180,7 +180,8 @@ _branch_or_tag_name_slug() {
 }
 
 _remote_force_tag() {
-  local -r tag="${1}"; shift
+  # shellcheck disable=SC2086
+  local -r tag="$(_branch_or_tag_name_slug ${1})"; shift
   local -r file="${1}"; shift
 
   local -r tag_in_file=$(grep -E '^[A-Z][A-Z\_]+\_TAG\=.*' "${file}")
