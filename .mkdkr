@@ -87,23 +87,32 @@ _remote_git_clone() {
   local -r checkout="${1}"; shift
   local -r file="${1}"; shift
   local -r include_path="${1}"; shift
+  local -r link_path="${1}"; shift
 
-  _pretty "light_cyan" "alias: ${alias}, repos: ${repos}, checkout: ${checkout}, file: ${file}\n"
+  if [[ ! -e "${link_path}" ]] || [[ "${MKDKR_FORCE_DOWNLOAD_INCLUDE}" == "true" ]]; then
+    _pretty "light_cyan" "alias: ${alias}, repos: ${repos}, checkout: ${checkout}, file: ${file}\n"
 
-  git clone "${repos}" \
-    --quiet \
-    --config advice.detachedHead=false \
-    --branch "${checkout}" \
-    --depth "${MKDKR_INCLUDE_CLONE_DEPTH:-1}" \
-    "${include_path}" >&2
+    git clone "${repos}" \
+      --quiet \
+      --config advice.detachedHead=false \
+      --branch "${checkout}" \
+      --depth "${MKDKR_INCLUDE_CLONE_DEPTH:-1}" \
+      "${include_path}" >&2
 
-  local -r exit_code="$?"
-  if [ "$exit_code" != "0" ]; then
-    exit "$exit_code"
+    local -r exit_code="$?"
+    if [ "$exit_code" != "0" ]; then
+      exit "$exit_code"
+    fi
+
+    ln -sf "${include_path}" "${link_path}"
+
+    rm -rf "${include_path}/.git"
+    chmod -R o+w "${include_path}"
+  else
+    _pretty "light_blue" "[cached] alias: ${alias}, repos: ${repos}, checkout: ${checkout}, file: ${file}\n"
   fi
 
-  rm -rf "${include_path}/.git"
-  chmod -R o+w "${include_path}"
+
 }
 
 _remote_include() {
@@ -125,18 +134,22 @@ _remote_include() {
       local checkout="${params[2]:-master}"
       local mk="${params[3]:-main.mk}"
       local tag="latest"
-
+      
       if [[ "$checkout" != "master" ]]; then
         tag="$checkout"
       fi
 
       mkdir -p "${_MKDKR_TMP_DIR}/includes"
       include_path="${_MKDKR_TMP_DIR}/includes/${alias}_$(uuid)"
-      
-      _remote_git_clone "${alias}" "${repos}" "${checkout}" "${mk}" "${include_path}"
-      _remote_force_tag "${tag}" "${include_path}/${mk}"
 
-      include_list+=("${include_path}/${mk}")
+      # shellcheck disable=SC2086
+      slug_checkout="$(_branch_or_tag_name_slug $checkout)"
+      link_path="${_MKDKR_TMP_DIR}/includes/${alias}_${slug_checkout}"
+      
+      _remote_git_clone "${alias}" "${repos}" "${checkout}" "${mk}" "${include_path}" "${link_path}"
+      _remote_force_tag "${tag}" "${link_path}/${mk}"
+
+      include_list+=("${link_path}/${mk}")
     done < <(grep -v '^ *#' <mkdkr.csv)
 
     echo "${include_list[*]}"
