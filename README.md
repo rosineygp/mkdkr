@@ -15,6 +15,7 @@
 [![kcov](https://img.shields.io/endpoint?url=https%3A%2F%2Fmkdkr.surge.sh%2Fcoverage.json)](https://mkdkr.surge.sh/)
 [![CodeFactor](https://www.codefactor.io/repository/github/rosineygp/mkdkr/badge)](https://www.codefactor.io/repository/github/rosineygp/mkdkr)
 ![Docker Pulls](https://img.shields.io/docker/pulls/rosiney/mkdkr)
+![GitHub all releases](https://img.shields.io/github/downloads/rosineygp/mkdkr/total)
 
 > mkdkr = Makefile + Docker
 
@@ -38,42 +39,44 @@ Super small and powerful framework for build CI pipeline, scripted with Makefile
 Table of contents
 -----------------
 
-* [Usage](#usage)
-  * [Installation](#installation)
-  * [Create Makefile](#create-makefile)
-  * [Execute](#execute)
-  * [Result](#result)
-  * [Export](#export)
-* [Reason](#reason)
-* [Functions](#functions)
-  * [@$(dkr)](#dkr)
-  * [instance:](#instance)
-  * [service:](#service)
-  * [dind:](#dind)
-  * [run:](#run)
-  * [var-run:](#var-run)
-  * [login:](#login)
-  * [retry:](#retry)
-  * [log:](#log)
-  * [push:](#push)
-  * [pull:](#pull)
-  * [cd:](#cd)
-* [Includes](#includes)
-	* [Explicit](#explicit)
-	* [Implicit](#implicit)
-	* [mkdkr.csv](#mkdkr.csv)
-	* [Collection](#collection)
-* [Helpers](#helpers)
-* [Examples](#examples)
-  * [Simple](#simple)
-  * [Service](#service)
-  * [DIND](#dind)
-  * [Escapes](#escapes)
-  * [Shell](#shell)
-  * [Stdout](#stdout)
-  * [Pipelines](#pipelines)
-* [Environment Variables](#environment-variables)
-* [Migration](#migration)
+- [mkdkr](#mkdkr)
+	- [Table of contents](#table-of-contents)
+- [Usage](#usage)
+	- [Installation](#installation)
+	- [Makefile](#makefile)
+	- [Execute](#execute)
+	- [Result](#result)
+	- [Export](#export)
+- [Reason](#reason)
+- [Functions](#functions)
+	- [@$(dkr)](#dkr)
+	- [instance:](#instance)
+	- [service:](#service)
+	- [dind:](#dind)
+	- [run:](#run)
+	- [var-run:](#var-run)
+	- [login:](#login)
+	- [retry:](#retry)
+	- [log:](#log)
+	- [push:](#push)
+	- [pull:](#pull)
+	- [cd:](#cd)
+- [Includes](#includes)
+	- [Explicit](#explicit)
+	- [Implicit](#implicit)
+	- [mkdkr.csv](#mkdkrcsv)
+	- [Collection](#collection)
+- [Helpers](#helpers)
+- [Examples](#examples)
+	- [Simple](#simple)
+	- [Service](#service-1)
+	- [DIND](#dind-1)
+	- [Escapes](#escapes)
+	- [Shell](#shell)
+	- [Stdout](#stdout)
+	- [Pipelines](#pipelines)
+- [Environment Variables](#environment-variables)
+- [Migration](#migration)
 
 # Usage
 
@@ -81,7 +84,7 @@ Table of contents
 
 ```bash
 # Download .mkdkr
-curl https://raw.githubusercontent.com/rosineygp/mkdkr/master/.mkdkr > .mkdkr
+curl -fsSL https://github.com/rosineygp/mkdkr/releases/latest/download/mkdkr > .mkdkr
 
 # not required, but can be used as template
 curl https://raw.githubusercontent.com/rosineygp/mkdkr/master/examples/simple.mk > Makefile
@@ -93,12 +96,19 @@ Create a file with name Makefile and paste the following content
 
 ```Makefile
 # Required header
-include $(shell bash .mkdkr init)
+include $(shell if [ ! -f .mkdkr ]; then curl -fsSL https://github.com/rosineygp/mkdkr/releases/latest/download/mkdkr > .mkdkr; fi && bash .mkdkr init)
 
 job:	                          # job name
 	@$(dkr)                       # required: load mkdkr (docker layer)
 	instance: alpine              # create a docker container using alpine image
 	run: echo "hello mkdkr!"      # execute a command inside container
+```
+
+.gitignore (optional)
+
+```.gitignore
+.tmp
+.mkdkr
 ```
 
 ## Execute
