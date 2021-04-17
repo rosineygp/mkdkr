@@ -4,7 +4,7 @@
   </a>
 </p>
 
-# mkdkr
+# mkdkr <!-- omit in toc -->
 
 [![Build Status](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Factions-badge.atrox.dev%2Frosineygp%2Fmkdkr%2Fbadge%3Fref%3Dmaster&style=flat)](https://actions-badge.atrox.dev/rosineygp/mkdkr/goto?ref=master)
 [![Build Status](https://travis-ci.org/rosineygp/mkdkr.svg?branch=master)](https://travis-ci.org/rosineygp/mkdkr)
@@ -39,10 +39,7 @@ Super small and powerful framework for build CI pipeline, scripted with Makefile
 Table of contents
 -----------------
 
-- [mkdkr](#mkdkr)
-	- [Table of contents](#table-of-contents)
 - [Usage](#usage)
-	- [Installation](#installation)
 	- [Makefile](#makefile)
 	- [Execute](#execute)
 	- [Result](#result)
@@ -80,35 +77,47 @@ Table of contents
 
 # Usage
 
-## Installation
+## Makefile
+
+Create a file with name Makefile and paste the following content.
+
+Download `.mkdkr` **dynamically**. 
+
+```Makefile
+# Required header
+include $(shell [ ! -f .mkdkr ] && curl -fsSL https://git.io/JOBYz > .mkdkr; bash .mkdkr init)
+
+# without shorten url
+# include $(shell [ ! -f .mkdkr ] && curl -fsSL https://github.com/rosineygp/mkdkr/releases/latest/download/mkdkr > .mkdkr; bash .mkdkr init)
+
+job:
+	@$(dkr)
+	instance: alpine
+	run: echo "hello mkdkr dynamic!"
+```
+
+OR keep `.mkdr` **locally**.
 
 ```bash
 # Download .mkdkr
 curl -fsSL https://github.com/rosineygp/mkdkr/releases/latest/download/mkdkr > .mkdkr
-
-# not required, but can be used as template
-curl https://raw.githubusercontent.com/rosineygp/mkdkr/master/examples/simple.mk > Makefile
 ```
-
-## Makefile
-
-Create a file with name Makefile and paste the following content
 
 ```Makefile
 # Required header
-include $(shell if [ ! -f .mkdkr ]; then curl -fsSL https://github.com/rosineygp/mkdkr/releases/latest/download/mkdkr > .mkdkr; fi && bash .mkdkr init)
+include $(shell bash .mkdkr init)
 
-job:	                          # job name
-	@$(dkr)                       # required: load mkdkr (docker layer)
-	instance: alpine              # create a docker container using alpine image
-	run: echo "hello mkdkr!"      # execute a command inside container
+job:
+	@$(dkr)
+	instance: alpine
+	run: echo "hello mkdkr local!"
 ```
 
-.gitignore (optional)
+**.gitignore (optional)**
 
 ```.gitignore
 .tmp
-.mkdkr
+.mkdkr # only in dynamic config
 ```
 
 ## Execute
@@ -124,7 +133,7 @@ make job
 start: job
 
 
-instance: alpine 
+instance: alpine
 20498831fe05f5d33852313a55be42efd88b1fb38b463c686dbb0f2a735df45c
 
 run: echo hello mkdkr!
@@ -458,7 +467,7 @@ change-folder:
 	@$(dkr)
 	instance: debian
 	cd: /tmp
-	run: pwd 
+	run: pwd
 	# /tmp
 ```
 
