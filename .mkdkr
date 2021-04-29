@@ -266,7 +266,7 @@ _header() {
 
     local exit_code="1"
     if [[ -x "$(command -v fuser)" ]]; then
-      fuser "${include}" >&2
+      fuser "${include}" > /dev/null 2>&1
       exit_code="$?"
     else
       _pretty "orange" "fuser not found, try update header"
