@@ -65,6 +65,8 @@ Table of contents
 	- [Implicit](#implicit)
 	- [mkdkr.csv](#mkdkrcsv)
 	- [Collection](#collection)
+- [Builtin Targets](#builtin-targets)
+	- [_list](#_list)
 - [Helpers](#helpers)
 - [Examples](#examples)
 	- [Simple](#simple)
@@ -560,6 +562,52 @@ The file contains four values per line in following order
 | [exporter](https://github.com/rosineygp/mkdkr_exporter)      | Generate pipeline definitions files from Makefile. |
 
 > Small collection, use it as example
+
+# Builtin Targets
+
+## _list
+
+List all targets in `Makefile`, include extensions.
+
+```shell
+$ make _list
+
+include
+
+alias: exporter, repos: https://github.com/rosineygp/mkdkr_exporter.git, checkout: v1.5.0, file: main.mk
+
+replace: MKDKR_EXPORTER_TAG=latest to v1.5.0
+bash.v4-0:
+bash.v4-1:
+bash.v4-2:
+bash.v4-3:
+bash.v4-4:
+bash.v5-0:
+_coverage.report:
+examples.dind:
+examples.escapes:
+examples.pipeline:
+examples.retry:
+examples.service:
+examples.shell:
+examples.simple:
+examples.stdout:
+_exporter_bitbucket-pipelines:
+_exporter_circle-ci:
+_exporter_github:
+_exporter_gitlab-ci:
+_exporter_jenkins_pipeline:
+_exporter_shell:
+_exporter_travis:
+lint.commit:
+lint.hadolint:
+lint.shellcheck:
+test.unit:
+```
+
+> The result are sorted by name.
+> 
+> First char target name: [a-zA-Z_]
 
 # Helpers
 
