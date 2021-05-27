@@ -256,6 +256,12 @@ define dkr =
   trap _job_destroy EXIT
   _pretty "orange" "\nstart: \$(@)\n"
 endef
+
+.PHONY: _list
+_list:
+	@FILTER="^[a-zA-Z_]([a-zA-Z0-9\_\/\.\-])+?:((\ [a-zA-Z][a-zA-Z0-9\_\/\.\-]+)?)+\$\$"
+	make -qp 2> /dev/null | grep -E "\$\$FILTER" | grep -v -E '(Makefile|_list)' | sort -u
+
 EOF
 }
 
